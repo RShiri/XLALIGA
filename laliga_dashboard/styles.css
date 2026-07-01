@@ -111,6 +111,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 26px 20px 80px; }
 .stat .k { color: var(--muted); font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.6px; }
 .stat .v.accent { color: var(--accent); }
 .stat .v.blue { color: var(--accent-2); }
+.stat .v.pos { color: var(--good); }
+.stat .v.neg { color: var(--bad); }
 
 /* group grid */
 .group-grid {
@@ -525,8 +527,10 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
   .header-inner { padding: 11px 14px; gap: 10px; }
   .brand .title { font-size: 17px; }
   .brand .sub { display: none; }
+  /* full-width row so the tab bar can scroll instead of forcing the page wider than the phone */
+  .header-right { width: 100%; min-width: 0; gap: 10px; justify-content: flex-start; }
   nav.tabs {
-    margin-left: 0; width: 100%;
+    margin-left: 0; width: 100%; min-width: 0;
     overflow-x: auto; -webkit-overflow-scrolling: touch;
     flex-wrap: nowrap; gap: 4px; padding-bottom: 2px;
   }

@@ -1455,11 +1455,13 @@
       var goals = shots.filter(function (s) { return s.g; }).length;
       var ot = shots.filter(function (s) { return s.ot; }).length;
       var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
+      var diff = goals - xg;                        // finishing over/under xG (goal difference vs expected)
+      var diffCls = "v " + (diff > 0.05 ? "pos" : diff < -0.05 ? "neg" : "");
       var items = [
         ["v accent", shots.length, "Shots"], ["v", goals, "Goals"], ["v blue", xg.toFixed(1), "Total xG"],
         ["v", shots.length ? (xg / shots.length).toFixed(2) : "0", "xG per shot"],
         ["v", shots.length ? Math.round(100 * ot / shots.length) + "%" : "0%", "On target"],
-        ["v", goals && xg ? (goals / xg).toFixed(2) : "—", "Goals / xG"],
+        [diffCls, (diff > 0 ? "+" : "") + diff.toFixed(1), "G − xG"],
       ];
       statsEl.innerHTML = items.map(function (it) { return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>"; }).join("");
       statsEl.style.display = "";
