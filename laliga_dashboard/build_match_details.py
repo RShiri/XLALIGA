@@ -38,7 +38,9 @@ NAME_MAP = {
 
 
 import re as _re
-_MATCH_NAME_RE = _re.compile(r"^\d{4}_\d{2}_\d{2}_.+_vs_.+$")
+# La Liga saves matches by FotMob id (e.g. 4837113.json); the WC pipeline used
+# date_Home_vs_Away.json. Accept either, excluding the scraper's match_<id>_cache.json.
+_MATCH_NAME_RE = _re.compile(r"^(\d+|\d{4}_\d{2}_\d{2}_.+_vs_.+)$")
 
 
 def is_match_file(path):

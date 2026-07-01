@@ -873,6 +873,7 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
     Open a WhoScored match URL with Selenium, extract matchCentreData JSON.
     Returns the parsed dict or None on failure.
     """
+    driver = None
     try:
         import undetected_chromedriver as uc
         options = uc.ChromeOptions()
@@ -881,8 +882,12 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
-        driver = uc.Chrome(options=options, version_main=149)
-    except ImportError:
+        driver = uc.Chrome(options=options)
+    except Exception as _uc_exc:
+        # undetected-chromedriver breaks on Chrome version bumps (ImportError OR
+        # SessionNotCreatedException); plain Selenium + Selenium Manager is the robust
+        # fallback and clears WhoScored's Cloudflare fine in practice.
+        log.info("undetected-chromedriver unavailable (%s); using plain selenium", _uc_exc)
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
         options = Options()
@@ -891,6 +896,8 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36")
         driver = webdriver.Chrome(options=options)
 
     log.info("WhoScored: loading %s …", ws_url)
@@ -1010,6 +1017,7 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
     if cached:
         return cached
 
+    driver = None
     try:
         import undetected_chromedriver as uc
         options = uc.ChromeOptions()
@@ -1017,8 +1025,9 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
             options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        driver = uc.Chrome(options=options, version_main=149)
-    except ImportError:
+        driver = uc.Chrome(options=options)
+    except Exception as _uc_exc:
+        log.info("undetected-chromedriver unavailable (%s); using plain selenium", _uc_exc)
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
         options = Options()
@@ -1026,6 +1035,8 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
             options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36")
         driver = webdriver.Chrome(options=options)
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)

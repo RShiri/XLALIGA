@@ -1,0 +1,13 @@
+match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass_acc,big_chances,big_missed,saves,fouls,duels_won,xg
+4837113,2025-08-17,Espanyol,Atletico Madrid,home,2,1,34,17,9,341,78,1,1,9,19,50,1.29
+4837113,2025-08-17,Atletico Madrid,Espanyol,away,1,2,66,16,11,671,89,2,1,7,16,50,1.84
+4837416,2026-04-12,Sevilla,Atletico Madrid,home,0,1,41,14,9,393,78,0,0,6,18,64,0.79
+4837416,2026-04-12,Atletico Madrid,Sevilla,away,1,0,59,12,6,556,87,2,2,10,12,36,1.83
+4837476,2026-05-17,Real Sociedad,Valencia,home,3,4,55,8,3,527,82,4,3,4,13,49,1.68
+4837476,2026-05-17,Valencia,Real Sociedad,away,4,3,45,14,9,434,79,4,2,1,11,51,1.92
+4837480,2026-05-24,Deportivo Alaves,Rayo Vallecano,home,1,2,49,19,19,395,78,1,0,7,13,44,2.17
+4837480,2026-05-24,Rayo Vallecano,Deportivo Alaves,away,2,1,51,15,9,413,81,4,2,18,14,56,2.08
+4837481,2026-05-24,Real Betis,Levante,home,2,1,63,19,14,645,91,4,2,8,11,51,2.4
+4837481,2026-05-24,Levante,Real Betis,away,1,2,37,15,9,373,83,4,3,12,7,49,2.97
+4837482,2026-05-24,Celta Vigo,Sevilla,home,1,0,54,12,4,555,88,2,2,4,11,47,1.6
+4837482,2026-05-24,Sevilla,Celta Vigo,away,0,1,46,9,4,468,85,1,1,3,20,53,0.88

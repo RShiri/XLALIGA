@@ -19,3 +19,7 @@ env/
 
 # Logs
 *.log
+
+# Raw WhoScored match JSONs are huge (~2MB each); the dashboard uses the derived
+# laliga_dashboard/matches_detail/*.js instead. Keep raw scrapes local only.
+laliga/matches/20*/*.json
