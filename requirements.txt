@@ -1,0 +1,26 @@
+# WC2026 live pipeline (wc2026/) Python dependencies.
+# Install with:  py -m pip install -r requirements.txt
+
+# --- Scrape (scraper.py) ---
+undetected-chromedriver
+selenium
+cloudscraper
+requests
+
+# --- Render PNG infographics (renderer.py) ---
+matplotlib
+mplsoccer
+numpy
+pandas
+Pillow
+
+# --- Config / auth (run_match.py, git_ops.py) ---
+# REQUIRED so the repo-root .env (GIT_TOKEN, WhatsApp creds) is actually read.
+# Without it, load_dotenv() is skipped (its import is best-effort) and GIT_TOKEN
+# silently stays unset, so git push fails and the site never updates.
+python-dotenv
+
+# --- Optional: WhatsApp match notifications (run_match.py, lazy import) ---
+# Only needed if WHATSAPP_PROVIDER=twilio; safe to omit otherwise.
+twilio
+curl_cffi>=0.7  # browser-TLS HTTP client: reaches FotMob JSON API (Varnish/JA3 gated)

@@ -1,0 +1,21 @@
+position,team,played,won,drawn,lost,gf,ga,gd,points
+1,Barcelona,16,13,1,2,47,20,27,40
+2,Real Madrid,16,11,3,2,32,15,17,36
+3,Villarreal,15,11,2,2,31,13,18,35
+4,Atletico Madrid,16,9,4,3,28,15,13,31
+5,Espanyol,15,8,3,4,19,16,3,27
+6,Real Betis,15,6,6,3,25,19,6,24
+7,Athletic Club,16,7,2,7,15,20,-5,23
+8,Getafe,15,6,2,7,13,17,-4,20
+9,Elche,15,4,7,4,18,17,1,19
+10,Celta Vigo,15,4,7,4,18,19,-1,19
+11,Deportivo Alaves,15,5,3,7,13,15,-2,18
+12,Rayo Vallecano,15,4,5,6,13,16,-3,17
+13,Sevilla,15,5,2,8,20,24,-4,17
+14,Real Sociedad,15,4,4,7,19,22,-3,16
+15,Valencia,15,3,6,6,14,23,-9,15
+16,Mallorca,15,3,5,7,15,22,-7,14
+17,Osasuna,14,3,3,8,12,18,-6,12
+18,Girona,15,2,6,7,13,29,-16,12
+19,Real Oviedo,15,2,4,9,7,22,-15,10
+20,Levante,14,2,3,9,16,26,-10,9

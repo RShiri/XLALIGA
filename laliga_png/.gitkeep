@@ -1,0 +1,3 @@
+# Published La Liga infographic PNGs land here (tracked, like WorldCup2026/ for the WC pipeline).
+# Named "laliga_png" (not "LaLiga") because the filesystem is case-insensitive and "LaLiga"
+# would alias the "laliga/" pipeline folder.

@@ -1,0 +1,21 @@
+# Rendered infographic PNGs are produced locally into laliga/output (git-ignored);
+# the tracked, published copies live in laliga_png/.
+laliga/output/
+
+# Internal scraper cookie / matchCentre caches
+laliga/matches/**/match_*_cache.json
+
+# Private configuration / credentials
+.env
+
+# Python caching
+__pycache__/
+*.py[cod]
+
+# Local virtual environments
+venv/
+.venv/
+env/
+
+# Logs
+*.log

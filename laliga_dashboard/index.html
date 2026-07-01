@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>La Liga — Dashboard &amp; xG Lab</title>
+<script>document.write('<link rel="stylesheet" href="styles.css?v=' + Date.now() + '">');</script>
+<noscript><link rel="stylesheet" href="styles.css" /></noscript>
+</head>
+<body class="laliga">
+<header class="site">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="title">La<span>Liga</span> · Dashboard</div>
+      <div class="sub">Standings · fixtures &amp; results · xG lab · season projection</div>
+    </div>
+    <div class="header-right">
+      <label class="season-pick">Season <select id="seasonSel"></select></label>
+      <nav class="tabs">
+        <button data-view="standings" class="active">Standings</button>
+        <button data-view="matches">Matches</button>
+        <button data-view="players">Players</button>
+        <button data-view="xg">xG Analysis</button>
+        <button data-view="data">Data</button>
+        <button data-view="projection">Projection</button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- STANDINGS -->
+  <section id="view-standings" class="view active">
+    <div class="section-head">
+      <h2>League Table</h2>
+      <p>Live standings built from played matches — ranked by points, then goal difference, then goals for.
+         European and relegation zones are shaded; recent form shows the last five results.</p>
+    </div>
+    <div class="stats-strip" id="overviewStats"></div>
+    <div class="card" style="padding:0;overflow:hidden"><div class="table-scroll" id="standings"></div></div>
+  </section>
+
+  <!-- MATCHES -->
+  <section id="view-matches" class="view">
+    <div class="section-head">
+      <h2>Matches</h2>
+      <p>Every fixture and result, grouped by matchday. Deep-scraped games link into the interactive Match Centre.</p>
+    </div>
+    <div class="controls">
+      <input id="mSearch" type="text" placeholder="Search a team…" />
+      <select id="mStatus">
+        <option value="all">All matches</option>
+        <option value="played">Played only</option>
+        <option value="upcoming">Upcoming only</option>
+      </select>
+      <select id="mMatchday"></select>
+    </div>
+    <div id="matchList"></div>
+  </section>
+
+  <!-- PLAYERS -->
+  <section id="view-players" class="view">
+    <div class="section-head">
+      <h2>Player Statistics</h2>
+      <p>Goals, assists, xG and ratings aggregated across every deep-scraped match. Pick a leaderboard.</p>
+    </div>
+    <div class="controls">
+      <div class="seg">
+        <button class="seg-btn active" data-preset="ga">G + A</button>
+        <button class="seg-btn" data-preset="g">Goals</button>
+        <button class="seg-btn" data-preset="a">Assists</button>
+        <button class="seg-btn" data-preset="xg">xG</button>
+        <button class="seg-btn" data-preset="rating">Rating</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden"><div class="table-scroll" id="playersTable"></div></div>
+  </section>
+
+  <!-- XG -->
+  <section id="view-xg" class="view">
+    <div class="section-head">
+      <h2>xG Efficiency Lab</h2>
+      <p>Do teams score as much as the quality of their chances says they should? These charts compare
+         <b>expected goals (xG)</b> with what actually happened. <span id="xgNote" class="hint"></span></p>
+    </div>
+    <div class="explainer">
+      <h3>New here? What is xG?</h3>
+      <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. A tap-in might be
+         0.7 xG; a hopeful 30-metre strike 0.03. Sum a team's shots and you get how many goals an <i>average</i>
+         finisher would score from those chances — a better "who deserved it" number than the scoreline alone.</p>
+      <p class="explainer-note">La Liga xG is layered in from the deep-scrape (Understat + WhoScored). Until a match is
+         deep-scraped it contributes to the table but not to these charts.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card full-card">
+        <h3>Attack vs defence quality</h3>
+        <p class="hint">Each team by how dangerous its <b>attack</b> is (right = more xG created per game) and how mean its
+           <b>defence</b> is (up = less xG conceded per game). Dashed lines are the league average.</p>
+        <div class="scatter-wrap" id="xgScatter"></div>
+      </div>
+      <div class="card full-card">
+        <h3>Finishing: goals vs xG</h3>
+        <p class="hint">Total xG (right) vs actual goals scored (up). Above the crowd = clinical finishing; below = wasteful.</p>
+        <div class="scatter-wrap" id="xgFinish"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section id="view-data" class="view">
+    <div class="section-head">
+      <h2>Results &amp; Data</h2>
+      <p>Every played match with score, xG (where deep-scraped) and a link to its infographic PNG.</p>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden"><div class="table-scroll" id="dataTable"></div></div>
+  </section>
+
+  <!-- PROJECTION -->
+  <section id="view-projection" class="view">
+    <div class="section-head">
+      <h2>Season Projection</h2>
+      <p>Where does the table finish? A Poisson model built from this season's goals (home/away attack &amp; defence
+         strengths) simulates the remaining fixtures thousands of times to estimate final points and the odds of the
+         title, a top-four/European finish, and relegation.</p>
+    </div>
+    <div id="projChamp"></div>
+    <div class="card" style="padding:0;overflow:hidden;margin-top:16px"><div class="table-scroll" id="projTable"></div></div>
+  </section>
+
+  <div class="footer-note" id="footNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  (function () {
+    var v = Date.now();
+    document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
+  })();
+</script>
+</body>
+</html>

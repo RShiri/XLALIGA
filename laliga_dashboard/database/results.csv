@@ -1,0 +1,152 @@
+match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_estimated
+4837112,2025-08-15,,,Girona,Rayo Vallecano,1,3,,,0
+4837118,2025-08-15,,,Villarreal,Real Oviedo,2,0,,,0
+4837114,2025-08-16,,,Mallorca,Barcelona,0,3,,,0
+4837109,2025-08-16,,,Deportivo Alaves,Levante,2,1,,,0
+4837117,2025-08-16,,,Valencia,Real Sociedad,1,1,,,0
+4837111,2025-08-17,,,Celta Vigo,Getafe,0,2,,,0
+4837110,2025-08-17,,,Athletic Club,Sevilla,3,2,,,0
+4837113,2025-08-17,,,Espanyol,Atletico Madrid,2,1,,,0
+4837115,2025-08-18,,,Elche,Real Betis,1,1,,,0
+4837116,2025-08-19,,,Real Madrid,Osasuna,1,0,,,0
+4837123,2025-08-22,,,Real Betis,Deportivo Alaves,1,0,,,0
+4837125,2025-08-23,,,Mallorca,Celta Vigo,1,1,,,0
+4837120,2025-08-23,,,Atletico Madrid,Elche,1,1,,,0
+4837124,2025-08-23,,,Levante,Barcelona,2,3,,,0
+4837121,2025-08-24,,,Osasuna,Valencia,1,0,,,0
+4837126,2025-08-24,,,Real Sociedad,Espanyol,2,2,,,0
+4837128,2025-08-24,,,Villarreal,Girona,5,0,,,0
+4837122,2025-08-24,,,Real Oviedo,Real Madrid,0,3,,,0
+4837119,2025-08-25,,,Athletic Club,Rayo Vallecano,1,0,,,0
+4837127,2025-08-25,,,Sevilla,Getafe,1,2,,,0
+4837131,2025-08-29,,,Elche,Levante,2,0,,,0
+4837137,2025-08-29,,,Valencia,Getafe,3,0,,,0
+4837129,2025-08-30,,,Deportivo Alaves,Atletico Madrid,1,1,,,0
+4837134,2025-08-30,,,Real Oviedo,Real Sociedad,1,0,,,0
+4837133,2025-08-30,,,Girona,Sevilla,0,2,,,0
+4837138,2025-08-30,,,Real Madrid,Mallorca,2,1,,,0
+4837130,2025-08-31,,,Celta Vigo,Villarreal,1,1,,,0
+4837135,2025-08-31,,,Real Betis,Athletic Club,1,2,,,0
+4837132,2025-08-31,,,Espanyol,Osasuna,1,0,,,0
+4837136,2025-08-31,,,Rayo Vallecano,Barcelona,1,1,,,0
+4837147,2025-09-12,,,Sevilla,Elche,2,2,,,0
+4837143,2025-09-13,,,Getafe,Real Oviedo,2,0,,,0
+4837148,2025-09-13,,,Real Sociedad,Real Madrid,1,2,,,0
+4837145,2025-09-13,,,Athletic Club,Deportivo Alaves,0,1,,,0
+4837139,2025-09-13,,,Atletico Madrid,Villarreal,2,0,,,0
+4837141,2025-09-14,,,Celta Vigo,Girona,1,1,,,0
+4837146,2025-09-14,,,Levante,Real Betis,2,2,,,0
+4837144,2025-09-14,,,Osasuna,Rayo Vallecano,2,0,,,0
+4837140,2025-09-14,,,Barcelona,Valencia,6,0,,,0
+4837142,2025-09-15,,,Espanyol,Mallorca,3,2,,,0
+4837151,2025-09-19,,,Real Betis,Real Sociedad,3,1,,,0
+4837153,2025-09-20,,,Girona,Levante,0,4,,,0
+4837157,2025-09-20,,,Real Madrid,Espanyol,2,0,,,0
+4837149,2025-09-20,,,Deportivo Alaves,Sevilla,1,2,,,0
+4837158,2025-09-20,,,Villarreal,Osasuna,2,1,,,0
+4837154,2025-09-20,,,Valencia,Athletic Club,2,0,,,0
+4837156,2025-09-21,,,Rayo Vallecano,Celta Vigo,1,1,,,0
+4837155,2025-09-21,,,Mallorca,Atletico Madrid,1,1,,,0
+4837152,2025-09-21,,,Elche,Real Oviedo,1,0,,,0
+4837150,2025-09-21,,,Barcelona,Getafe,3,0,,,0
+4837167,2025-08-27,,,Celta Vigo,Real Betis,1,1,,,0
+4837160,2025-09-23,,,Athletic Club,Girona,1,1,,,0
+4837162,2025-09-23,,,Espanyol,Valencia,2,2,,,0
+4837163,2025-09-23,,,Levante,Real Madrid,1,4,,,0
+4837164,2025-09-23,,,Sevilla,Villarreal,1,2,,,0
+4837165,2025-09-24,,,Getafe,Deportivo Alaves,1,1,,,0
+4837161,2025-09-24,,,Atletico Madrid,Rayo Vallecano,3,2,,,0
+4837169,2025-09-24,,,Real Sociedad,Mallorca,1,0,,,0
+4837168,2025-09-25,,,Osasuna,Elche,1,1,,,0
+4837166,2025-09-25,,,Real Oviedo,Barcelona,1,3,,,0
+4837178,2025-09-26,,,Girona,Espanyol,0,0,,,0
+4837173,2025-09-27,,,Getafe,Levante,1,1,,,0
+4837170,2025-09-27,,,Atletico Madrid,Real Madrid,5,2,,,0
+4837175,2025-09-27,,,Mallorca,Deportivo Alaves,1,0,,,0
+4837176,2025-09-27,,,Villarreal,Athletic Club,1,0,,,0
+4837174,2025-09-28,,,Rayo Vallecano,Sevilla,0,1,,,0
+4837177,2025-09-28,,,Elche,Celta Vigo,2,1,,,0
+4837171,2025-09-28,,,Barcelona,Real Sociedad,2,1,,,0
+4837172,2025-09-28,,,Real Betis,Osasuna,2,0,,,0
+4837179,2025-09-30,,,Valencia,Real Oviedo,1,2,,,0
+4837187,2025-10-03,,,Osasuna,Getafe,2,1,,,0
+4837188,2025-10-04,,,Real Oviedo,Levante,0,2,,,0
+4837182,2025-10-04,,,Girona,Valencia,2,1,,,0
+4837181,2025-10-04,,,Athletic Club,Mallorca,2,1,,,0
+4837183,2025-10-04,,,Real Madrid,Villarreal,3,1,,,0
+4837180,2025-10-05,,,Deportivo Alaves,Elche,3,1,,,0
+4837185,2025-10-05,,,Sevilla,Barcelona,4,1,,,0
+4837186,2025-10-05,,,Espanyol,Real Betis,1,2,,,0
+4837189,2025-10-05,,,Real Sociedad,Rayo Vallecano,0,1,,,0
+4837184,2025-10-05,,,Celta Vigo,Atletico Madrid,1,1,,,0
+4837198,2025-10-17,,,Real Oviedo,Espanyol,0,2,,,0
+4837199,2025-10-18,,,Sevilla,Mallorca,1,3,,,0
+4837192,2025-10-18,,,Barcelona,Girona,2,1,,,0
+4837197,2025-10-18,,,Villarreal,Real Betis,2,2,,,0
+4837191,2025-10-18,,,Atletico Madrid,Osasuna,1,0,,,0
+4837196,2025-10-19,,,Elche,Athletic Club,0,0,,,0
+4837193,2025-10-19,,,Celta Vigo,Real Sociedad,1,1,,,0
+4837195,2025-10-19,,,Levante,Rayo Vallecano,0,3,,,0
+4837194,2025-10-19,,,Getafe,Real Madrid,0,1,,,0
+4837190,2025-10-20,,,Deportivo Alaves,Valencia,0,0,,,0
+4837202,2025-10-24,,,Real Sociedad,Sevilla,2,1,,,0
+4837201,2025-10-25,,,Girona,Real Oviedo,3,3,,,0
+4837208,2025-10-25,,,Espanyol,Elche,1,0,,,0
+4837200,2025-10-25,,,Athletic Club,Getafe,0,1,,,0
+4837203,2025-10-25,,,Valencia,Villarreal,0,2,,,0
+4837209,2025-10-26,,,Mallorca,Levante,1,1,,,0
+4837206,2025-10-26,,,Real Madrid,Barcelona,2,1,,,0
+4837207,2025-10-26,,,Osasuna,Celta Vigo,2,3,,,0
+4837204,2025-10-26,,,Rayo Vallecano,Deportivo Alaves,1,0,,,0
+4837205,2025-10-27,,,Real Betis,Atletico Madrid,0,2,,,0
+4837214,2025-10-31,,,Getafe,Girona,2,1,,,0
+4837219,2025-11-01,,,Villarreal,Rayo Vallecano,4,0,,,0
+4837211,2025-11-01,,,Atletico Madrid,Sevilla,3,0,,,0
+4837216,2025-11-01,,,Real Sociedad,Athletic Club,3,2,,,0
+4837215,2025-11-01,,,Real Madrid,Valencia,4,0,,,0
+4837217,2025-11-02,,,Levante,Celta Vigo,1,2,,,0
+4837210,2025-11-02,,,Deportivo Alaves,Espanyol,2,1,,,0
+4837212,2025-11-02,,,Barcelona,Elche,3,1,,,0
+4837213,2025-11-02,,,Real Betis,Mallorca,3,0,,,0
+4837218,2025-11-03,,,Real Oviedo,Osasuna,0,0,,,0
+4837222,2025-11-07,,,Elche,Real Sociedad,1,1,,,0
+4837225,2025-11-08,,,Girona,Deportivo Alaves,1,0,,,0
+4837229,2025-11-08,,,Sevilla,Osasuna,1,0,,,0
+4837221,2025-11-08,,,Atletico Madrid,Levante,3,1,,,0
+4837223,2025-11-08,,,Espanyol,Villarreal,0,2,,,0
+4837220,2025-11-09,,,Athletic Club,Real Oviedo,1,0,,,0
+4837224,2025-11-09,,,Rayo Vallecano,Real Madrid,0,0,,,0
+4837227,2025-11-09,,,Valencia,Real Betis,1,1,,,0
+4837228,2025-11-09,,,Mallorca,Getafe,1,0,,,0
+4837226,2025-11-09,,,Celta Vigo,Barcelona,2,4,,,0
+4837238,2025-11-21,,,Valencia,Levante,1,0,,,0
+4837230,2025-11-22,,,Deportivo Alaves,Celta Vigo,0,1,,,0
+4837236,2025-11-22,,,Barcelona,Athletic Club,4,0,,,0
+4837234,2025-11-22,,,Osasuna,Real Sociedad,1,3,,,0
+4837239,2025-11-22,,,Villarreal,Mallorca,2,1,,,0
+4837235,2025-11-23,,,Real Oviedo,Rayo Vallecano,0,0,,,0
+4837231,2025-11-23,,,Real Betis,Girona,1,1,,,0
+4837237,2025-11-23,,,Getafe,Atletico Madrid,0,1,,,0
+4837232,2025-11-23,,,Elche,Real Madrid,2,2,,,0
+4837233,2025-11-24,,,Espanyol,Sevilla,2,1,,,0
+4837249,2025-11-28,,,Getafe,Elche,1,0,,,0
+4837243,2025-11-29,,,Mallorca,Osasuna,2,2,,,0
+4837246,2025-11-29,,,Barcelona,Deportivo Alaves,3,1,,,0
+4837247,2025-11-29,,,Levante,Athletic Club,0,2,,,0
+4837240,2025-11-29,,,Atletico Madrid,Real Oviedo,2,0,,,0
+4837245,2025-11-30,,,Real Sociedad,Villarreal,2,3,,,0
+4837248,2025-11-30,,,Sevilla,Real Betis,0,2,,,0
+4837241,2025-11-30,,,Celta Vigo,Espanyol,0,1,,,0
+4837242,2025-11-30,,,Girona,Real Madrid,1,1,,,0
+4837244,2025-12-01,,,Rayo Vallecano,Valencia,1,1,,,0
+4837258,2025-12-05,,,Real Oviedo,Mallorca,0,0,,,0
+4837256,2025-12-06,,,Villarreal,Getafe,2,0,,,0
+4837250,2025-12-06,,,Deportivo Alaves,Real Sociedad,1,0,,,0
+4837254,2025-12-06,,,Real Betis,Barcelona,3,5,,,0
+4837251,2025-12-06,,,Athletic Club,Atletico Madrid,1,0,,,0
+4837252,2025-12-07,,,Elche,Girona,3,0,,,0
+4837259,2025-12-07,,,Valencia,Sevilla,1,1,,,0
+4837253,2025-12-07,,,Espanyol,Rayo Vallecano,1,0,,,0
+4837255,2025-12-07,,,Real Madrid,Celta Vigo,0,2,,,0
+4837294,2025-12-02,,,Barcelona,Atletico Madrid,3,1,,,0
+4837290,2025-12-03,,,Athletic Club,Real Madrid,0,3,,,0

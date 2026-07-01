@@ -1,0 +1,8 @@
+{
+  "season": "2026-27",
+  "competition": "LaLiga",
+  "fotmob_league_id": "87",
+  "generated_utc": "",
+  "_note": "Placeholder. Fixtures not released yet. Once FotMob lists the 2026/27 La Liga schedule, run:  py laliga/build_schedule.py --season 2026-27  to fill this in, then rebuild the dashboard.",
+  "matches": []
+}
