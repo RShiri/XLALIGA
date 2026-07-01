@@ -129,6 +129,11 @@
       svg.push('<line x1="' + padL + '" y1="' + AY.toFixed(1) + '" x2="' + (padL + plotW) + '" y2="' + AY.toFixed(1) + '" stroke="#5d6a90" stroke-width="1" stroke-dasharray="4 4"/>');
       svg.push('<text x="' + (padL + plotW - 4) + '" y="' + (AY - 4).toFixed(1) + '" fill="#7e8bb0" font-size="9.5" text-anchor="end">avg</text>');
     }
+    if (cfg.diagonal) {
+      var dMax = Math.min(xMax, yMax);
+      svg.push('<line x1="' + sx(0).toFixed(1) + '" y1="' + sy(0).toFixed(1) + '" x2="' + sx(dMax).toFixed(1) +
+        '" y2="' + sy(dMax).toFixed(1) + '" stroke="#8b96b8" stroke-width="1.2" stroke-dasharray="5 4"/>');
+    }
     (cfg.corners || []).forEach(function (c) {
       var x = c.h === "l" ? padL + 8 : padL + plotW - 8, anc = c.h === "l" ? "start" : "end";
       var y = c.v === "t" ? padT + 14 : padT + plotH - 8;
@@ -258,49 +263,1264 @@
   }
 
   /* ---- xG analysis lab (reuses teamScatter; lights up post-backfill) ---- */
-  function teamXgAgg() {
-    var R = D.xgRecords || [], agg = {};
+  /* ============================================================
+     xG EFFICIENCY LAB — ported from the WC2026 dashboard. Driven by
+     D.xgRecords (one row per team-match: xgf/xga/gf/ga/opp/home) plus
+     the per-match team `stats` block for the shot-quality chart.
+     Derived stats recompute per season (see computeXgDerived). ======= */
+  var COL = { green: "#3ddc97", blue: "#4ea1ff", orange: "#ffb454", red: "#ff6b81" };
+  var R = [], AGG = [], xgVals = [], goalVals = [], rPearson = 0, fit = { slope: 0, intercept: 0 };
+  var ledgerSort = { key: "xgd", dir: -1 };
+  var dbSort = { key: "gf", dir: -1 };
+  var TOTALS = [];
+
+  function pearson(xs, ys) {
+    var n = xs.length, sx = 0, sy = 0, sxy = 0, sx2 = 0, sy2 = 0;
+    for (var i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; sxy += xs[i] * ys[i]; sx2 += xs[i] * xs[i]; sy2 += ys[i] * ys[i]; }
+    var num = n * sxy - sx * sy;
+    var den = Math.sqrt((n * sx2 - sx * sx) * (n * sy2 - sy * sy));
+    return den === 0 ? 0 : num / den;
+  }
+  function linreg(xs, ys) {
+    var n = xs.length, sx = 0, sy = 0, sxy = 0, sx2 = 0;
+    for (var i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; sxy += xs[i] * ys[i]; sx2 += xs[i] * xs[i]; }
+    var slope = (n * sx2 - sx * sx) === 0 ? 0 : (n * sxy - sx * sy) / (n * sx2 - sx * sx);
+    return { slope: slope, intercept: (sy - slope * sx) / n };
+  }
+  function poisP(k, lam) { var f = 1; for (var i = 2; i <= k; i++) f *= i; return Math.exp(-lam) * Math.pow(lam, k) / f; }
+
+  function teamAggregates() {
+    var t = {};
     R.forEach(function (r) {
-      var a = agg[r.team] = agg[r.team] || { team: r.team, n: 0, xgf: 0, xga: 0, gf: 0, ga: 0 };
-      a.n++; a.xgf += r.xgf; a.xga += r.xga; a.gf += r.gf; a.ga += r.ga;
+      var a = t[r.team] || (t[r.team] = { team: r.team, gf: 0, ga: 0, xgf: 0, xga: 0, n: 0 });
+      a.gf += r.gf; a.ga += r.ga; a.xgf += r.xgf; a.xga += r.xga; a.n++;
     });
-    return Object.keys(agg).map(function (t) {
-      var a = agg[t];
-      return { team: t, n: a.n, xgfpg: a.xgf / a.n, xgapg: a.xga / a.n,
-               xgf: a.xgf, xga: a.xga, gf: a.gf, ga: a.ga, xgd: (a.xgf - a.xga) / a.n };
+    return Object.keys(t).map(function (k) {
+      var a = t[k];
+      a.attDelta = a.gf - a.xgf;   // finishing: + = clinical
+      a.defDelta = a.xga - a.ga;   // defence/keeping: + = conceded fewer than expected
+      a.xgd = a.xgf - a.xga;       // deserved margin
+      return a;
     });
   }
-  function renderXg() {
-    var rows = teamXgAgg();
-    var note = document.getElementById("xgNote");
-    if (note) note.textContent = rows.length
-      ? (rows.length + " teams with xG data (" + (D.counts.with_xg || 0) + " matches deep-scraped).")
-      : "No xG yet — run the deep-scrape backfill to populate this section.";
-    // Attack vs defence: xG for (x) vs xG against (y, flipped so up-right = best)
-    if (rows.length) {
-      var avgF = rows.reduce(function (s, r) { return s + r.xgfpg; }, 0) / rows.length;
-      var avgA = rows.reduce(function (s, r) { return s + r.xgapg; }, 0) / rows.length;
-      teamScatter("xgScatter", rows.map(function (r) {
-        return { team: r.team, x: r.xgfpg, y: r.xgapg, col: r.xgd >= 0 ? "#39d98a" : "#ff6b6b" };
-      }), {
-        xLabel: "xG created per game", yLabel: "xG conceded per game", flipY: true,
-        avgX: avgF, avgY: avgA,
-        corners: [{ h: "r", v: "t", text: "dominant", color: "#39d98a" }, { h: "l", v: "b", text: "outplayed", color: "#ff6b6b" }],
-        tip: function (r) { return "xGF " + r.x.toFixed(2) + " / xGA " + r.y.toFixed(2); },
-        legend: chartLegend([["#39d98a", "positive xG diff"], ["#ff6b6b", "negative xG diff"]], "Top-right = creates lots, concedes little.")
+  function computeXgDerived() {
+    R = D.xgRecords || [];
+    xgVals = R.map(function (r) { return r.xgf; });
+    goalVals = R.map(function (r) { return r.gf; });
+    rPearson = R.length ? pearson(xgVals, goalVals) : 0;
+    fit = R.length ? linreg(xgVals, goalVals) : { slope: 0, intercept: 0 };
+    AGG = teamAggregates();
+  }
+
+  function renderXgStats() {
+    var totalGoals = goalVals.reduce(function (a, b) { return a + b; }, 0);
+    var totalXg = xgVals.reduce(function (a, b) { return a + b; }, 0);
+    var ratio = totalXg ? totalGoals / totalXg : 0;
+    var items = [
+      ["v accent", rPearson.toFixed(2), "xG↔Goals correlation (r)"],
+      ["v blue", totalGoals + " / " + totalXg.toFixed(1), "Goals vs xG (total)"],
+      ["v", (ratio * 100).toFixed(0) + "%", "Conversion vs expected"],
+      ["v", R.length, "Team-matches analysed"],
+    ];
+    document.getElementById("xgStats").innerHTML = items.map(function (it) {
+      return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>";
+    }).join("");
+  }
+
+  /* Per team-match scatter (hand-rolled SVG): xG vs actual goals */
+  function renderScatter() {
+    var host = document.getElementById("scatter");
+    if (!R.length) { host.innerHTML = '<p class="hint">Not enough data yet — deep-scrape matches to populate xG.</p>'; return; }
+    var W = 560, H = 420, pad = 46;
+    var maxV = Math.max(5, Math.ceil(Math.max.apply(null, xgVals.concat(goalVals).concat([1]))));
+    function sx(v) { return pad + (v / maxV) * (W - pad - 14); }
+    function sy(v) { return H - pad - (v / maxV) * (H - pad - 14); }
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
+    for (var g = 0; g <= maxV; g++) {
+      svg.push('<line x1="' + sx(g) + '" y1="' + sy(0) + '" x2="' + sx(g) + '" y2="' + sy(maxV) + '" stroke="#26304d" stroke-width="' + (g === 0 ? 1.4 : 0.5) + '"/>');
+      svg.push('<line x1="' + sx(0) + '" y1="' + sy(g) + '" x2="' + sx(maxV) + '" y2="' + sy(g) + '" stroke="#26304d" stroke-width="' + (g === 0 ? 1.4 : 0.5) + '"/>');
+      svg.push('<text x="' + sx(g) + '" y="' + (sy(0) + 16) + '" fill="#93a0bd" font-size="10" text-anchor="middle">' + g + "</text>");
+      if (g > 0) svg.push('<text x="' + (sx(0) - 8) + '" y="' + (sy(g) + 3) + '" fill="#93a0bd" font-size="10" text-anchor="end">' + g + "</text>");
+    }
+    svg.push('<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(maxV) + '" y2="' + sy(maxV) + '" stroke="#93a0bd" stroke-width="1.2" stroke-dasharray="5 4"/>');
+    svg.push('<line x1="' + sx(0) + '" y1="' + sy(fit.intercept) + '" x2="' + sx(maxV) + '" y2="' + sy(fit.slope * maxV + fit.intercept) + '" stroke="#3ddc97" stroke-width="2"/>');
+    svg.push('<text x="' + (W / 2) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Expected goals (xG)</text>');
+    svg.push('<text x="14" y="' + (H / 2) + '" fill="#e8edf7" font-size="12" text-anchor="middle" transform="rotate(-90 14 ' + (H / 2) + ')">Actual goals</text>');
+    R.forEach(function (r, i) {
+      var jx = ((i * 7) % 5 - 2) * 1.2, jy = ((i * 3) % 5 - 2) * 1.2;
+      var cx = sx(r.xgf) + jx, cy = sy(r.gf) + jy, over = r.gf - r.xgf;
+      var col = over > 0.4 ? "#3ddc97" : over < -0.4 ? "#ff6b81" : "#4ea1ff";
+      svg.push('<circle class="pt" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5.5" fill="' + col +
+        '" fill-opacity="0.78" stroke="#0b0f1a" stroke-width="1" data-team="' + esc(r.team) + '" data-opp="' + esc(r.opp) +
+        '" data-g="' + r.gf + '" data-xg="' + r.xgf.toFixed(2) + '"/>');
+    });
+    svg.push("</svg>");
+    host.innerHTML = svg.join("");
+    host.querySelectorAll("circle.pt").forEach(function (c) {
+      c.addEventListener("mousemove", function (e) {
+        tooltip.innerHTML = '<div class="t-team">' + c.dataset.team + " vs " + c.dataset.opp + "</div>" +
+          '<div class="t-line">Goals: ' + c.dataset.g + " · xG: " + c.dataset.xg + "</div>";
+        tooltip.style.opacity = "1";
+        tooltip.style.left = (e.clientX + 14) + "px";
+        tooltip.style.top = (e.clientY + 14) + "px";
       });
-    } else teamScatter("xgScatter", [], {});
-    // Goals vs xG (finishing): actual GF (x) vs xGF (y)
-    if (rows.length) {
-      teamScatter("xgFinish", rows.map(function (r) {
-        return { team: r.team, x: r.xgf, y: r.gf, col: r.gf >= r.xgf ? "#4ea8ff" : "#f7b955" };
-      }), {
-        xLabel: "Total xG", yLabel: "Actual goals", diagonal: false,
-        corners: [{ h: "l", v: "t", text: "clinical", color: "#4ea8ff" }, { h: "r", v: "b", text: "wasteful", color: "#f7b955" }],
-        tip: function (r) { return r.y + " goals from " + r.x.toFixed(1) + " xG"; },
-        legend: chartLegend([["#4ea8ff", "outscoring xG"], ["#f7b955", "underscoring xG"]])
+      c.addEventListener("mouseleave", function () { tooltip.style.opacity = "0"; });
+    });
+  }
+
+  function renderCorr() {
+    var box = document.getElementById("corrBox"), ins = document.getElementById("corrInsight");
+    if (!R.length) { box.innerHTML = '<p class="hint">No xG data yet.</p>'; ins.innerHTML = ""; return; }
+    var rr = rPearson, r2 = rr * rr;
+    var strength = rr > 0.75 ? "strong" : rr > 0.5 ? "moderate" : rr > 0.3 ? "modest" : "weak";
+    var scalePct = Math.max(0, Math.min(100, rr * 100));
+    box.innerHTML =
+      '<div class="r-row"><span class="r-big">' + rr.toFixed(2) + '</span><span class="lab">link strength (0 = none, 1 = perfect) — <b>' + strength + '</b></span></div>' +
+      '<div class="corr-scale"><div class="corr-scale-fill" style="width:' + scalePct.toFixed(0) + '%"></div></div>' +
+      '<div class="r-row" style="margin-top:12px"><span style="font-size:22px;font-weight:800;color:var(--accent-2)">' +
+        (r2 * 100).toFixed(0) + '%</span><span class="lab">of the difference in goals is explained by chance quality (xG). The rest is finishing skill, goalkeeping &amp; luck.</span></div>' +
+      '<div class="r-row"><span style="font-size:18px;font-weight:700">' + fit.slope.toFixed(2) +
+        '</span><span class="lab">goals scored, on average, for every 1.0 xG of chances created</span></div>';
+    ins.innerHTML =
+      "In plain terms: across the <b>" + R.length + "</b> team-performances this season, teams that created better " +
+      "chances did tend to score more — a <b>" + strength + "</b> relationship. But it's far from one-to-one, which is " +
+      "exactly why upsets happen: on any given day finishing and luck can override who created the better chances. " +
+      "Each 1.0 xG has turned into about <b>" + fit.slope.toFixed(2) + " goals</b>, so teams are finishing slightly <b>" +
+      (fit.slope < 1 ? "below" : "above") + "</b> their chances overall.";
+  }
+
+  function renderQuadrant() {
+    var src = AGG.filter(function (a) { return a.n > 0; });
+    if (!src.length) { teamScatter("quadrant", [], {}); return; }
+    var avgF = src.reduce(function (s, a) { return s + a.xgf / a.n; }, 0) / src.length;
+    var avgA = src.reduce(function (s, a) { return s + a.xga / a.n; }, 0) / src.length;
+    var rows = src.map(function (a) {
+      var fwd = a.xgf / a.n, def = a.xga / a.n;
+      var attGood = fwd >= avgF, defGood = def <= avgA;
+      var col = attGood && defGood ? COL.green : !attGood && defGood ? COL.blue : attGood && !defGood ? COL.orange : COL.red;
+      return { team: a.team, x: fwd, y: def, col: col, _f: fwd, _d: def };
+    });
+    teamScatter("quadrant", rows, {
+      h: 580, flipY: true, avgX: avgF, avgY: avgA,
+      xLabel: "xG created per game  →  (more dangerous attack)",
+      yLabel: "xG conceded per game  (higher up = meaner defence)",
+      corners: [
+        { h: "r", v: "t", text: "Strong both ends ↗", color: COL.green },
+        { h: "l", v: "t", text: "↖ Defence-first", color: COL.blue },
+        { h: "r", v: "b", text: "All-out attack ↘", color: COL.orange },
+        { h: "l", v: "b", text: "↙ Struggling", color: COL.red }
+      ],
+      tip: function (r) { return "create " + r._f.toFixed(2) + " / concede " + r._d.toFixed(2) + " xG per game"; },
+      legend: chartLegend([
+        [COL.green, "Strong both ends — good attack &amp; mean defence"],
+        [COL.blue, "Defence-first — solid at the back, blunt up front"],
+        [COL.orange, "All-out attack — dangerous but leaky"],
+        [COL.red, "Struggling — out-created at both ends"]
+      ], "Dashed lines mark the league average for each axis.")
+    });
+  }
+
+  function matchXpts(lh, la) {
+    var pw = 0, pd = 0, pl = 0;
+    for (var i = 0; i <= 8; i++) for (var j = 0; j <= 8; j++) {
+      var p = poisP(i, lh) * poisP(j, la);
+      if (i > j) pw += p; else if (i === j) pd += p; else pl += p;
+    }
+    return [3 * pw + pd, 3 * pl + pd];
+  }
+  function teamPoints() {
+    var t = {};
+    function g(n) { return t[n] || (t[n] = { team: n, pts: 0, xpts: 0, n: 0 }); }
+    D.matches.forEach(function (m) {
+      if (!m.played || m.xg_home == null) return;
+      var H = g(m.home), A = g(m.away);
+      H.n++; A.n++;
+      H.pts += m.hs > m.as ? 3 : m.hs === m.as ? 1 : 0;
+      A.pts += m.as > m.hs ? 3 : m.hs === m.as ? 1 : 0;
+      var xp = matchXpts(m.xg_home, m.xg_away);
+      H.xpts += xp[0]; A.xpts += xp[1];
+    });
+    return Object.keys(t).map(function (k) { return t[k]; });
+  }
+  function renderXpts() {
+    var src = teamPoints();
+    var ins = document.getElementById("xptsInsight");
+    if (!src.length) { teamScatter("xpts", [], {}); ins.innerHTML = ""; return; }
+    var rows = src.map(function (r) {
+      var d = r.pts - r.xpts;
+      return { team: r.team, x: r.xpts, y: r.pts, col: d > 0.5 ? COL.green : d < -0.5 ? COL.red : COL.blue, _d: d };
+    });
+    teamScatter("xpts", rows, {
+      h: 560, diagonal: true,
+      xLabel: "Expected points from xG  →  (what the chances were worth)",
+      yLabel: "Actual points won",
+      tip: function (r) { return r.y + " pts vs " + r.x.toFixed(1) + " deserved (" + (r._d >= 0 ? "+" : "") + r._d.toFixed(1) + ")"; },
+      legend: chartLegend([
+        [COL.green, "Over-performing — more points than the chances deserved (clinical or lucky)"],
+        [COL.blue, "About right — points roughly match performances"],
+        [COL.red, "Under-performing — fewer points than deserved (wasteful or unlucky)"]
+      ], "Dashed line = got exactly the points the xG says they earned. Above it = lucky, below = unlucky.")
+    });
+    var rr = src.slice().sort(function (a, b) { return (b.pts - b.xpts) - (a.pts - a.xpts); });
+    var lucky = rr[0], unlucky = rr[rr.length - 1];
+    ins.innerHTML =
+      "Biggest over-achiever so far: <b>" + esc(lucky.team) + "</b> (+" + (lucky.pts - lucky.xpts).toFixed(1) +
+      " pts vs expected). Most unlucky: <b>" + esc(unlucky.team) + "</b> (" + (unlucky.pts - unlucky.xpts).toFixed(1) +
+      "). Expected points come from a Poisson model on each match's xG.";
+  }
+
+  function teamShotAgg() {
+    var t = {};
+    function g(n) { return t[n] || (t[n] = { team: n, shots: 0, xg: 0, n: 0 }); }
+    D.matches.forEach(function (m) {
+      if (!m.played || !m.has_stats) return;
+      var s = m.stats;
+      if (!s || s.shots[0] == null) return;
+      var H = g(m.home), A = g(m.away);
+      H.shots += s.shots[0] || 0; H.xg += s.xg[0] || 0; H.n++;
+      A.shots += s.shots[1] || 0; A.xg += s.xg[1] || 0; A.n++;
+    });
+    return Object.keys(t).map(function (k) { return t[k]; }).filter(function (r) { return r.shots > 0; });
+  }
+  function renderShotQuality() {
+    var src = teamShotAgg();
+    if (!src.length) { teamScatter("shotquality", [], {}); return; }
+    src.forEach(function (r) { r.spg = r.shots / r.n; r.xgPerShot = r.xg / r.shots; });
+    var avgX = src.reduce(function (s, r) { return s + r.spg; }, 0) / src.length;
+    var avgY = src.reduce(function (s, r) { return s + r.xgPerShot; }, 0) / src.length;
+    var rows = src.map(function (r) {
+      var hiVol = r.spg >= avgX, hiQual = r.xgPerShot >= avgY;
+      var col = hiVol && hiQual ? COL.green : !hiVol && hiQual ? COL.blue : hiVol && !hiQual ? COL.orange : COL.red;
+      return { team: r.team, x: r.spg, y: r.xgPerShot, col: col, _s: r.spg, _q: r.xgPerShot };
+    });
+    teamScatter("shotquality", rows, {
+      h: 560, avgX: avgX, avgY: avgY, centerAvg: true,
+      xLabel: "Shots per game  →  (volume)",
+      yLabel: "xG per shot  (chance quality)",
+      corners: [
+        { h: "r", v: "t", text: "Lots of great chances ↗", color: COL.green },
+        { h: "l", v: "t", text: "↖ Few but excellent", color: COL.blue },
+        { h: "r", v: "b", text: "High volume, long-range ↘", color: COL.orange },
+        { h: "l", v: "b", text: "↙ Creating little", color: COL.red }
+      ],
+      tip: function (r) { return r._s.toFixed(1) + " shots/game · " + r._q.toFixed(2) + " xG per shot"; },
+      legend: chartLegend([
+        [COL.green, "Lots of high-quality chances — volume + quality"],
+        [COL.blue, "Fewer but excellent looks — picky, high quality"],
+        [COL.orange, "High volume, lower quality — lots of long-range shots"],
+        [COL.red, "Creating little — low volume and low quality"]
+      ], "Dashed lines mark the league average for each axis.")
+    });
+  }
+
+  function renderHomeAway() {
+    var host = document.getElementById("homeAway");
+    var h = R.filter(function (r) { return r.home; }), a = R.filter(function (r) { return !r.home; });
+    if (!h.length || !a.length) { host.innerHTML = '<p class="hint">No home/away xG data yet.</p>'; return; }
+    function avg(arr, k) { return arr.reduce(function (s, r) { return s + r[k]; }, 0) / arr.length; }
+    var hx = avg(h, "xgf"), ax = avg(a, "xgf"), hg = avg(h, "gf"), ag = avg(a, "gf");
+    var mx = Math.max(hx, ax) * 1.15;
+    function bar(label, hv, av) {
+      return '<div style="margin-bottom:14px"><div style="font-size:12px;color:var(--muted);margin-bottom:5px">' + label + "</div>" +
+        '<div class="ha-row"><span class="ha-lab">Home</span><div class="ha-track"><div class="ha-fill" style="width:' + (100 * hv / mx).toFixed(1) + '%;background:var(--accent)"></div></div><b>' + hv.toFixed(2) + "</b></div>" +
+        '<div class="ha-row"><span class="ha-lab">Away</span><div class="ha-track"><div class="ha-fill" style="width:' + (100 * av / mx).toFixed(1) + '%;background:var(--accent-2)"></div></div><b>' + av.toFixed(2) + "</b></div></div>";
+    }
+    var diff = ((hx - ax) >= 0 ? "+" : "") + (hx - ax).toFixed(2);
+    host.innerHTML =
+      bar("Average xG created per game", hx, ax) +
+      bar("Average goals scored per game", hg, ag) +
+      '<div class="insight">Home teams create <b>' + diff + ' xG</b> more per game than away teams across ' +
+      h.length + " home and " + a.length + " away team-matches.</div>";
+  }
+
+  function renderUnlucky() {
+    var host = document.getElementById("unlucky");
+    if (!host) return;
+    var rows = D.matches.filter(function (m) { return m.played && m.xg_home != null; }).map(function (m) {
+      var hWon = m.hs > m.as, aWon = m.as > m.hs, adv = 0, who = "";
+      if (m.xg_home > m.xg_away && !hWon) { adv = m.xg_home - m.xg_away; who = m.home; }
+      else if (m.xg_away > m.xg_home && !aWon) { adv = m.xg_away - m.xg_home; who = m.away; }
+      return { m: m, adv: adv, who: who };
+    }).filter(function (x) { return x.adv > 0; })
+      .sort(function (a, b) { return b.adv - a.adv; }).slice(0, 10);
+    if (!rows.length) { host.innerHTML = '<p class="hint">No unlucky results yet.</p>'; return; }
+    host.innerHTML = '<table class="rank"><thead><tr><th class="team">Match</th><th>Result</th><th>xG</th>' +
+      '<th class="team">Deserved more</th><th>xG edge</th></tr></thead><tbody>' +
+      rows.map(function (x) {
+        var m = x.m;
+        return "<tr><td class='team'>" + esc(m.home) + " v " + esc(m.away) + "</td>" +
+          "<td>" + m.hs + "–" + m.as + "</td><td>" + m.xg_home.toFixed(2) + "–" + m.xg_away.toFixed(2) + "</td>" +
+          "<td class='team'>" + esc(x.who) + "</td>" +
+          "<td><span class='delta pos'>+" + x.adv.toFixed(2) + "</span></td></tr>";
+      }).join("") + "</tbody></table>";
+  }
+
+  function renderFinishingBars() {
+    var host = document.getElementById("finishingBars");
+    var rows = AGG.slice().sort(function (a, b) { return b.attDelta - a.attDelta; });
+    if (!rows.length) { host.innerHTML = '<p class="hint">No xG data yet.</p>'; return; }
+    var maxAbs = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.attDelta); }).concat([1]));
+    host.innerHTML = rows.map(function (r) {
+      var d = r.attDelta, pct = (Math.abs(d) / maxAbs) * 50;
+      var fill = '<div class="bar-fill ' + (d >= 0 ? "pos" : "neg") + '" style="width:' + pct.toFixed(1) + '%"></div>';
+      return '<div class="bar-row"><div class="nm">' + logoImg(r.team) + "<span>" + esc(r.team) +
+        '</span></div><div class="bar-track"><div class="bar-mid"></div>' + fill + "</div>" +
+        '<div class="bar-val ' + (d >= 0 ? "pos" : "neg") + '">' + (d >= 0 ? "+" : "") + d.toFixed(2) + "</div></div>";
+    }).join("");
+  }
+
+  function renderLedger() {
+    var host = document.getElementById("ledger");
+    var cols = [["team", "Team"], ["n", "MP"], ["gf", "G"], ["xgf", "xG"], ["attDelta", "G−xG"],
+      ["ga", "GA"], ["xga", "xGA"], ["defDelta", "xGA−GA"], ["xgd", "xGD"]];
+    var rows = AGG.slice().sort(function (a, b) {
+      var k = ledgerSort.key;
+      if (k === "team") return ledgerSort.dir * a.team.localeCompare(b.team);
+      return ledgerSort.dir * (a[k] - b[k]);
+    });
+    if (!rows.length) { host.innerHTML = '<p class="hint">No xG data yet.</p>'; return; }
+    var head = cols.map(function (c) {
+      var arr = ledgerSort.key === c[0] ? (ledgerSort.dir < 0 ? " ▼" : " ▲") : "";
+      return '<th class="' + (c[0] === "team" ? "team" : "") + '" data-k="' + c[0] + '">' + c[1] + '<span class="arr">' + arr + "</span></th>";
+    }).join("");
+    var body = rows.map(function (r) {
+      function cell(k) {
+        if (k === "team") return '<td class="team"><div class="team-cell">' + logoImg(r.team) + '<span class="nm">' + esc(r.team) + "</span></div></td>";
+        if (k === "n" || k === "gf" || k === "ga") return "<td>" + r[k] + "</td>";
+        if (k === "xgf" || k === "xga") return "<td>" + r[k].toFixed(2) + "</td>";
+        var v = r[k], cls = v > 0.05 ? "pos" : v < -0.05 ? "neg" : "";
+        return '<td><span class="delta ' + cls + '">' + (v >= 0 ? "+" : "") + v.toFixed(2) + "</span></td>";
+      }
+      return "<tr>" + cols.map(function (c) { return cell(c[0]); }).join("") + "</tr>";
+    }).join("");
+    host.innerHTML = '<table class="rank"><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    host.querySelectorAll("th").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var k = th.dataset.k;
+        if (ledgerSort.key === k) ledgerSort.dir *= -1;
+        else { ledgerSort.key = k; ledgerSort.dir = k === "team" ? 1 : -1; }
+        renderLedger();
       });
-    } else teamScatter("xgFinish", [], {});
+    });
+  }
+
+  function renderAgreement() {
+    var host = document.getElementById("agreement");
+    var matches = D.matches.filter(function (m) { return m.played && m.xg_home != null; });
+    if (!matches.length) { host.innerHTML = '<p class="hint">No xG data yet.</p>'; return; }
+    var agree = 0, total = matches.length, draws = 0;
+    var rows = matches.map(function (m) {
+      var xgWin = m.xg_home > m.xg_away ? "H" : m.xg_home < m.xg_away ? "A" : "D";
+      var actWin = m.hs > m.as ? "H" : m.hs < m.as ? "A" : "D";
+      var ok = xgWin === actWin;
+      if (ok) agree++;
+      if (actWin === "D") draws++;
+      return { m: m, ok: ok, xgName: xgWin === "H" ? m.home : xgWin === "A" ? m.away : "Even" };
+    }).sort(function (a, b) { return (a.ok === b.ok) ? 0 : a.ok ? 1 : -1; });
+    var pct = total ? Math.round((agree / total) * 100) : 0;
+    host.innerHTML = '<div class="stats-strip" style="margin-bottom:16px">' +
+      '<div class="stat"><div class="v accent">' + pct + '%</div><div class="k">xG winner = actual result</div></div>' +
+      '<div class="stat"><div class="v">' + agree + " / " + total + '</div><div class="k">matches in agreement</div></div>' +
+      '<div class="stat"><div class="v blue">' + draws + '</div><div class="k">actual draws (hard for xG)</div></div></div>' +
+      '<table class="rank"><thead><tr><th class="team">Match</th><th class="team">xG favoured</th><th>xG</th><th>Result</th><th>Match</th></tr></thead><tbody>' +
+      rows.map(function (x) {
+        var m = x.m;
+        var mark = x.ok ? '<span style="color:var(--good)">✔ matched</span>' : '<span style="color:var(--bad)">✘ upset</span>';
+        return "<tr><td class='team'>" + esc(m.home) + " v " + esc(m.away) + "</td>" +
+          "<td class='team'>" + esc(x.xgName) + "</td>" +
+          "<td>" + m.xg_home.toFixed(2) + "–" + m.xg_away.toFixed(2) + "</td>" +
+          "<td>" + m.hs + "–" + m.as + "</td><td>" + mark + "</td></tr>";
+      }).join("") + "</tbody></table>";
+  }
+
+  function renderXgLab() {
+    computeXgDerived();
+    renderXgStats();
+    renderScatter();
+    renderCorr();
+    renderFinishingBars();
+    renderQuadrant();
+    renderXpts();
+    renderShotQuality();
+    renderHomeAway();
+    renderLedger();
+    renderAgreement();
+    renderUnlucky();
+  }
+
+  /* ================= STANDOUTS (player leaderboards) ================= */
+  function renderPlayerLeaders() {
+    var wrap = document.getElementById("playerLeaders");
+    if (!PLAYERS.length) { wrap.innerHTML = '<p class="hint">Player data populates as matches are deep-scraped.</p>'; return; }
+    function top(key, label, fmt) {
+      var arr = PLAYERS.filter(function (p) { return p[key] != null; }).sort(function (a, b) { return b[key] - a[key]; });
+      var p = arr[0];
+      if (!p) return "";
+      var v = fmt ? fmt(p[key]) : p[key];
+      return '<div class="stat"><div class="v accent">' + v + '</div><div class="k">' + label +
+        '<br><span style="color:var(--text)">' + esc(p.name) + "</span> · " + esc(p.team) + "</div></div>";
+    }
+    wrap.innerHTML = top("g", "Top scorer") + top("a", "Most assists") +
+      top("xg", "Highest xG", function (v) { return v.toFixed(2); }) +
+      top("rating", "Best avg rating", function (v) { return v.toFixed(2); });
+  }
+  function renderPlayerBoards() {
+    var host = document.getElementById("playerBoards");
+    if (!host) return;
+    if (!PLAYERS.length) { host.innerHTML = '<p class="hint">Player data populates as matches are deep-scraped.</p>'; return; }
+    function rows(list, valFn, subFn, cls) {
+      var html = list.slice(0, 8).map(function (p) {
+        return '<div class="fin-row"><div class="nm">' + logoImg(p.team) + "<span>" + esc(p.name) +
+          '</span></div><div class="fin-stat">' + (subFn ? '<span class="sub">' + subFn(p) + "</span>" : "") +
+          '<span class="lb-val ' + (cls || "") + '">' + valFn(p) + "</span></div></div>";
+      }).join("");
+      return html || '<p class="hint">Not enough data yet.</p>';
+    }
+    function card(title, hint, body) {
+      return '<div class="card lboard"><h3>' + title + '</h3><p class="hint">' + hint + "</p>" + body + "</div>";
+    }
+    function desc(key) {
+      return PLAYERS.slice().filter(function (p) { return p[key] != null; }).sort(function (a, b) { return b[key] - a[key]; });
+    }
+    function per90(filterFn, rateFn) {
+      return PLAYERS.filter(filterFn).map(function (p) { return Object.assign({}, p, { _r: rateFn(p) }); })
+        .sort(function (a, b) { return b._r - a._r; });
+    }
+    var fin = PLAYERS.filter(function (p) { return p.xg >= 1.0; });
+    var rated = PLAYERS.filter(function (p) { return p.mp >= 2 && p.rating != null; }).sort(function (a, b) { return b.rating - a.rating; });
+    var xgSub = function (p) { return p.g + "G vs " + p.xg.toFixed(2) + " xG"; };
+    var shooters = PLAYERS.filter(function (p) { return p.shots >= 5; })
+      .map(function (p) { return Object.assign({}, p, { conv: Math.round(p.g / p.shots * 100) }); })
+      .sort(function (a, b) { return b.conv - a.conv; });
+    var goalsPer90 = per90(function (p) { return p.mins >= 450 && p.g > 0; }, function (p) { return p.g / p.mins * 90; });
+    var dribblers = per90(function (p) { return p.mins >= 450 && p.dribbles > 0; }, function (p) { return p.dribbles / p.mins * 90; });
+    var chancesPer90 = per90(function (p) { return p.mins >= 450 && p.keyPasses > 0; }, function (p) { return p.keyPasses / p.mins * 90; });
+    var passersPer90 = per90(function (p) { return p.mins >= 450 && p.passes > 0; }, function (p) { return p.passes / p.mins * 90; });
+    var tacklersPer90 = per90(function (p) { return p.mins >= 450 && p.tackles > 0; }, function (p) { return p.tackles / p.mins * 90; });
+    var boards = [
+      card("Top scorers", "Goals scored.", rows(desc("g"), function (p) { return p.g; }, function (p) { return p.team; })),
+      card("Goals per 90'", "Goals per 90 minutes, min. 450 mins.", rows(goalsPer90, function (p) { return p._r.toFixed(2); }, function (p) { return p.g + "G"; })),
+      card("Dribbles per 90'", "Successful dribbles per 90, min. 450 mins.", rows(dribblers, function (p) { return p._r.toFixed(1); }, function (p) { return p.dribbles + " total"; })),
+      card("Best shot conversion", "Goals per shot %, min. 5 attempts.", rows(shooters, function (p) { return p.conv + "%"; }, function (p) { return p.g + "G / " + p.shots + " shots"; })),
+      card("Most assists", "Assists provided.", rows(desc("a"), function (p) { return p.a; }, function (p) { return p.team; })),
+      card("Goal involvements", "Goals + assists combined.", rows(desc("ga"), function (p) { return p.g + p.a; }, function (p) { return p.g + "G " + p.a + "A"; })),
+      card("Highest average rating", "Match rating, min. 2 games.", rows(rated, function (p) { return p.rating.toFixed(2); }, function (p) { return p.mp + " gms"; })),
+      card("Most clinical finishers", "Goals above shot xG (min. 1.0 xG faced).",
+        rows(fin.slice().sort(function (a, b) { return b.xg_diff - a.xg_diff; }), function (p) { return (p.xg_diff > 0 ? "+" : "") + p.xg_diff.toFixed(2); }, xgSub, "pos")),
+      card("Wasteful in front of goal", "Goals below shot xG (min. 1.0 xG faced).",
+        rows(fin.slice().sort(function (a, b) { return a.xg_diff - b.xg_diff; }), function (p) { return p.xg_diff.toFixed(2); }, xgSub, "neg")),
+      card("Chances created per 90'", "Key passes per 90, min. 450 mins.", rows(chancesPer90, function (p) { return p._r.toFixed(2); }, function (p) { return p.keyPasses + " total"; })),
+      card("Most shots on target", "Shots that hit the target.", rows(desc("sot"), function (p) { return p.sot; }, function (p) { return p.shots + " shots"; })),
+      card("Most shots taken", "Total attempts.", rows(desc("shots"), function (p) { return p.shots; }, function (p) { return p.team; })),
+      card("Passes per 90'", "Passes per 90, min. 450 mins.", rows(passersPer90, function (p) { return Math.round(p._r); }, function (p) { return p.pass_pct + "%"; })),
+      card("Tackles per 90'", "Tackles per 90, min. 450 mins.", rows(tacklersPer90, function (p) { return p._r.toFixed(1); }, function (p) { return p.tackles + " total"; })),
+    ];
+    host.innerHTML = boards.join("");
+  }
+  /* ---- Standouts distribution view (KDE density + anomalies + 2-stat scatter + radar).
+     Ported from the WC2026 dashboard; stat / preset / radar lists trimmed to the
+     metrics La Liga's players.js carries. All client-side from window.LL_PLAYERS. ---- */
+  var SO_STATS = [
+    ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0],
+    ["xg", "Expected goals (xG)", 2], ["xg_diff", "Finishing (goals − xG)", 2],
+    ["shots", "Shots", 0], ["sot", "Shots on target", 0], ["keyPasses", "Key passes", 0],
+    ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["pass_pct", "Pass accuracy %", 0],
+    ["tackles", "Tackles", 0], ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
+    ["aerials", "Aerials won", 0], ["fouls", "Fouls", 0], ["dispossessed", "Dispossessed", 0],
+    ["saves", "Saves", 0], ["touches", "Touches", 0], ["rating", "Average match rating", 2]
+  ];
+  var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
+  var soState = { stat: "ga", pos: "all", mins: 450, player: "" };
+
+  function soPosGroup(pos) {
+    var s = (pos || "").toUpperCase();
+    if (s === "GK") return "GK";
+    if (s[0] === "F" || s === "ST" || s === "CF" || s[0] === "A") return "FWD";
+    if (s[0] === "M" || s.indexOf("DM") === 0) return "MID";
+    if (s[0] === "D" || s[0] === "W" || s === "B") return "DEF";
+    return "OTH";
+  }
+  function soFmt(v, dp) { return dp ? (+v).toFixed(dp) : Math.round(v); }
+  function normPdf(z) { return Math.exp(-0.5 * z * z) / 2.5066282746310002; }
+  function soStatMeta() {
+    for (var i = 0; i < SO_STATS.length; i++) if (SO_STATS[i][0] === soState.stat) return SO_STATS[i];
+    return SO_STATS[0];
+  }
+  function soQualify() {
+    return PLAYERS.filter(function (p) {
+      if ((p.mins || 0) < soState.mins) return false;
+      if (soState.pos !== "all" && soPosGroup(p.pos) !== soState.pos) return false;
+      if (soState.stat === "rating" && !(p.rating > 0)) return false;
+      return true;
+    });
+  }
+
+  function soDistChart(rows, statKey, dp, spotPid, mean, sd) {
+    var W = 880, H = 380, padL = 22, padR = 22, padT = 20, padB = 50;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var vals = rows.map(function (p) { return +p[statKey] || 0; });
+    var n = vals.length;
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    var span = (hi - lo) || 1;
+    var xMin = statKey === "rating" ? lo - span * 0.06 : Math.min(lo, 0) - span * 0.03;
+    var xMax = hi + span * 0.10;
+    function sx(v) { return padL + plotW * (v - xMin) / (xMax - xMin); }
+    var baseY = padT + plotH;
+    var h = 1.06 * (sd || span * 0.1) * Math.pow(n, -0.2);
+    if (!(h > 0)) h = span * 0.08;
+    var GRID = 140, dens = [], maxD = 0;
+    for (var i = 0; i <= GRID; i++) {
+      var x = xMin + (xMax - xMin) * i / GRID, d = 0;
+      for (var j = 0; j < n; j++) d += normPdf((x - vals[j]) / h);
+      d /= (n * h);
+      dens.push(d);
+      if (d > maxD) maxD = d;
+    }
+    function densInterp(v) {
+      var t = (v - xMin) / (xMax - xMin) * GRID;
+      var i = Math.max(0, Math.min(GRID - 1, Math.floor(t))), frac = t - i;
+      return dens[i] * (1 - frac) + dens[i + 1] * frac;
+    }
+    function sy(d) { return baseY - (maxD ? d / maxD : 0) * plotH; }
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    var area = "M " + sx(xMin).toFixed(1) + " " + baseY.toFixed(1);
+    for (var k = 0; k <= GRID; k++) area += " L " + sx(xMin + (xMax - xMin) * k / GRID).toFixed(1) + " " + sy(dens[k]).toFixed(1);
+    area += " L " + sx(xMax).toFixed(1) + " " + baseY.toFixed(1) + " Z";
+    svg.push('<path d="' + area + '" fill="rgba(78,161,255,0.10)" stroke="none"/>');
+    var line = "";
+    for (var k2 = 0; k2 <= GRID; k2++) line += (k2 ? " L " : "M ") + sx(xMin + (xMax - xMin) * k2 / GRID).toFixed(1) + " " + sy(dens[k2]).toFixed(1);
+    svg.push('<path d="' + line + '" fill="none" stroke="#8aa0d8" stroke-width="1.4" stroke-opacity="0.85"/>');
+    svg.push('<line x1="' + padL + '" y1="' + baseY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + baseY.toFixed(1) + '" stroke="#26304d" stroke-width="1"/>');
+    niceTicks(xMax, 6).forEach(function (t) {
+      if (t < xMin - 1e-9 || t > xMax + 1e-9) return;
+      svg.push('<line x1="' + sx(t).toFixed(1) + '" y1="' + baseY.toFixed(1) + '" x2="' + sx(t).toFixed(1) + '" y2="' + (baseY + 4).toFixed(1) + '" stroke="#46527a" stroke-width="1"/>');
+      svg.push('<text x="' + sx(t).toFixed(1) + '" y="' + (baseY + 17) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + fmtTick(t) + "</text>");
+    });
+    var ax = sx(mean);
+    svg.push('<line x1="' + ax.toFixed(1) + '" y1="' + padT + '" x2="' + ax.toFixed(1) + '" y2="' + baseY.toFixed(1) + '" stroke="#cfd8ee" stroke-width="1.2" stroke-dasharray="5 4" stroke-opacity="0.7"/>');
+    svg.push('<text x="' + ax.toFixed(1) + '" y="' + (padT - 6) + '" fill="#cfd8ee" font-size="11" text-anchor="middle">average ' + soFmt(mean, dp || 1) + "</text>");
+    function jit(pid) { var s = Math.sin((pid + 1) * 12.9898) * 43758.5453; return s - Math.floor(s); }
+    rows.forEach(function (p) {
+      var v = +p[statKey] || 0, z = sd ? (v - mean) / sd : 0;
+      var dx = sx(v), band = (maxD ? densInterp(v) / maxD : 0) * plotH;
+      var dy = baseY - 4 - jit(p.pid) * Math.max(6, band - 6);
+      var isSpot = spotPid && p.pid === spotPid, anom = z >= 2;
+      var r = isSpot ? 5.5 : anom ? 3.4 : 2.3;
+      var fill = isSpot ? "#ffd24d" : anom ? "#ff3d8b" : "#4ea1ff";
+      var op = isSpot ? 1 : anom ? 0.92 : 0.5;
+      var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
+      var info = p.name + " · " + p.team + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)";
+      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
+    });
+    var labels = [];
+    rows.slice().sort(function (a, b) { return (+b[statKey] || 0) - (+a[statKey] || 0); })
+      .slice(0, 5).forEach(function (p) {
+        var v = +p[statKey] || 0, z = sd ? (v - mean) / sd : 0;
+        if (z < 1.2) return;
+        labels.push({ x: sx(v), y: baseY - 6 - (maxD ? densInterp(v) / maxD : 0) * plotH, txt: p.name, gold: false });
+      });
+    if (spotPid) {
+      var sp = rows.filter(function (p) { return p.pid === spotPid; })[0];
+      if (sp) {
+        var v = +sp[statKey] || 0;
+        labels.push({ x: sx(v), y: baseY - 6 - (maxD ? densInterp(v) / maxD : 0) * plotH, txt: sp.name, gold: true });
+      }
+    }
+    labels.sort(function (a, b) { return a.x - b.x; });
+    var lastX = -999, tier = 0;
+    labels.forEach(function (L) {
+      tier = (L.x - lastX < 86) ? tier + 1 : 0; lastX = L.x;
+      var ly = Math.max(padT + 6, L.y - 8 - tier * 13);
+      var lx = Math.max(padL + 18, Math.min(W - padR - 18, L.x));
+      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#ffd24d" : "#ff3d8b") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '" fill="' + (L.gold ? "#ffe08a" : "#ffaecb") + '" font-size="10.5" text-anchor="middle">' + esc(L.txt) + "</text>");
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderStandouts() {
+    if (!document.getElementById("view-standouts")) return;
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    var meta = soStatMeta(), statKey = meta[0], label = meta[1], dp = meta[2];
+    var rows = soQualify();
+    setHTML("soChartTitle", label + " — distribution across " + rows.length + " players");
+    setHTML("soChartHint", "Each dot is one player with " + (soState.mins ? soState.mins + "+ minutes" : "any minutes") +
+      (soState.pos === "all" ? "" : " · " + SO_POS_LABEL[soState.pos]) + ". Pink = 2σ or more above average.");
+    if (!rows.length) {
+      setHTML("soChart", '<p class="hint">No players match these filters — try lowering the minimum minutes.</p>');
+      ["soStats", "soStandouts", "soSpotlight"].forEach(function (id) { setHTML(id, ""); });
+      return;
+    }
+    if (!(statKey in rows[0])) {
+      setHTML("soChart", '<p class="hint">"' + esc(label) + '" isn\'t in the current data.</p>');
+      ["soStats", "soStandouts", "soSpotlight"].forEach(function (id) { setHTML(id, ""); });
+      return;
+    }
+    var vals = rows.map(function (p) { return +p[statKey] || 0; }), n = vals.length;
+    var mean = vals.reduce(function (s, v) { return s + v; }, 0) / n;
+    var sd = Math.sqrt(vals.reduce(function (s, v) { return s + (v - mean) * (v - mean); }, 0) / n);
+    var sorted = rows.slice().sort(function (a, b) { return (+b[statKey] || 0) - (+a[statKey] || 0); });
+    var leader = sorted[0], leadZ = sd ? ((+leader[statKey] || 0) - mean) / sd : 0;
+    var spot = null;
+    if (soState.player) {
+      var q = soState.player.toLowerCase();
+      spot = rows.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+        rows.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0] || null;
+    }
+    var spotPid = spot ? spot.pid : null;
+    var anomCount = rows.filter(function (p) { return sd && ((+p[statKey] || 0) - mean) / sd >= 2; }).length;
+    var items = [
+      ["v accent", soFmt(mean, dp || 1), "Average"],
+      ["v blue", soFmt(sd, dp || 1), "Std dev (σ)"],
+      ["v", n, "Players"],
+      ["v", anomCount, "Anomalies (2σ+)"],
+      ["v accent", soFmt(+leader[statKey] || 0, dp) + " <span style='font-size:13px;color:var(--muted)'>" + esc(leader.name) + "</span>", "Highest value"],
+      ["v", "+" + leadZ.toFixed(1) + "σ", "Leader vs average"],
+    ];
+    setHTML("soStats", items.map(function (it) {
+      return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>";
+    }).join(""));
+    setHTML("soChart", soDistChart(rows, statKey, dp, spotPid, mean, sd));
+    if (spot) {
+      var sv = +spot[statKey] || 0, sz = sd ? (sv - mean) / sd : 0;
+      var better = Math.min(99, Math.round(100 * rows.filter(function (p) { return (+p[statKey] || 0) < sv; }).length / n));
+      setHTML("soSpotlight",
+        '<div class="so-spot"><span class="so-spot-tag">spotlight</span> <b>' + esc(spot.name) + "</b> (" + esc(spot.team) +
+        (spot.pos ? ", " + esc(spot.pos) : "") + ") — <b>" + soFmt(sv, dp) + "</b> " + esc(label.toLowerCase()) +
+        ', <b style="color:' + (sz >= 0 ? "var(--good)" : "var(--bad)") + '">' + (sz >= 0 ? "+" : "") + sz.toFixed(1) +
+        "σ</b> " + (sz >= 0 ? "over" : "below") + " average — better than <b>" + better + "%</b> of " +
+        (soState.pos === "all" ? "players" : "players in this position") + ".</div>");
+    } else if (soState.player) {
+      setHTML("soSpotlight", '<span class="hint">No qualifying player matches "' + esc(soState.player) + '". Check the spelling or relax the filters.</span>');
+    } else {
+      setHTML("soSpotlight", '<span class="hint">Tip: type a name in <b>Spotlight player</b> to highlight one player (gold) and see their percentile.</span>');
+    }
+    var top = sorted.slice(0, 12).map(function (p) {
+      var v = +p[statKey] || 0; return { p: p, v: v, z: sd ? (v - mean) / sd : 0 };
+    });
+    var maxZ = Math.max.apply(null, top.map(function (t) { return t.z; }).concat([0.001]));
+    setHTML("soStandouts", '<div class="so-bars">' + top.map(function (t) {
+      var pct = Math.max(2, 100 * t.z / maxZ), hot = t.z >= 2;
+      return '<div class="so-bar-row"><div class="nm">' + logoImg(t.p.team) + "<span>" + esc(t.p.name) + "</span></div>" +
+        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff3d8b" : "var(--accent-2)") + '"></div></div>' +
+        '<div class="so-bar-val">' + soFmt(t.v, dp) + ' <span class="so-z">' + (t.z >= 0 ? "+" : "") + t.z.toFixed(1) + "σ</span></div></div>";
+    }).join("") + "</div>");
+  }
+
+  /* ---- Two-stat scatter ---- */
+  var soSc = { x: "xg", y: "g", size: "shots", pos: "all", mins: 900 };
+  var SO_PRESETS = [
+    { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 450 },
+    { label: "🎨 Creators", x: "keyPasses", y: "passes", size: "dribbles", pos: "all", mins: 900 },
+    { label: "⚡ Dribble & create", x: "dribbles", y: "keyPasses", size: "touches", pos: "all", mins: 900 },
+    { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 900 },
+    { label: "🧱 Defensive rock", x: "clearances", y: "aerials", size: "tackles", pos: "DEF", mins: 900 },
+    { label: "🎽 Sharpshooters", x: "shots", y: "sot", size: "xg", pos: "all", mins: 450 },
+    { label: "⭐ Complete player", x: "ga", y: "rating", size: "xg", pos: "all", mins: 900 }
+  ];
+  function soStatLabel(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[1] : k; }
+  function soStatDp(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[2] : 0; }
+  function soNiceStep(raw) {
+    raw = raw || 1; var pow = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / pow;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+  }
+  function soLTicks(lo, hi) {
+    var step = soNiceStep((hi - lo) / 5), start = Math.ceil(lo / step - 1e-9) * step, out = [];
+    for (var v = start; v <= hi + 1e-9; v += step) out.push(+v.toFixed(4));
+    return out;
+  }
+  function soQualifyFor(pos, mins) {
+    return PLAYERS.filter(function (p) {
+      if ((p.mins || 0) < mins) return false;
+      if (pos !== "all" && soPosGroup(p.pos) !== pos) return false;
+      return true;
+    });
+  }
+
+  function soScatterSVG(rows, xKey, yKey, sizeKey, spotPid) {
+    var W = 880, H = 480, padL = 56, padR = 22, padT = 22, padB = 54;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var xs = rows.map(function (p) { return +p[xKey] || 0; });
+    var ys = rows.map(function (p) { return +p[yKey] || 0; });
+    var mean = function (a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; };
+    var stdev = function (a, m) { return Math.sqrt(a.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / a.length); };
+    var mx = mean(xs), my = mean(ys), sdx = stdev(xs, mx) || 1, sdy = stdev(ys, my) || 1;
+    function dom(vals) {
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      lo = Math.min(lo, 0); var pad = (hi - lo) * 0.08 || 1;
+      return [lo - (lo < 0 ? pad * 0.4 : 0), hi + pad];
+    }
+    var dx = dom(xs), dy = dom(ys);
+    function sx(v) { return padL + plotW * (v - dx[0]) / (dx[1] - dx[0]); }
+    function sy(v) { return padT + plotH * (1 - (v - dy[0]) / (dy[1] - dy[0])); }
+    var sizeMax = sizeKey ? Math.max.apply(null, rows.map(function (p) { return +p[sizeKey] || 0; }).concat([0.0001])) : 1;
+    function radius(p) { if (!sizeKey) return 4.2; return 3 + 9 * Math.sqrt(Math.max(0, +p[sizeKey] || 0) / sizeMax); }
+    var dpx = soStatDp(xKey), dpy = soStatDp(yKey), dps = soStatDp(sizeKey);
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    soLTicks(dx[0], dx[1]).forEach(function (t) {
+      var x = sx(t);
+      svg.push('<line x1="' + x.toFixed(1) + '" y1="' + padT + '" x2="' + x.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<text x="' + x.toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + soFmt(t, dpx) + "</text>");
+    });
+    soLTicks(dy[0], dy[1]).forEach(function (t) {
+      var y = sy(t);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 7) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + soFmt(t, dpy) + "</text>");
+    });
+    svg.push('<line x1="' + sx(mx).toFixed(1) + '" y1="' + padT + '" x2="' + sx(mx).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
+    svg.push('<line x1="' + padL + '" y1="' + sy(my).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + sy(my).toFixed(1) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle">' + esc(soStatLabel(xKey)) + " →</text>");
+    svg.push('<text x="16" y="' + (padT + plotH / 2).toFixed(1) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle" transform="rotate(-90 16 ' + (padT + plotH / 2).toFixed(1) + ')">' + esc(soStatLabel(yKey)) + " →</text>");
+    var pts = [];
+    rows.forEach(function (p) {
+      var vx = +p[xKey] || 0, vy = +p[yKey] || 0;
+      var cx = sx(vx), cy = sy(vy), r = radius(p);
+      var elite = vx > mx && vy > my;
+      var isSpot = spotPid && p.pid === spotPid;
+      var fill = isSpot ? "#ffd24d" : elite ? "#ff3d8b" : "#4ea1ff";
+      var op = isSpot ? 1 : elite ? 0.85 : 0.5;
+      var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
+      var info = p.name + " · " + p.team + " — " + soStatLabel(xKey) + " " + soFmt(vx, dpx) +
+        ", " + soStatLabel(yKey) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + soStatLabel(sizeKey) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
+      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
+      var zx = (vx - mx) / sdx, zy = (vy - my) / sdy;
+      pts.push({ p: p, cx: cx, cy: cy, score: zx + zy, team: p.name, spot: isSpot });
+    });
+    var labelSet = pts.slice().sort(function (a, b) { return b.score - a.score; }).filter(function (q) { return q.score > 1.4; }).slice(0, 9);
+    pts.forEach(function (q) { if (q.spot && labelSet.indexOf(q) < 0) labelSet.push(q); });
+    declutter(labelSet, 8.7);
+    labelSet.forEach(function (q) {
+      if (q.led) svg.push('<line x1="' + q.cx.toFixed(1) + '" y1="' + q.cy.toFixed(1) + '" x2="' + (q.lx - 1).toFixed(1) + '" y2="' + (q.ly - 3).toFixed(1) + '" stroke="#46527a" stroke-width="0.6"/>');
+      svg.push('<text x="' + q.lx.toFixed(1) + '" y="' + q.ly.toFixed(1) + '" fill="' + (q.spot ? "#ffe08a" : "#c2cce0") + '" font-size="8.9">' + esc(q.team) + "</text>");
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderScatter2() {
+    var host = document.getElementById("soScatter");
+    if (!host) return;
+    var rows = soQualifyFor(soSc.pos, soSc.mins);
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    if (rows.length < 3) { host.innerHTML = '<p class="hint">Not enough players match these filters.</p>'; setHTML("soScInsight", ""); return; }
+    var missing = [soSc.x, soSc.y, soSc.size].filter(function (k) { return k && !(k in rows[0]); });
+    if (missing.length) {
+      host.innerHTML = '<p class="hint">Some selected metrics (' + missing.map(soStatLabel).join(", ") + ') aren\'t in the current data.</p>';
+      setHTML("soScInsight", ""); return;
+    }
+    var spot = null;
+    if (soState.player) {
+      var q = soState.player.toLowerCase();
+      spot = rows.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+        rows.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0] || null;
+    }
+    host.innerHTML = soScatterSVG(rows, soSc.x, soSc.y, soSc.size, spot ? spot.pid : null);
+    var xs = rows.map(function (p) { return +p[soSc.x] || 0; }), ys = rows.map(function (p) { return +p[soSc.y] || 0; });
+    var mx = xs.reduce(function (s, v) { return s + v; }, 0) / xs.length;
+    var my = ys.reduce(function (s, v) { return s + v; }, 0) / ys.length;
+    var elite = rows.filter(function (p) { return (+p[soSc.x] || 0) > mx && (+p[soSc.y] || 0) > my; });
+    var best = elite.slice().sort(function (a, b) {
+      return ((+b[soSc.x] || 0) / (mx || 1) + (+b[soSc.y] || 0) / (my || 1)) - ((+a[soSc.x] || 0) / (mx || 1) + (+a[soSc.y] || 0) / (my || 1));
+    }).slice(0, 5).map(function (p) { return esc(p.name); });
+    setHTML("soScInsight", "<b>" + elite.length + "</b> player" + (elite.length === 1 ? "" : "s") +
+      " are above average in <b>both</b> " + esc(soStatLabel(soSc.x).toLowerCase()) + " and " + esc(soStatLabel(soSc.y).toLowerCase()) +
+      " (top-right quadrant)" + (best.length ? " — led by " + best.join(", ") : "") + "." +
+      (soSc.size ? ' Dot size = ' + esc(soStatLabel(soSc.size).toLowerCase()) + "." : ""));
+  }
+
+  /* ---- Player percentile radar ---- */
+  var RADAR_OUT = [["g", "Goals"], ["a", "Assists"], ["keyPasses", "Key passes"], ["dribbles", "Dribbles"],
+    ["tackles", "Tackles"], ["interceptions", "Intercept"], ["shots", "Shots"], ["xg", "xG"]];
+  var RADAR_GK = [["saves", "Saves"], ["passes", "Passes"], ["pass_pct", "Pass %"], ["clearances", "Clearances"], ["rating", "Rating"]];
+
+  function radarSVG(player) {
+    var grp = soPosGroup(player.pos);
+    var axes = grp === "GK" ? RADAR_GK : RADAR_OUT;
+    function inPool(p) {
+      if ((p.mins || 0) < 450) return false;
+      var g = soPosGroup(p.pos);
+      if (grp === "GK") return g === "GK";
+      if (grp === "OTH") return g !== "GK";
+      return g === grp;
+    }
+    var pool = PLAYERS.filter(inPool);
+    if (pool.indexOf(player) < 0) pool.push(player);
+    var N = axes.length, W = 580, H = 470, cx = W / 2, cy = H / 2 + 4, R = 148;
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-radar" preserveAspectRatio="xMidYMid meet" role="img">'];
+    [0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var pts = [];
+      for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
+    });
+    var poly = [];
+    axes.forEach(function (ax, i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / N;
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      var pv = +player[ax[0]] || 0;
+      var below = pool.filter(function (p) { return (+p[ax[0]] || 0) < pv; }).length;
+      var pct = pool.length ? below / pool.length : 0;
+      poly.push((cx + R * pct * Math.cos(a)).toFixed(1) + "," + (cy + R * pct * Math.sin(a)).toFixed(1));
+      var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
+      var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 2).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + soFmt(pv, soStatDp(ax[0])) + " (" + Math.round(pct * 100) + "%)</text>");
+    });
+    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#ffd24d" stroke-width="2"/>');
+    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#ffd24d"/>'); });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderRadar() {
+    var host = document.getElementById("soRadar");
+    if (!host) return;
+    if (!soState.player) {
+      host.innerHTML = '<p class="hint">Pick a <b>spotlight player</b> at the top of this page to see their percentile radar.</p>';
+      return;
+    }
+    var q = soState.player.toLowerCase();
+    var pl = PLAYERS.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+      PLAYERS.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0];
+    if (!pl) { host.innerHTML = '<p class="hint">No player matches "' + esc(soState.player) + '".</p>'; return; }
+    var grp = soPosGroup(pl.pos);
+    var grpLabel = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers", OTH: "outfield players" }[grp] || "peers";
+    host.innerHTML = '<div class="so-radar-head"><b>' + esc(pl.name) + "</b> · " + esc(pl.team) +
+      (pl.pos ? " · " + esc(pl.pos) : "") + " — percentiles vs other " + grpLabel + " (450+ min)</div>" + radarSVG(pl);
+  }
+
+  /* Tap-to-identify: dots carry data-info; hover shows the floating tooltip, tap shows
+     a caption line below the chart. Delegated so it survives chart re-renders. */
+  function tipHTML(info) {
+    var i = info.indexOf(" — ");
+    var a = i >= 0 ? info.slice(0, i) : info, b = i >= 0 ? info.slice(i + 3) : "";
+    return '<div class="t-team">' + esc(a) + "</div>" + (b ? '<div class="t-line">' + esc(b) + "</div>" : "");
+  }
+  function wireChartTaps(hostId, tipId) {
+    var host = document.getElementById(hostId), tip = document.getElementById(tipId);
+    if (!host || host._tapWired) return;
+    host._tapWired = true;
+    var last = null;
+    function isDot(el) { return el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info"); }
+    host.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      if (isDot(e.target)) {
+        tooltip.innerHTML = tipHTML(e.target.getAttribute("data-info"));
+        tooltip.style.opacity = "1";
+        tooltip.style.left = (e.clientX + 14) + "px";
+        tooltip.style.top = (e.clientY + 14) + "px";
+      } else { tooltip.style.opacity = "0"; }
+    });
+    host.addEventListener("pointerleave", function () { tooltip.style.opacity = "0"; });
+    host.addEventListener("click", function (e) {
+      if (!isDot(e.target)) return;
+      var el = e.target;
+      if (last && last.parentNode) { last.setAttribute("stroke", last._os || "none"); last.setAttribute("stroke-width", last._ow || "0"); }
+      el._os = el.getAttribute("stroke") || "none"; el._ow = el.getAttribute("stroke-width") || "0";
+      el.setAttribute("stroke", "#fff"); el.setAttribute("stroke-width", "2");
+      last = el;
+      if (tip) { tip.textContent = el.getAttribute("data-info"); tip.classList.add("show"); }
+    });
+  }
+
+  // One-time wiring of the static Standouts controls + events.
+  function wireStandouts() {
+    var statSel = document.getElementById("soStat");
+    if (!statSel || statSel._wired) return;
+    statSel._wired = true;
+    statSel.innerHTML = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    statSel.value = soState.stat;
+    statSel.addEventListener("change", function () { soState.stat = statSel.value; renderStandouts(); });
+    document.getElementById("soPos").addEventListener("change", function (e) { soState.pos = e.target.value; renderStandouts(); });
+    document.getElementById("soMins").addEventListener("change", function (e) { soState.mins = +e.target.value; renderStandouts(); });
+    var pin = document.getElementById("soPlayer"), deb;
+    pin.addEventListener("input", function () {
+      clearTimeout(deb);
+      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); renderScatter2(); renderRadar(); }, 200);
+    });
+    wireChartTaps("soChart", "soChartTip");
+    wireChartTaps("soScatter", "soScatterTip");
+    var axisOpts = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    var xSel = document.getElementById("soScX"), ySel = document.getElementById("soScY"), sizeSel = document.getElementById("soScSize");
+    xSel.innerHTML = axisOpts; ySel.innerHTML = axisOpts;
+    sizeSel.innerHTML = '<option value="">— none —</option>' + axisOpts;
+    function syncScatterControls() {
+      xSel.value = soSc.x; ySel.value = soSc.y; sizeSel.value = soSc.size;
+      document.getElementById("soScPos").value = soSc.pos;
+      document.getElementById("soScMins").value = String(soSc.mins);
+    }
+    syncScatterControls();
+    xSel.addEventListener("change", function () { soSc.x = xSel.value; renderScatter2(); });
+    ySel.addEventListener("change", function () { soSc.y = ySel.value; renderScatter2(); });
+    sizeSel.addEventListener("change", function () { soSc.size = sizeSel.value; renderScatter2(); });
+    document.getElementById("soScPos").addEventListener("change", function (e) { soSc.pos = e.target.value; renderScatter2(); });
+    document.getElementById("soScMins").addEventListener("change", function (e) { soSc.mins = +e.target.value; renderScatter2(); });
+    var pHost = document.getElementById("soPresets");
+    pHost.innerHTML = SO_PRESETS.map(function (pr, i) {
+      var on = pr.x === soSc.x && pr.y === soSc.y && pr.pos === soSc.pos;
+      return '<button class="so-preset' + (on ? " active" : "") + '" data-i="' + i + '">' + esc(pr.label) + "</button>";
+    }).join("");
+    pHost.querySelectorAll(".so-preset").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var pr = SO_PRESETS[+btn.dataset.i];
+        soSc.x = pr.x; soSc.y = pr.y; soSc.size = pr.size; soSc.pos = pr.pos; soSc.mins = pr.mins;
+        pHost.querySelectorAll(".so-preset").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        syncScatterControls();
+        renderScatter2();
+      });
+    });
+  }
+
+  // Per-season Standouts refresh: repopulate the player datalist + redraw everything.
+  function refreshStandouts() {
+    var dl = document.getElementById("soPlayerList");
+    if (dl) dl.innerHTML = PLAYERS.map(function (p) { return p.name; }).sort()
+      .map(function (nm) { return '<option value="' + esc(nm) + '">'; }).join("");
+    renderStandouts();
+    renderScatter2();
+    renderRadar();
+    renderPlayerLeaders();
+    renderPlayerBoards();
+  }
+
+  /* ================= TEAM LAB (per-team season aggregates) ================= */
+  function teamTotals() {
+    var t = {};
+    function get(name) {
+      return t[name] || (t[name] = { team: name, mp: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0,
+        sg: 0, xgf: 0, xga: 0, shots: 0, sot: 0, poss: 0, pacc: 0, bch: 0 });
+    }
+    D.matches.forEach(function (m) {
+      if (!m.played) return;
+      var H = get(m.home), A = get(m.away);
+      H.mp++; A.mp++;
+      H.gf += m.hs; H.ga += m.as; A.gf += m.as; A.ga += m.hs;
+      if (m.hs > m.as) { H.w++; A.l++; } else if (m.hs < m.as) { A.w++; H.l++; } else { H.d++; A.d++; }
+      if (!m.has_stats) return;
+      var s = m.stats;
+      function add(side, sign) {
+        var i = sign === "h" ? 0 : 1, j = sign === "h" ? 1 : 0;
+        side.sg++;
+        side.xgf += s.xg[i] || 0; side.xga += s.xg[j] || 0;
+        side.shots += s.shots[i] || 0; side.sot += s.sot[i] || 0;
+        side.poss += s.possession[i] || 0; side.pacc += s.pass_acc[i] || 0;
+        side.bch += s.big_chances[i] || 0;
+      }
+      add(H, "h"); add(A, "a");
+    });
+    return Object.keys(t).map(function (k) {
+      var r = t[k], n = r.sg || 1;
+      r.shotsPg = r.shots / n; r.sotPg = r.sot / n; r.possAvg = r.poss / n;
+      r.paccAvg = r.pacc / n; r.bchPg = r.bch / n;
+      return r;
+    });
+  }
+  function renderDbTeamTable() {
+    var input = document.getElementById("tlSearch");
+    var q = (input ? input.value : "").toLowerCase().trim();
+    var cols = [
+      ["team", "Team", "t"], ["mp", "MP", "i"], ["w", "W", "i"], ["d", "D", "i"], ["l", "L", "i"],
+      ["gf", "GF", "i"], ["ga", "GA", "i"], ["xgf", "xG", "f"], ["xga", "xGA", "f"],
+      ["shotsPg", "Sh/g", "f"], ["sotPg", "SoT/g", "f"], ["possAvg", "Poss%", "i"],
+      ["paccAvg", "Pass%", "i"], ["bchPg", "BigCh/g", "f"],
+    ];
+    var rows = TOTALS.filter(function (r) { return !q || r.team.toLowerCase().indexOf(q) >= 0; })
+      .sort(function (a, b) {
+        var k = dbSort.key;
+        if (k === "team") return dbSort.dir * a.team.localeCompare(b.team);
+        return dbSort.dir * ((a[k] || 0) - (b[k] || 0));
+      });
+    function cell(r, c) {
+      var k = c[0];
+      if (k === "team") return '<td class="team"><div class="team-cell">' + logoImg(r.team) + '<span class="nm">' + esc(r.team) + "</span></div></td>";
+      var v = r[k];
+      if (c[2] === "f") v = (v || 0).toFixed(2);
+      else if (c[2] === "i") v = Math.round(v || 0);
+      return "<td>" + v + "</td>";
+    }
+    var head = cols.map(function (c) {
+      var arr = dbSort.key === c[0] ? (dbSort.dir < 0 ? " ▼" : " ▲") : "";
+      return '<th class="' + (c[2] === "t" ? "team" : "") + '" data-k="' + c[0] + '">' + c[1] + '<span class="arr">' + arr + "</span></th>";
+    }).join("");
+    var body = rows.map(function (r) {
+      return "<tr>" + cols.map(function (c) { return cell(r, c); }).join("") + "</tr>";
+    }).join("");
+    document.getElementById("teamTable").innerHTML =
+      '<table class="rank db-team"><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    document.querySelectorAll("#teamTable th").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var k = th.dataset.k;
+        if (dbSort.key === k) dbSort.dir *= -1;
+        else { dbSort.key = k; dbSort.dir = k === "team" ? 1 : -1; }
+        renderDbTeamTable();
+      });
+    });
+  }
+  /* ---- Team Lab: shot map / xG heatmap + team style fingerprint. Shots come from
+     window.LL_SHOTS[season] (build_shots.py, aggregated from matches_detail). WhoScored
+     coords attack toward x=100; the pitch is drawn goal-at-top. ---- */
+  var SHOTS = [];
+  var tlState = { team: "all", teamB: "none", teamC: "none", filter: "all", sit: "all", mode: "dots" };
+  var TL_COLORS = ["#4ea1ff", "#ff3d8b", "#ffd24d"];
+
+  function tlMatchSit(s, sit) {
+    if (sit === "all") return true;
+    if (sit === "open") return s.s === "Open Play" || s.s === "Fast Break";
+    if (sit === "set") return s.s === "Corner" || s.s === "Free Kick" || s.s === "Set Piece";
+    if (sit === "pen") return s.s === "Penalty";
+    return true;
+  }
+  function tlShotsFor(team) {
+    return SHOTS.filter(function (s) {
+      if (team !== "all" && s.t !== team) return false;
+      if (tlState.filter === "ot" && !s.ot) return false;
+      if (tlState.filter === "goal" && !s.g) return false;
+      return tlMatchSit(s, tlState.sit);
+    });
+  }
+  function tlPitch(W, H) {
+    var padX = 12, padTop = 12, padBot = 12;
+    var plotW = W - padX * 2, plotH = H - padTop - padBot;
+    function px(yws) { return padX + plotW * (yws / 100); }
+    function py(xws) { return padTop + plotH * (1 - (Math.max(50, Math.min(100, xws)) - 50) / 50); }
+    var st = 'stroke="#3a456b" stroke-width="1.3" fill="none"';
+    var svg = [];
+    svg.push('<rect x="' + px(0).toFixed(1) + '" y="' + py(100).toFixed(1) + '" width="' + (px(100) - px(0)).toFixed(1) + '" height="' + (py(50) - py(100)).toFixed(1) + '" ' + st + ' rx="2"/>');
+    svg.push('<rect x="' + px(21.1).toFixed(1) + '" y="' + py(100).toFixed(1) + '" width="' + (px(78.9) - px(21.1)).toFixed(1) + '" height="' + (py(83) - py(100)).toFixed(1) + '" ' + st + '/>');
+    svg.push('<rect x="' + px(36.8).toFixed(1) + '" y="' + py(100).toFixed(1) + '" width="' + (px(63.2) - px(36.8)).toFixed(1) + '" height="' + (py(94.2) - py(100)).toFixed(1) + '" ' + st + '/>');
+    svg.push('<rect x="' + px(44.2).toFixed(1) + '" y="' + (py(100) - 4).toFixed(1) + '" width="' + (px(55.8) - px(44.2)).toFixed(1) + '" height="4" stroke="#6f7fb0" fill="none"/>');
+    svg.push('<circle cx="' + px(50).toFixed(1) + '" cy="' + py(88.5).toFixed(1) + '" r="1.8" fill="#3a456b"/>');
+    var ay = py(83);
+    svg.push('<path d="M ' + px(36).toFixed(1) + ' ' + ay.toFixed(1) + ' A ' + ((px(64) - px(36)) / 2).toFixed(1) + ' ' + (py(83) - py(73)).toFixed(1) + ' 0 0 1 ' + px(64).toFixed(1) + ' ' + ay.toFixed(1) + '" ' + st + '/>');
+    svg.push('<line x1="' + px(0).toFixed(1) + '" y1="' + py(50).toFixed(1) + '" x2="' + px(100).toFixed(1) + '" y2="' + py(50).toFixed(1) + '" ' + st + '/>');
+    svg.push('<path d="M ' + px(40).toFixed(1) + ' ' + py(50).toFixed(1) + ' A ' + ((px(60) - px(40)) / 2).toFixed(1) + ' ' + (py(50) - py(60)).toFixed(1) + ' 0 0 1 ' + px(60).toFixed(1) + ' ' + py(50).toFixed(1) + '" ' + st + '/>');
+    return { svg: svg, px: px, py: py };
+  }
+  function tlShotMap(shots) {
+    var W = 600, H = 470;
+    var P = tlPitch(W, H);
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="tl-pitch" preserveAspectRatio="xMidYMid meet" role="img">'];
+    svg.push('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#0d1322"/>');
+    svg = svg.concat(P.svg);
+    if (tlState.mode === "heat") {
+      var CW = 12, CH = 10, cells = [];
+      for (var i = 0; i < CW * CH; i++) cells.push(0);
+      shots.forEach(function (s) {
+        var cx = Math.min(CW - 1, Math.max(0, Math.floor(s.y / 100 * CW)));
+        var cr = Math.min(CH - 1, Math.max(0, Math.floor((Math.max(50, Math.min(100, s.x)) - 50) / 50 * CH)));
+        cells[cr * CW + cx] += s.xg;
+      });
+      var maxC = Math.max.apply(null, cells.concat([0.0001]));
+      var x0 = P.px(0), x1 = P.px(100), y0 = P.py(50), y1 = P.py(100);
+      var cw = (x1 - x0) / CW, ch = (y0 - y1) / CH;
+      for (var r = 0; r < CH; r++) for (var c = 0; c < CW; c++) {
+        var v = cells[r * CW + c]; if (v <= 0) continue;
+        var op = 0.08 + 0.78 * (v / maxC);
+        var rx = x0 + c * cw, ry = y1 + (CH - 1 - r) * ch;
+        svg.push('<rect x="' + rx.toFixed(1) + '" y="' + ry.toFixed(1) + '" width="' + cw.toFixed(1) + '" height="' + ch.toFixed(1) + '" fill="#ff6a3d" fill-opacity="' + op.toFixed(3) + '"/>');
+      }
+      svg = svg.concat(P.svg);
+    } else {
+      shots.slice().sort(function (a, b) { return (a.g ? 1 : 0) - (b.g ? 1 : 0); }).forEach(function (s) {
+        var r = 2.3 + 6 * Math.sqrt(Math.max(0, s.xg));
+        var fill = s.g ? "#ff3d8b" : s.ot ? "#4ea1ff" : "#7c89a8";
+        var op = s.g ? 0.95 : s.ot ? 0.6 : 0.35;
+        var stroke = s.g ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
+        var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : s.ot ? " (on target)" : "") + " · " + s.s + " · " + s.m + "'";
+        svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
+      });
+    }
+    svg.push("</svg>");
+    return svg.join("");
+  }
+  function tlTeamStyle() {
+    var T = {};
+    function get(t) { return T[t] || (T[t] = { gp: 0, poss: 0, possN: 0, shots: 0, paSum: 0, paN: 0, xgf: 0, xga: 0, shotN: 0, xgAll: 0, spXg: 0 }); }
+    D.matches.forEach(function (m) {
+      if (!m.played) return;
+      [["home", m.home], ["away", m.away]].forEach(function (z) {
+        var side = z[0], t = get(z[1]);
+        var st = m.stats || {};
+        var pi = side === "home" ? 0 : 1;
+        function v(k) { var a = st[k]; return a && a[pi] != null ? a[pi] : null; }
+        t.gp++;
+        var po = v("possession"); if (po != null) { t.poss += po; t.possN++; }
+        var sh = v("shots"); if (sh != null) t.shots += sh;
+        var pa = v("pass_acc"); if (pa != null) { t.paSum += pa; t.paN++; }
+        t.xgf += side === "home" ? (m.xg_home || 0) : (m.xg_away || 0);
+        t.xga += side === "home" ? (m.xg_away || 0) : (m.xg_home || 0);
+      });
+    });
+    SHOTS.forEach(function (s) {
+      var t = T[s.t]; if (!t) return;
+      t.shotN++; t.xgAll += s.xg;
+      if (s.s !== "Open Play" && s.s !== "Fast Break") t.spXg += s.xg;
+    });
+    var out = {};
+    Object.keys(T).forEach(function (k) {
+      var t = T[k]; if (!t.gp) return;
+      out[k] = {
+        team: k, gp: t.gp,
+        poss: t.possN ? t.poss / t.possN : 0,
+        shotsPG: t.shots / t.gp,
+        xgPG: t.xgf / t.gp,
+        xgPerShot: t.shotN ? t.xgAll / t.shotN : 0,
+        spShare: t.xgAll ? t.spXg / t.xgAll * 100 : 0,
+        passAcc: t.paN ? t.paSum / t.paN : 0,
+        xgaPG: t.xga / t.gp
+      };
+    });
+    return out;
+  }
+  var TL_AXES = [["poss", "Possession", 0], ["shotsPG", "Shots /game", 1], ["xgPG", "xG /game", 2],
+    ["xgPerShot", "xG /shot", 2], ["spShare", "Set-piece xG %", 0], ["passAcc", "Pass accuracy", 0], ["DEF", "Defensive", 2]];
+  function tlRadar(teams, styleMap) {
+    var pool = Object.keys(styleMap).map(function (k) { return styleMap[k]; });
+    var present = teams.filter(function (t) { return styleMap[t]; });
+    if (!present.length) return '<p class="hint">No style data for these teams yet.</p>';
+    var single = present.length === 1;
+    var N = TL_AXES.length, W = 580, H = 470, cx = W / 2, cy = H / 2 + 4, R = 146;
+    function axVal(me, ax) { return ax[0] === "DEF" ? -me.xgaPG : me[ax[0]]; }
+    function axGet(ax) { return ax[0] === "DEF" ? function (s) { return -s.xgaPG; } : function (s) { return s[ax[0]]; }; }
+    function pctOf(me, ax) {
+      var v = axVal(me, ax), get = axGet(ax);
+      var below = pool.filter(function (s) { return get(s) < v; }).length;
+      return pool.length ? below / pool.length : 0;
+    }
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-radar" preserveAspectRatio="xMidYMid meet" role="img">'];
+    [0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var pts = [];
+      for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
+    });
+    TL_AXES.forEach(function (ax, i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / N;
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
+      var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + ((single ? ly - 2 : ly + 3.5)).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
+      if (single) {
+        var me = styleMap[present[0]], dp = ax[2];
+        var disp = ax[0] === "DEF" ? me.xgaPG.toFixed(2) + " xGA" : soFmt(me[ax[0]], dp) + (ax[0] === "poss" || ax[0] === "passAcc" || ax[1].indexOf("%") >= 0 ? "%" : "");
+        svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + disp + " (" + Math.round(pctOf(me, ax) * 100) + "%)</text>");
+      }
+    });
+    present.forEach(function (t, ti) {
+      var me = styleMap[t], col = TL_COLORS[ti % TL_COLORS.length], poly = [];
+      TL_AXES.forEach(function (ax, i) {
+        var a = -Math.PI / 2 + i * 2 * Math.PI / N, pct = pctOf(me, ax);
+        poly.push((cx + R * pct * Math.cos(a)).toFixed(1) + "," + (cy + R * pct * Math.sin(a)).toFixed(1));
+      });
+      svg.push('<polygon points="' + poly.join(" ") + '" fill="' + col + '" fill-opacity="' + (single ? 0.18 : 0.12) + '" stroke="' + col + '" stroke-width="2"/>');
+      poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="' + col + '"/>'); });
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+  function tlMapCard(label, shots) {
+    var goals = shots.filter(function (s) { return s.g; }).length;
+    var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
+    var head = '<div class="tl-map-head"><b>' + esc(label) + "</b> · " + shots.length + " shots · " + goals + " goals · " + xg.toFixed(1) + " xG</div>";
+    var body = shots.length ? tlShotMap(shots) : '<p class="hint">No shots match these filters.</p>';
+    return '<div class="tl-map-card">' + head + '<div class="tl-pitch-wrap">' + body + "</div></div>";
+  }
+
+  function renderTeamLab() {
+    if (!document.getElementById("view-teamlab")) return;
+    // season totals table (always shown, below the maps)
+    TOTALS = teamTotals();
+    renderDbTeamTable();
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    var mapsHost = document.getElementById("tlMaps");
+    if (!SHOTS.length) {
+      if (mapsHost) mapsHost.innerHTML = '<p class="hint">No shot data available yet.</p>';
+      setHTML("tlStats", "");
+      var sc0 = document.getElementById("tlStyleCard"); if (sc0) sc0.style.display = "none";
+      return;
+    }
+    var allMode = tlState.team === "all";
+    var teams = allMode ? [] : [tlState.team, tlState.teamB, tlState.teamC].filter(function (t, i, arr) {
+      return t && t !== "none" && t !== "all" && arr.indexOf(t) === i;
+    });
+    var mapList = allMode ? [["All teams", "all"]] : teams.map(function (t) { return [t, t]; });
+    if (!mapList.length) mapList = [["All teams", "all"]];
+    setHTML("tlMapTitle", allMode ? "All teams — shot map"
+      : (teams.length > 1 ? "Shot maps — " + teams.join(" vs ") : teams[0] + " — shot map"));
+    setHTML("tlMaps", mapList.map(function (m) { return tlMapCard(m[0], tlShotsFor(m[1])); }).join(""));
+    mapsHost.classList.toggle("compare", mapList.length > 1);
+    var statsEl = document.getElementById("tlStats");
+    if (mapList.length === 1) {
+      var shots = tlShotsFor(mapList[0][1]);
+      var goals = shots.filter(function (s) { return s.g; }).length;
+      var ot = shots.filter(function (s) { return s.ot; }).length;
+      var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
+      var items = [
+        ["v accent", shots.length, "Shots"], ["v", goals, "Goals"], ["v blue", xg.toFixed(1), "Total xG"],
+        ["v", shots.length ? (xg / shots.length).toFixed(2) : "0", "xG per shot"],
+        ["v", shots.length ? Math.round(100 * ot / shots.length) + "%" : "0%", "On target"],
+        ["v", goals && xg ? (goals / xg).toFixed(2) : "—", "Goals / xG"],
+      ];
+      statsEl.innerHTML = items.map(function (it) { return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>"; }).join("");
+      statsEl.style.display = "";
+    } else { statsEl.innerHTML = ""; statsEl.style.display = "none"; }
+    var styleCard = document.getElementById("tlStyleCard");
+    if (allMode || !teams.length) { if (styleCard) styleCard.style.display = "none"; return; }
+    styleCard.style.display = "";
+    setHTML("tlStyleTitle", teams.length > 1 ? "Style fingerprints — " + teams.join(" vs ") : teams[0] + " — style fingerprint");
+    var sm = tlTeamStyle();
+    setHTML("tlRadar", tlRadar(teams, sm));
+    setHTML("tlLegend", teams.length > 1 ? teams.map(function (t, i) {
+      return '<span class="tl-leg"><i style="background:' + TL_COLORS[i % TL_COLORS.length] + '"></i>' + esc(t) + "</span>";
+    }).join("") : "");
+  }
+
+  // One-time wiring of Team Lab controls.
+  function wireTeamLab() {
+    var sel = document.getElementById("tlTeam");
+    if (!sel || sel._wired) return;
+    sel._wired = true;
+    sel.addEventListener("change", function () { tlState.team = sel.value; renderTeamLab(); });
+    document.getElementById("tlTeamB").addEventListener("change", function (e) { tlState.teamB = e.target.value; renderTeamLab(); });
+    document.getElementById("tlTeamC").addEventListener("change", function (e) { tlState.teamC = e.target.value; renderTeamLab(); });
+    document.getElementById("tlFilter").addEventListener("change", function (e) { tlState.filter = e.target.value; renderTeamLab(); });
+    document.getElementById("tlSit").addEventListener("change", function (e) { tlState.sit = e.target.value; renderTeamLab(); });
+    document.getElementById("tlMode").addEventListener("change", function (e) { tlState.mode = e.target.value; renderTeamLab(); });
+    wireChartTaps("tlMaps", "tlMapTip");
+  }
+
+  // Per-season Team Lab refresh: reload shots, repopulate team pickers, redraw.
+  function refreshTeamLab() {
+    SHOTS = (window.LL_SHOTS && window.LL_SHOTS[season]) || [];
+    var sel = document.getElementById("tlTeam");
+    if (sel) {
+      var teams = {}; SHOTS.forEach(function (s) { teams[s.t] = 1; });
+      var teamOpts = Object.keys(teams).sort().map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + "</option>"; }).join("");
+      if (tlState.team !== "all" && !teams[tlState.team]) tlState.team = "all";
+      ["teamB", "teamC"].forEach(function (k) { if (tlState[k] !== "none" && !teams[tlState[k]]) tlState[k] = "none"; });
+      sel.innerHTML = '<option value="all">All teams</option>' + teamOpts;
+      var selB = document.getElementById("tlTeamB"), selC = document.getElementById("tlTeamC");
+      selB.innerHTML = '<option value="none">— none —</option>' + teamOpts;
+      selC.innerHTML = '<option value="none">— none —</option>' + teamOpts;
+      sel.value = tlState.team; selB.value = tlState.teamB; selC.value = tlState.teamC;
+    }
+    renderTeamLab();
+  }
+
+  /* ================= DATA DOWNLOADS ================= */
+  function renderDownloads() {
+    var db = window.WC_DATABASE;
+    var wrap = document.getElementById("dataDownloads");
+    if (!wrap) return;
+    if (!db) { wrap.innerHTML = '<p class="hint">Run build_database.py to generate the downloads.</p>'; return; }
+    wrap.innerHTML = db.tables.filter(function (t) { return t.rows > 0; }).map(function (t) {
+      return '<a class="data-card" href="database/' + esc(t.file) + '" download>' +
+        '<div class="dc-name">' + esc(t.label) + "</div>" +
+        '<div class="dc-meta">' + t.rows + " rows · " + esc(t.file) + " · CSV</div>" +
+        '<div class="dc-dl">⬇ Download</div></a>';
+    }).join("");
+    var link = document.getElementById("sqliteLink");
+    if (link && db.sqlite) link.setAttribute("href", "database/" + db.sqlite);
   }
 
   /* ---- Projection: Poisson strengths + Monte-Carlo over remaining fixtures ---- */
@@ -470,6 +1690,15 @@
   }
 
   /* ================= wiring ================= */
+  // Standouts + Team Lab are dot-heavy (the all-teams shot map alone is thousands of
+  // circles), so we render them lazily the first time their tab is opened and re-mark
+  // them dirty on a season switch rather than redrawing on every renderAll.
+  var heavyDirty = { standouts: true, teamlab: true };
+  function renderHeavyIfNeeded(view) {
+    if (view === "standouts" && heavyDirty.standouts) { refreshStandouts(); heavyDirty.standouts = false; }
+    else if (view === "teamlab" && heavyDirty.teamlab) { refreshTeamLab(); heavyDirty.teamlab = false; }
+  }
+
   function renderAll() {
     D = ALL.seasons[season];
     PLAYERS = PLAYERS_ALL[season] || [];
@@ -477,10 +1706,15 @@
     renderStandings();
     populateMatchdayFilter();
     renderMatches();
-    renderXg();
-    renderProjection();
     renderPlayers();
+    renderXgLab();
+    renderProjection();
     renderData();
+    renderDownloads();
+    // defer the heavy views; redraw now only if one is already on screen
+    heavyDirty.standouts = true; heavyDirty.teamlab = true;
+    var active = document.querySelector("nav.tabs button.active");
+    if (active) renderHeavyIfNeeded(active.dataset.view);
     var foot = document.getElementById("footNote");
     if (foot) foot.textContent = "Season " + season + " · generated " + ALL.generated + " · " +
       (D.counts.played || 0) + " matches played · " + (D.counts.with_xg || 0) + " with xG · La Liga analytics pipeline.";
@@ -495,6 +1729,7 @@
         b.classList.add("active");
         document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
         document.getElementById("view-" + b.dataset.view).classList.add("active");
+        renderHeavyIfNeeded(b.dataset.view);
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
     });
@@ -521,6 +1756,12 @@
         b.classList.add("active"); renderPlayers();
       });
     });
+    // Team Lab search
+    var tl = document.getElementById("tlSearch");
+    if (tl) tl.addEventListener("input", renderDbTeamTable);
+    // Standouts + Team Lab one-time control wiring (renders happen per season in renderAll)
+    wireStandouts();
+    wireTeamLab();
   }
 
   initControls();

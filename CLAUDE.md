@@ -25,9 +25,10 @@ laliga_dashboard/              the website (static, no build step at view time)
   styles.css match.css
   data.js                      window.LL_DATA, season-keyed  ← generated
   players.js                   window.LL_PLAYERS, season-keyed ← generated
+  shots.js                     window.LL_SHOTS, season-keyed (Team Lab shot maps) ← generated
   matches_detail/<id>.js       per-match shots/passes/dribbles/goals/lineups ← generated (SHIPPED)
   database/                    CSV + sqlite exports ← generated
-  build_data.py build_players.py build_match_details.py build_database.py  builders
+  build_data.py build_players.py build_match_details.py build_database.py build_shots.py  builders
   xg_model.py                  shared shot-extraction + xG model (matches the PNGs)
 laliga/                        the pipeline
   build_schedule.py            FotMob token-free sweep → schedules/SCHEDULE_<season>.json
@@ -76,9 +77,10 @@ powershell -File laliga/register_tasks.ps1 -Season 2026-27   # arm per-match liv
 # (re)scrape rich per-match data (needs Chrome; ~1h for a full season)
 py laliga/scrape_whoscored.py --season 2025-26                # full season (resumable)
 py laliga/scrape_whoscored.py --season 2025-26 --ids 1914240  # specific WhoScored id(s)
-# then rebuild everything:
+# then rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
 py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_players.py \
-  && py laliga_dashboard/build_database.py && py laliga_dashboard/build_data.py
+  && py laliga_dashboard/build_database.py && py laliga_dashboard/build_shots.py \
+  && py laliga_dashboard/build_data.py
 ```
 **`scrape_whoscored.py` is the workhorse** for rich data: WhoScored match ids aren't
 range-enumerable, so it pages the **weekly** fixtures calendar back (`#dayChangeBtn-prev`),
