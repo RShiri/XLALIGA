@@ -441,17 +441,18 @@
     }
     var preset = (document.querySelector("#view-players .seg-btn.active") || {}).dataset;
     var key = (preset && preset.preset) || "ga";
-    var metric = { ga: function (p) { return (p.goals || 0) + (p.assists || 0); },
-                   g: function (p) { return p.goals || 0; }, a: function (p) { return p.assists || 0; },
+    // players.js fields: g (goals), a (assists), xg, rating, mp (matches), mins, keyPasses.
+    var metric = { ga: function (p) { return (p.g || 0) + (p.a || 0); },
+                   g: function (p) { return p.g || 0; }, a: function (p) { return p.a || 0; },
                    xg: function (p) { return p.xg || 0; }, rating: function (p) { return p.rating || 0; } }[key] || function (p) { return 0; };
     var rows = PLAYERS.slice().sort(function (a, b) { return metric(b) - metric(a); }).slice(0, 50);
     var body = rows.map(function (p, i) {
       return "<tr><td class='pos'>" + (i + 1) + "</td>" +
         "<td class='team'><div class='team-cell'>" + logoImg(p.team) + "<span class='nm'>" + esc(p.name) + "</span></div></td>" +
-        "<td>" + esc(p.team) + "</td><td>" + (p.goals || 0) + "</td><td>" + (p.assists || 0) + "</td>" +
+        "<td>" + esc(p.team) + "</td><td>" + (p.mp || 0) + "</td><td>" + (p.g || 0) + "</td><td>" + (p.a || 0) + "</td>" +
         "<td>" + (p.xg != null ? p.xg.toFixed(2) : "–") + "</td><td>" + (p.rating != null ? p.rating.toFixed(2) : "–") + "</td></tr>";
     }).join("");
-    host.innerHTML = "<table><thead><tr><th>#</th><th class='team'>Player</th><th>Team</th><th>G</th><th>A</th><th>xG</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
+    host.innerHTML = "<table><thead><tr><th>#</th><th class='team'>Player</th><th>Team</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   /* ---- Data dump ---- */
