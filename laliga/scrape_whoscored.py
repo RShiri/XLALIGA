@@ -33,10 +33,20 @@ MATCH_DIR = _REPO / "laliga" / "matches"
 
 
 def _key(name: str) -> str:
+    # Accent-fold + lowercase, strip SAFE club-suffix noise, alnum only. Critically do NOT
+    # strip "real": collapsing "Real Madrid" -> "madrid" makes it substring-match
+    # "atleticoMADRID" and scrambles the two Madrid clubs. Keeping "real" leaves
+    # "realmadrid" vs "atleticomadrid" distinct. Contains-matching still handles short/long
+    # variants (WhoScored "Betis"/"Alaves"/"Athletic Bilbao" vs schedule "Real Betis"/
+    # "Deportivo Alaves"/"Athletic Club").
     s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
-    for j in ("deportivo ", "real ", "rcd ", "cd ", "cf ", "ud ", "sd ", "club ", " balompie", " fc"):
+    for j in ("deportivo ", "rcd ", "cd ", "cf ", "ud ", "sd ", "club", " balompie", " fc"):
         s = s.replace(j, " ")
     return re.sub(r"[^a-z0-9]", "", s)
+
+
+def _exact_match(ws_h, ws_a, sc_h, sc_a):
+    return _key(ws_h) == _key(sc_h) and _key(ws_a) == _key(sc_a)
 
 
 def _teams_match(ws_h, ws_a, sc_h, sc_a):
@@ -238,7 +248,10 @@ def main():
                 continue
             wh = (mcd.get("home") or {}).get("name", "")
             wa = (mcd.get("away") or {}).get("name", "")
-            fixture = next((f for f in schedule if _teams_match(wh, wa, f["home"], f["away"])), None)
+            # Exact team-key match first (so "Real Madrid" never grabs an Atletico fixture),
+            # then fall back to contains-matching for short/long name variants.
+            fixture = (next((f for f in schedule if _exact_match(wh, wa, f["home"], f["away"])), None)
+                       or next((f for f in schedule if _teams_match(wh, wa, f["home"], f["away"])), None))
             if not fixture:
                 unmatched += 1
                 print(f"[{n}/{len(ids)}] {wsid}: {wh} vs {wa} — not in {args.season} schedule, skip")
