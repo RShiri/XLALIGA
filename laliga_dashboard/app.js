@@ -1509,8 +1509,23 @@
       var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
       var diff = goals - xg;                        // finishing over/under xG (goal difference vs expected)
       var diffCls = "v " + (diff > 0.05 ? "pos" : diff < -0.05 ? "neg" : "");
+      // own goals count in match scores but aren't shots — annotate the card so the
+      // lower number is self-explaining (only in the unfiltered view)
+      var goalsLabel = "Goals";
+      if (tlState.filter === "all" && tlState.sit === "all") {
+        var selTeam = allMode ? null : mapList[0][1];
+        var scoreGoals = 0;
+        (D.matches || []).forEach(function (m) {
+          if (!m.played) return;
+          if (!selTeam || selTeam === "all") scoreGoals += (m.hs || 0) + (m.as || 0);
+          else if (m.home === selTeam) scoreGoals += (m.hs || 0);
+          else if (m.away === selTeam) scoreGoals += (m.as || 0);
+        });
+        var og = scoreGoals - goals;
+        if (og > 0) goalsLabel = "Goals from shots<br>+" + og + " own goal" + (og > 1 ? "s" : "") + " in scores";
+      }
       var items = [
-        ["v accent", shots.length, "Shots"], ["v", goals, "Goals"], ["v blue", xg.toFixed(1), "Total xG"],
+        ["v accent", shots.length, "Shots"], ["v", goals, goalsLabel], ["v blue", xg.toFixed(1), "Total xG"],
         ["v", shots.length ? (xg / shots.length).toFixed(2) : "0", "xG per shot"],
         ["v", shots.length ? Math.round(100 * ot / shots.length) + "%" : "0%", "On target"],
         [diffCls, (diff > 0 ? "+" : "") + diff.toFixed(1), "G − xG"],
