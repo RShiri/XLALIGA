@@ -800,6 +800,17 @@ tr.z-rel  { background: rgba(255,107,129,0.06); }
 /* ── Player Lab (team → player, with compare) ───────────────────────────── */
 .pl-controls label { display: inline-flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
 .pl-controls select { min-width: 190px; }
+/* clickable team badges filtering where the COMPARE player comes from */
+.pl-badges-wrap { display: flex; align-items: flex-start; gap: 12px; margin: -8px 0 18px; flex-wrap: wrap; }
+.pl-badges-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; padding-top: 10px; }
+.pl-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.pl-badge { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); border-radius: 9px; cursor: pointer;
+  padding: 0; opacity: 0.45; transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.pl-badge:hover { opacity: 0.85; }
+.pl-badge.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.pl-badge .crest { width: 24px; height: 24px; object-fit: contain; }
+.pl-badge-all { width: auto; padding: 0 12px; font-size: 12px; font-weight: 700; color: var(--text); font-family: inherit; }
 /* comparing: the two players' values sit SIDE BY SIDE (main gold | compare blue) */
 .stat .cmp-vals { display: flex; gap: 10px; justify-content: center; align-items: baseline; }
 .stat .cmp-vals .v { font-size: 24px; }
