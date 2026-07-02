@@ -26,7 +26,9 @@ sys.path.insert(0, ROOT)
 from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shootout,
                       player_xa_from_events)
 
-MATCH_DIR = os.path.join(ROOT, "laliga", "matches")
+# raw scrapes are git-ignored and absent in this clone; LALIGA_MATCH_DIR lets a
+# rebuild point at the dev copy (Desktop\XWORLDCUPTWIT\laliga\matches)
+MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")
 OUT_DIR = os.path.join(HERE, "matches_detail")
 
 NAME_MAP = {

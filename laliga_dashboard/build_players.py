@@ -18,7 +18,7 @@ sys.path.insert(0, HERE)
 from build_match_details import norm, _match_extras, _player_rating, is_match_file
 from xg_model import ascii_name, SHOT_TYPES, shot_xg, is_shootout, player_xa_from_events
 
-MATCH_DIR = os.path.join(ROOT, "laliga", "matches")
+MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")
 OUT = os.path.join(HERE, "players.js")
 
 # WhoScored per-minute stat dicts are incremental → sum the values.

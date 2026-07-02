@@ -27,7 +27,7 @@ import build_players
 from build_match_details import norm, is_match_file
 from xg_model import team_xg_from_events
 
-MATCH_DIR = os.path.join(ROOT, "laliga", "matches")
+MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")
 OUT_DIR = os.path.join(HERE, "database")
 
 

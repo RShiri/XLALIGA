@@ -28,7 +28,7 @@ from xg_model import team_xg_from_events  # shared shot-extraction + xG (matches
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHED_DIR = os.path.join(ROOT, "laliga", "schedules")
-MATCH_DIR = os.path.join(ROOT, "laliga", "matches")          # rich scrapes: <season>/<id>.json
+MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")  # rich scrapes: <season>/<id>.json
 PNG_DIRS = [os.path.join(ROOT, "laliga_png"), os.path.join(ROOT, "laliga", "output")]
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.js")
 

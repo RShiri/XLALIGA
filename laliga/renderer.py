@@ -16,6 +16,7 @@ import os
 import math
 import json
 import logging
+import sys
 import unicodedata
 from pathlib import Path
 from typing import Optional
@@ -39,27 +40,14 @@ from laliga.team_colors import get_team_colors
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 SCALE_Y = 0.80
 
-# Unified, data-driven xG model — byte-for-byte mirror of xg_model.py so the PNG
-# infographics and the website report identical xG. One logistic regression fit on
-# ALL La Liga + World Cup shots (11,830 non-pen shots, 1,166 goals) by
-# laliga_dashboard/tools/fit_unified_xg.py (Brier 0.071). Keep in sync with
-# xg_model._INTERCEPT/_COEF. Penalties keep _PENALTY_XG.
-_INTERCEPT = -3.379503
-_COEF = {
-    "dist": -0.004175, "angle": 1.421131, "header": -0.580616, "big": 1.891534,
-    "freekick": 0.278088, "corner": -0.303916, "setpiece": -0.345961, "fastbreak": 0.455797,
-}
-_CAL_SHIFT = -0.044712   # La Liga finishing shift (World Cup uses +0.162084)
-_PENALTY_XG = 0.76
+# xG via the shared xg_core v2 artifact — the SAME scorer xg_model.py routes
+# through, so the PNG infographics and the website report identical xG.
+# (Replaces the hard-coded unified-LR coefficients; retrain with xg_core/train.py.)
+sys.path.insert(0, str(_REPO_ROOT))
+from xg_core.score import XGScorer
 
-
-def _shot_angle(x_sb: float, y_sb: float) -> float:
-    a = math.hypot(120.0 - x_sb, 36.0 - y_sb)
-    b = math.hypot(120.0 - x_sb, 44.0 - y_sb)
-    if a <= 0.0 or b <= 0.0:
-        return math.pi
-    c = max(-1.0, min(1.0, (a * a + b * b - 64.0) / (2.0 * a * b)))
-    return math.acos(c)
+_XG_SCORER = XGScorer()
+_XG_LEAGUE = "LaLiga"
 
 
 def _ws_to_sb_x(ws_x: float) -> float:
@@ -69,20 +57,11 @@ def _ws_to_sb_x(ws_x: float) -> float:
 
 
 def _estimate_xg(x_sb: float, y_sb: float, is_penalty: bool, is_big_chance: bool,
-                 body_part: str, situation: str = "Open Play") -> float:
-    if is_penalty:
-        return _PENALTY_XG
-    dist = max(math.hypot(120.0 - x_sb, 40.0 - y_sb), 0.5)
-    z = _INTERCEPT + _CAL_SHIFT
-    z += _COEF["dist"] * dist + _COEF["angle"] * _shot_angle(x_sb, y_sb)
-    if body_part == "Header":
-        z += _COEF["header"]
-    if is_big_chance:
-        z += _COEF["big"]
-    z += {"Free Kick": _COEF["freekick"], "Corner": _COEF["corner"],
-          "Set Piece": _COEF["setpiece"], "Fast Break": _COEF["fastbreak"]}.get(situation, 0.0)
-    xg = 1.0 / (1.0 + math.exp(-z))
-    return round(min(max(xg, 0.01), 0.95), 3)
+                 body_part: str, situation: str = "Open Play",
+                 assisted: bool = False) -> float:
+    return _XG_SCORER.estimate_xg(x_sb, y_sb, is_penalty, is_big_chance,
+                                  body_part, situation, assisted=assisted,
+                                  league=_XG_LEAGUE)
 
 
 def _ascii_name(name: str) -> str:
@@ -192,7 +171,8 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
             "is_goal":      type_name == "Goal",
             "is_on_target": type_name in ("SavedShot", "Goal"),
             "xG":           (xg_stored if xg_stored is not None
-                             else _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation)),
+                             else _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
+                                               assisted=ev.get("relatedPlayerId") is not None)),
             "body_part":    body,
             "situation":    situation,
             "zone":         zone,
