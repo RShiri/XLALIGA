@@ -723,6 +723,7 @@
   var SO_STATS = [
     ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0],
     ["xg", "Expected goals (xG)", 2], ["xg_diff", "Finishing (goals − xG)", 2],
+    ["xa", "Expected assists (xA)", 2], ["xgi", "xG involvement (xG + xA)", 2],
     ["shots", "Shots", 0], ["sot", "Shots on target", 0], ["keyPasses", "Key passes", 0],
     ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["pass_pct", "Pass accuracy %", 0],
     ["tackles", "Tackles", 0], ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
@@ -1666,15 +1667,17 @@
     // players.js fields: g (goals), a (assists), xg, rating, mp (matches), mins, keyPasses.
     var metric = { ga: function (p) { return (p.g || 0) + (p.a || 0); },
                    g: function (p) { return p.g || 0; }, a: function (p) { return p.a || 0; },
-                   xg: function (p) { return p.xg || 0; }, rating: function (p) { return p.rating || 0; } }[key] || function (p) { return 0; };
+                   xg: function (p) { return p.xg || 0; }, xa: function (p) { return p.xa || 0; },
+                   rating: function (p) { return p.rating || 0; } }[key] || function (p) { return 0; };
     var rows = PLAYERS.slice().sort(function (a, b) { return metric(b) - metric(a); }).slice(0, 50);
     var body = rows.map(function (p, i) {
       return "<tr><td class='pos'>" + (i + 1) + "</td>" +
         "<td class='team'><div class='team-cell'>" + logoImg(p.team) + "<span class='nm'>" + esc(p.name) + "</span></div></td>" +
         "<td>" + esc(p.team) + "</td><td>" + (p.mp || 0) + "</td><td>" + (p.g || 0) + "</td><td>" + (p.a || 0) + "</td>" +
-        "<td>" + (p.xg != null ? p.xg.toFixed(2) : "–") + "</td><td>" + (p.rating != null ? p.rating.toFixed(2) : "–") + "</td></tr>";
+        "<td>" + (p.xg != null ? p.xg.toFixed(2) : "–") + "</td><td>" + (p.xa != null ? p.xa.toFixed(2) : "–") + "</td>" +
+        "<td>" + (p.rating != null ? p.rating.toFixed(2) : "–") + "</td></tr>";
     }).join("");
-    host.innerHTML = "<table><thead><tr><th>#</th><th class='team'>Player</th><th>Team</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
+    host.innerHTML = "<table><thead><tr><th>#</th><th class='team'>Player</th><th>Team</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>xA</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   /* ---- Data dump ---- */

@@ -414,14 +414,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.82,
-     "xg_away": 3.33,
+     "xg_home": 0.59,
+     "xg_away": 2.55,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.82,
-       3.33
+       0.59,
+       2.55
       ],
       "shots": [
        7,
@@ -489,14 +489,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-15T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.18,
-     "xg_away": 0.94,
+     "xg_home": 2.34,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.18,
-       0.94
+       2.34,
+       0.92
       ],
       "shots": [
        25,
@@ -564,14 +564,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-16T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.61,
-     "xg_away": 1.74,
+     "xg_home": 0.42,
+     "xg_away": 1.41,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.61,
-       1.74
+       0.42,
+       1.41
       ],
       "shots": [
        4,
@@ -639,14 +639,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-16T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.21,
-     "xg_away": 0.89,
+     "xg_home": 1.58,
+     "xg_away": 0.65,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.21,
-       0.89
+       1.58,
+       0.65
       ],
       "shots": [
        15,
@@ -714,14 +714,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-16T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.02,
-     "xg_away": 0.91,
+     "xg_home": 1.51,
+     "xg_away": 0.75,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.02,
-       0.91
+       1.51,
+       0.75
       ],
       "shots": [
        18,
@@ -789,14 +789,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-17T17:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.01,
-     "xg_away": 1.46,
+     "xg_home": 0.77,
+     "xg_away": 1.03,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.01,
-       1.46
+       0.77,
+       1.03
       ],
       "shots": [
        11,
@@ -864,14 +864,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-17T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.24,
-     "xg_away": 1.07,
+     "xg_home": 2.5,
+     "xg_away": 0.86,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.24,
-       1.07
+       2.5,
+       0.86
       ],
       "shots": [
        14,
@@ -939,14 +939,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-17T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.49,
-     "xg_away": 1.44,
+     "xg_home": 1.04,
+     "xg_away": 1.12,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.49,
-       1.44
+       1.04,
+       1.12
       ],
       "shots": [
        9,
@@ -1014,14 +1014,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-18T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.21,
-     "xg_away": 1.45,
+     "xg_home": 0.83,
+     "xg_away": 1.05,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.21,
-       1.45
+       0.83,
+       1.05
       ],
       "shots": [
        6,
@@ -1089,14 +1089,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-19T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.75,
-     "xg_away": 0.23,
+     "xg_home": 1.62,
+     "xg_away": 0.17,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.75,
-       0.23
+       1.62,
+       0.17
       ],
       "shots": [
        18,
@@ -1164,14 +1164,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-22T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.17,
-     "xg_away": 1.79,
+     "xg_home": 1.56,
+     "xg_away": 1.24,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.17,
-       1.79
+       1.56,
+       1.24
       ],
       "shots": [
        16,
@@ -1239,14 +1239,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-23T17:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.13,
-     "xg_away": 0.71,
+     "xg_home": 0.86,
+     "xg_away": 0.53,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.13,
-       0.71
+       0.86,
+       0.53
       ],
       "shots": [
        12,
@@ -1314,14 +1314,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-23T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.83,
-     "xg_away": 0.62,
+     "xg_home": 1.29,
+     "xg_away": 0.47,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.83,
-       0.62
+       1.29,
+       0.47
       ],
       "shots": [
        13,
@@ -1389,14 +1389,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-23T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.48,
-     "xg_away": 2.83,
+     "xg_home": 2.52,
+     "xg_away": 2.12,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.48,
-       2.83
+       2.52,
+       2.12
       ],
       "shots": [
        9,
@@ -1464,14 +1464,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-24T17:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.06,
-     "xg_away": 0.69,
+     "xg_home": 0.87,
+     "xg_away": 0.47,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.06,
-       0.69
+       0.87,
+       0.47
       ],
       "shots": [
        16,
@@ -1539,14 +1539,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-24T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.72,
-     "xg_away": 1.6,
+     "xg_home": 1.27,
+     "xg_away": 1.44,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.72,
-       1.6
+       1.27,
+       1.44
       ],
       "shots": [
        15,
@@ -1614,14 +1614,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-24T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.1,
-     "xg_away": 0.22,
+     "xg_home": 2.19,
+     "xg_away": 0.2,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.1,
-       0.22
+       2.19,
+       0.2
       ],
       "shots": [
        19,
@@ -1689,14 +1689,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-24T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.41,
-     "xg_away": 3.41,
+     "xg_home": 0.34,
+     "xg_away": 2.46,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.41,
-       3.41
+       0.34,
+       2.46
       ],
       "shots": [
        6,
@@ -1764,14 +1764,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-25T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.88,
-     "xg_away": 0.88,
+     "xg_home": 1.6,
+     "xg_away": 0.61,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.88,
-       0.88
+       1.6,
+       0.61
       ],
       "shots": [
        11,
@@ -1839,14 +1839,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-25T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.85,
-     "xg_away": 1.68,
+     "xg_home": 0.7,
+     "xg_away": 1.16,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.85,
-       1.68
+       0.7,
+       1.16
       ],
       "shots": [
        12,
@@ -1914,14 +1914,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-29T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.21,
-     "xg_away": 0.91,
+     "xg_home": 0.99,
+     "xg_away": 0.69,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.21,
-       0.91
+       0.99,
+       0.69
       ],
       "shots": [
        16,
@@ -1989,14 +1989,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-29T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.56,
-     "xg_away": 1.11,
+     "xg_home": 1.05,
+     "xg_away": 0.83,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.56,
-       1.11
+       1.05,
+       0.83
       ],
       "shots": [
        7,
@@ -2064,14 +2064,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-30T17:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.88,
-     "xg_away": 1.86,
+     "xg_home": 0.89,
+     "xg_away": 1.38,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.88,
-       1.86
+       0.89,
+       1.38
       ],
       "shots": [
        5,
@@ -2139,14 +2139,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-30T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.36,
-     "xg_away": 1.1,
+     "xg_home": 0.34,
+     "xg_away": 0.94,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.36,
-       1.1
+       0.34,
+       0.94
       ],
       "shots": [
        8,
@@ -2214,14 +2214,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-30T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.64,
-     "xg_away": 1.54,
+     "xg_home": 1.91,
+     "xg_away": 1.12,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.64,
-       1.54
+       1.91,
+       1.12
       ],
       "shots": [
        20,
@@ -2289,14 +2289,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-30T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.94,
-     "xg_away": 1.24,
+     "xg_home": 1.43,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.94,
-       1.24
+       1.43,
+       0.92
       ],
       "shots": [
        17,
@@ -2364,14 +2364,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-31T17:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.33,
-     "xg_away": 1.06,
+     "xg_home": 0.95,
+     "xg_away": 0.78,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.33,
-       1.06
+       0.95,
+       0.78
       ],
       "shots": [
        10,
@@ -2439,14 +2439,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-31T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.89,
-     "xg_away": 1.23,
+     "xg_home": 0.68,
+     "xg_away": 0.95,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.89,
-       1.23
+       0.68,
+       0.95
       ],
       "shots": [
        10,
@@ -2514,14 +2514,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-31T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.44,
-     "xg_away": 1.89,
+     "xg_home": 1.02,
+     "xg_away": 1.32,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.44,
-       1.89
+       1.02,
+       1.32
       ],
       "shots": [
        10,
@@ -2589,14 +2589,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-31T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.42,
-     "xg_away": 2.33,
+     "xg_home": 2.28,
+     "xg_away": 1.88,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.42,
-       2.33
+       2.28,
+       1.88
       ],
       "shots": [
        12,
@@ -2664,14 +2664,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-12T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.53,
-     "xg_away": 1.05,
+     "xg_home": 0.43,
+     "xg_away": 0.7,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.53,
-       1.05
+       0.43,
+       0.7
       ],
       "shots": [
        7,
@@ -2739,14 +2739,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-13T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.07,
-     "xg_away": 0.41,
+     "xg_home": 0.78,
+     "xg_away": 0.32,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.07,
-       0.41
+       0.78,
+       0.32
       ],
       "shots": [
        10,
@@ -2814,14 +2814,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-13T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.96,
-     "xg_away": 2.62,
+     "xg_home": 3.03,
+     "xg_away": 1.89,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.96,
-       2.62
+       3.03,
+       1.89
       ],
       "shots": [
        23,
@@ -2889,14 +2889,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-13T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.99,
-     "xg_away": 0.06,
+     "xg_home": 0.77,
+     "xg_away": 0.08,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.99,
-       0.06
+       0.77,
+       0.08
       ],
       "shots": [
        13,
@@ -2964,14 +2964,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-13T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.39,
-     "xg_away": 0.85,
+     "xg_home": 0.94,
+     "xg_away": 0.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.39,
-       0.85
+       0.94,
+       0.63
       ],
       "shots": [
        8,
@@ -3039,14 +3039,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-14T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.45,
-     "xg_away": 1.64,
+     "xg_home": 2.08,
+     "xg_away": 1.2,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.45,
-       1.64
+       2.08,
+       1.2
       ],
       "shots": [
        21,
@@ -3114,14 +3114,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-14T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.99,
-     "xg_away": 3.13,
+     "xg_home": 0.67,
+     "xg_away": 2.33,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.99,
-       3.13
+       0.67,
+       2.33
       ],
       "shots": [
        5,
@@ -3189,14 +3189,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-14T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.63,
-     "xg_away": 1.09,
+     "xg_home": 1.13,
+     "xg_away": 0.95,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.63,
-       1.09
+       1.13,
+       0.95
       ],
       "shots": [
        9,
@@ -3264,14 +3264,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-14T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.81,
-     "xg_away": 0.16,
+     "xg_home": 2.65,
+     "xg_away": 0.13,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.81,
-       0.16
+       2.65,
+       0.13
       ],
       "shots": [
        24,
@@ -3339,14 +3339,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-15T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.74,
-     "xg_away": 2.62,
+     "xg_home": 2.09,
+     "xg_away": 2.24,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.74,
-       2.62
+       2.09,
+       2.24
       ],
       "shots": [
        9,
@@ -3414,14 +3414,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-19T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.71,
-     "xg_away": 1.22,
+     "xg_home": 1.96,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.71,
-       1.22
+       1.96,
+       0.92
       ],
       "shots": [
        21,
@@ -3489,14 +3489,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-20T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.46,
-     "xg_away": 4.54,
+     "xg_home": 0.4,
+     "xg_away": 2.99,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.46,
-       4.54
+       0.4,
+       2.99
       ],
       "shots": [
        7,
@@ -3564,14 +3564,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-20T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.57,
-     "xg_away": 1.15,
+     "xg_home": 1.82,
+     "xg_away": 0.83,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.57,
-       1.15
+       1.82,
+       0.83
       ],
       "shots": [
        16,
@@ -3639,14 +3639,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-20T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.0,
-     "xg_away": 1.03,
+     "xg_home": 0.99,
+     "xg_away": 0.75,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.0,
-       1.03
+       0.99,
+       0.75
       ],
       "shots": [
        8,
@@ -3714,14 +3714,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-20T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.87,
-     "xg_away": 2.38,
+     "xg_home": 2.72,
+     "xg_away": 1.85,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.87,
-       2.38
+       2.72,
+       1.85
       ],
       "shots": [
        26,
@@ -3789,14 +3789,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-20T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.38,
-     "xg_away": 0.66,
+     "xg_home": 1.65,
+     "xg_away": 0.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.38,
-       0.66
+       1.65,
+       0.57
       ],
       "shots": [
        13,
@@ -3864,14 +3864,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-21T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.83,
-     "xg_away": 2.0,
+     "xg_home": 1.3,
+     "xg_away": 1.36,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.83,
-       2.0
+       1.3,
+       1.36
       ],
       "shots": [
        15,
@@ -3939,14 +3939,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-21T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.58,
-     "xg_away": 2.71,
+     "xg_home": 0.45,
+     "xg_away": 2.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.58,
-       2.71
+       0.45,
+       2.11
       ],
       "shots": [
        8,
@@ -4014,14 +4014,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-21T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.61,
-     "xg_away": 1.49,
+     "xg_home": 1.22,
+     "xg_away": 1.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.61,
-       1.49
+       1.22,
+       1.11
       ],
       "shots": [
        15,
@@ -4089,14 +4089,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-21T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.56,
-     "xg_away": 0.24,
+     "xg_home": 1.79,
+     "xg_away": 0.2,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.56,
-       0.24
+       1.79,
+       0.2
       ],
       "shots": [
        16,
@@ -4164,14 +4164,14 @@ window.LL_DATA = {
      "kickoff": "2025-08-27T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.48,
-     "xg_away": 0.86,
+     "xg_home": 1.11,
+     "xg_away": 0.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.48,
-       0.86
+       1.11,
+       0.6
       ],
       "shots": [
        14,
@@ -4239,14 +4239,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-23T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.68,
-     "xg_away": 0.94,
+     "xg_home": 1.89,
+     "xg_away": 0.65,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.68,
-       0.94
+       1.89,
+       0.65
       ],
       "shots": [
        17,
@@ -4314,14 +4314,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-23T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.99,
-     "xg_away": 1.12,
+     "xg_home": 3.36,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.99,
-       1.12
+       3.36,
+       0.77
       ],
       "shots": [
        21,
@@ -4389,14 +4389,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-23T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.96,
-     "xg_away": 4.47,
+     "xg_home": 1.36,
+     "xg_away": 3.37,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.96,
-       4.47
+       1.36,
+       3.37
       ],
       "shots": [
        11,
@@ -4464,14 +4464,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-23T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.2,
-     "xg_away": 2.6,
+     "xg_home": 0.97,
+     "xg_away": 1.76,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.2,
-       2.6
+       0.97,
+       1.76
       ],
       "shots": [
        16,
@@ -4539,14 +4539,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.58,
-     "xg_away": 1.58,
+     "xg_home": 0.44,
+     "xg_away": 1.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.58,
-       1.58
+       0.44,
+       1.11
       ],
       "shots": [
        7,
@@ -4614,14 +4614,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-24T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 5.18,
-     "xg_away": 1.84,
+     "xg_home": 3.52,
+     "xg_away": 1.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       5.18,
-       1.84
+       3.52,
+       1.25
       ],
       "shots": [
        20,
@@ -4689,14 +4689,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-24T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.98,
-     "xg_away": 0.75,
+     "xg_home": 2.07,
+     "xg_away": 0.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.98,
-       0.75
+       2.07,
+       0.57
       ],
       "shots": [
        17,
@@ -4764,14 +4764,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-25T19:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.06,
-     "xg_away": 1.6,
+     "xg_home": 0.79,
+     "xg_away": 1.12,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.06,
-       1.6
+       0.79,
+       1.12
       ],
       "shots": [
        9,
@@ -4839,14 +4839,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-25T21:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.59,
-     "xg_away": 2.5,
+     "xg_home": 1.08,
+     "xg_away": 1.86,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.59,
-       2.5
+       1.08,
+       1.86
       ],
       "shots": [
        7,
@@ -4914,14 +4914,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-26T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.95,
-     "xg_away": 1.02,
+     "xg_home": 0.75,
+     "xg_away": 0.91,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.95,
-       1.02
+       0.75,
+       0.91
       ],
       "shots": [
        12,
@@ -4989,14 +4989,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-27T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.18,
-     "xg_away": 1.49,
+     "xg_home": 0.85,
+     "xg_away": 1.04,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.18,
-       1.49
+       0.85,
+       1.04
       ],
       "shots": [
        11,
@@ -5064,14 +5064,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-27T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.84,
-     "xg_away": 0.86,
+     "xg_home": 2.17,
+     "xg_away": 0.59,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.84,
-       0.86
+       2.17,
+       0.59
       ],
       "shots": [
        13,
@@ -5139,14 +5139,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-27T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.99,
-     "xg_away": 0.85,
+     "xg_home": 0.75,
+     "xg_away": 0.7,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.99,
-       0.85
+       0.75,
+       0.7
       ],
       "shots": [
        12,
@@ -5214,14 +5214,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-27T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.64,
-     "xg_away": 2.14,
+     "xg_home": 1.84,
+     "xg_away": 1.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.64,
-       2.14
+       1.84,
+       1.57
       ],
       "shots": [
        14,
@@ -5289,14 +5289,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-28T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.25,
-     "xg_away": 0.71,
+     "xg_home": 1.66,
+     "xg_away": 0.48,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.25,
-       0.71
+       1.66,
+       0.48
       ],
       "shots": [
        18,
@@ -5364,14 +5364,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-28T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.95,
-     "xg_away": 1.15,
+     "xg_home": 3.59,
+     "xg_away": 0.83,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.95,
-       1.15
+       3.59,
+       0.83
       ],
       "shots": [
        17,
@@ -5439,14 +5439,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-28T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.82,
-     "xg_away": 1.01,
+     "xg_home": 2.67,
+     "xg_away": 0.74,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.82,
-       1.01
+       2.67,
+       0.74
       ],
       "shots": [
        22,
@@ -5514,14 +5514,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-28T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.08,
-     "xg_away": 0.94,
+     "xg_home": 0.83,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.08,
-       0.94
+       0.83,
+       0.77
       ],
       "shots": [
        12,
@@ -5589,14 +5589,14 @@ window.LL_DATA = {
      "kickoff": "2025-09-30T20:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.23,
-     "xg_away": 1.16,
+     "xg_home": 1.86,
+     "xg_away": 0.87,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.23,
-       1.16
+       1.86,
+       0.87
       ],
       "shots": [
        16,
@@ -5664,14 +5664,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-03T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.85,
-     "xg_away": 1.32,
+     "xg_home": 0.63,
+     "xg_away": 0.91,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.85,
-       1.32
+       0.63,
+       0.91
       ],
       "shots": [
        7,
@@ -5739,14 +5739,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-04T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.1,
-     "xg_away": 1.54,
+     "xg_home": 1.49,
+     "xg_away": 1.16,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.1,
-       1.54
+       1.49,
+       1.16
       ],
       "shots": [
        13,
@@ -5814,14 +5814,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-04T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.64,
-     "xg_away": 2.62,
+     "xg_home": 1.08,
+     "xg_away": 1.9,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.64,
-       2.62
+       1.08,
+       1.9
       ],
       "shots": [
        4,
@@ -5889,14 +5889,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-04T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.18,
-     "xg_away": 0.47,
+     "xg_home": 1.86,
+     "xg_away": 0.35,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.18,
-       0.47
+       1.86,
+       0.35
       ],
       "shots": [
        18,
@@ -5964,14 +5964,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-04T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.59,
-     "xg_away": 0.79,
+     "xg_home": 3.42,
+     "xg_away": 0.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.59,
-       0.79
+       3.42,
+       0.6
       ],
       "shots": [
        26,
@@ -6039,14 +6039,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-05T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.04,
-     "xg_away": 1.2,
+     "xg_home": 2.48,
+     "xg_away": 0.81,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.04,
-       1.2
+       2.48,
+       0.81
       ],
       "shots": [
        25,
@@ -6114,14 +6114,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-05T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.16,
-     "xg_away": 3.15,
+     "xg_home": 2.39,
+     "xg_away": 2.45,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.16,
-       3.15
+       2.39,
+       2.45
       ],
       "shots": [
        13,
@@ -6189,14 +6189,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-05T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.56,
-     "xg_away": 1.28,
+     "xg_home": 2.06,
+     "xg_away": 0.94,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.56,
-       1.28
+       2.06,
+       0.94
       ],
       "shots": [
        14,
@@ -6264,14 +6264,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-05T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.12,
-     "xg_away": 1.15,
+     "xg_home": 0.84,
+     "xg_away": 0.79,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.12,
-       1.15
+       0.84,
+       0.79
       ],
       "shots": [
        10,
@@ -6339,14 +6339,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-05T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.7,
-     "xg_away": 0.61,
+     "xg_home": 1.9,
+     "xg_away": 0.45,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.7,
-       0.61
+       1.9,
+       0.45
       ],
       "shots": [
        19,
@@ -6414,14 +6414,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-17T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.14,
-     "xg_away": 4.77,
+     "xg_home": 0.88,
+     "xg_away": 3.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.14,
-       4.77
+       0.88,
+       3.25
       ],
       "shots": [
        13,
@@ -6489,14 +6489,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-18T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.6,
-     "xg_away": 1.8,
+     "xg_home": 1.2,
+     "xg_away": 1.21,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.6,
-       1.8
+       1.2,
+       1.21
       ],
       "shots": [
        13,
@@ -6564,14 +6564,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-18T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.59,
-     "xg_away": 1.77,
+     "xg_home": 1.99,
+     "xg_away": 1.24,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.59,
-       1.77
+       1.99,
+       1.24
       ],
       "shots": [
        27,
@@ -6639,14 +6639,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-18T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.25,
-     "xg_away": 1.19,
+     "xg_home": 0.85,
+     "xg_away": 0.99,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.25,
-       1.19
+       0.85,
+       0.99
       ],
       "shots": [
        7,
@@ -6714,14 +6714,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-18T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.97,
-     "xg_away": 1.43,
+     "xg_home": 2.06,
+     "xg_away": 1.01,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.97,
-       1.43
+       2.06,
+       1.01
       ],
       "shots": [
        18,
@@ -6789,14 +6789,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-19T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.4,
-     "xg_away": 0.29,
+     "xg_home": 1.09,
+     "xg_away": 0.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.4,
-       0.29
+       1.09,
+       0.25
       ],
       "shots": [
        15,
@@ -6864,14 +6864,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-19T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.74,
-     "xg_away": 2.71,
+     "xg_home": 0.5,
+     "xg_away": 1.89,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.74,
-       2.71
+       0.5,
+       1.89
       ],
       "shots": [
        4,
@@ -6939,14 +6939,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-19T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.26,
-     "xg_away": 2.66,
+     "xg_home": 1.02,
+     "xg_away": 1.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.26,
-       2.66
+       1.02,
+       1.77
       ],
       "shots": [
        17,
@@ -7014,14 +7014,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-19T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.91,
-     "xg_away": 2.34,
+     "xg_home": 0.66,
+     "xg_away": 1.76,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.91,
-       2.34
+       0.66,
+       1.76
       ],
       "shots": [
        7,
@@ -7089,14 +7089,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-20T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.36,
-     "xg_away": 0.79,
+     "xg_home": 1.03,
+     "xg_away": 0.56,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.36,
-       0.79
+       1.03,
+       0.56
       ],
       "shots": [
        13,
@@ -7164,13 +7164,13 @@ window.LL_DATA = {
      "kickoff": "2025-10-24T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.82,
+     "xg_home": 1.46,
      "xg_away": 0.23,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.82,
+       1.46,
        0.23
       ],
       "shots": [
@@ -7239,14 +7239,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-25T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.32,
-     "xg_away": 2.79,
+     "xg_home": 2.07,
+     "xg_away": 2.15,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.32,
-       2.79
+       2.07,
+       2.15
       ],
       "shots": [
        8,
@@ -7314,14 +7314,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-25T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.81,
-     "xg_away": 1.7,
+     "xg_home": 1.95,
+     "xg_away": 1.22,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.81,
-       1.7
+       1.95,
+       1.22
       ],
       "shots": [
        16,
@@ -7389,14 +7389,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-25T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.43,
-     "xg_away": 1.39,
+     "xg_home": 0.36,
+     "xg_away": 0.97,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.43,
-       1.39
+       0.36,
+       0.97
       ],
       "shots": [
        7,
@@ -7464,14 +7464,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-25T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.84,
-     "xg_away": 2.92,
+     "xg_home": 0.73,
+     "xg_away": 2.26,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.84,
-       2.92
+       0.73,
+       2.26
       ],
       "shots": [
        15,
@@ -7539,14 +7539,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-26T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.67,
-     "xg_away": 2.81,
+     "xg_home": 1.92,
+     "xg_away": 1.94,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.67,
-       2.81
+       1.92,
+       1.94
       ],
       "shots": [
        20,
@@ -7614,14 +7614,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-26T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.71,
-     "xg_away": 1.28,
+     "xg_home": 2.92,
+     "xg_away": 1.0,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.71,
-       1.28
+       2.92,
+       1.0
       ],
       "shots": [
        23,
@@ -7689,14 +7689,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-26T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.62,
-     "xg_away": 1.5,
+     "xg_home": 2.4,
+     "xg_away": 1.07,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.62,
-       1.5
+       2.4,
+       1.07
       ],
       "shots": [
        17,
@@ -7764,14 +7764,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-26T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.55,
-     "xg_away": 1.2,
+     "xg_home": 1.14,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.55,
-       1.2
+       1.14,
+       0.92
       ],
       "shots": [
        15,
@@ -7839,14 +7839,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-27T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.71,
-     "xg_away": 0.74,
+     "xg_home": 1.28,
+     "xg_away": 0.58,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.71,
-       0.74
+       1.28,
+       0.58
       ],
       "shots": [
        17,
@@ -7914,14 +7914,14 @@ window.LL_DATA = {
      "kickoff": "2025-10-31T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.46,
-     "xg_away": 1.35,
+     "xg_home": 1.07,
+     "xg_away": 1.21,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.46,
-       1.35
+       1.07,
+       1.21
       ],
       "shots": [
        12,
@@ -7989,14 +7989,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-01T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.52,
-     "xg_away": 1.12,
+     "xg_home": 1.78,
+     "xg_away": 0.86,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.52,
-       1.12
+       1.78,
+       0.86
       ],
       "shots": [
        16,
@@ -8064,14 +8064,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-01T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.45,
-     "xg_away": 0.5,
+     "xg_home": 2.58,
+     "xg_away": 0.45,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.45,
-       0.5
+       2.58,
+       0.45
       ],
       "shots": [
        15,
@@ -8139,14 +8139,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-01T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.52,
-     "xg_away": 1.26,
+     "xg_home": 1.7,
+     "xg_away": 0.96,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.52,
-       1.26
+       1.7,
+       0.96
       ],
       "shots": [
        9,
@@ -8214,14 +8214,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-01T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.48,
-     "xg_away": 0.61,
+     "xg_home": 2.99,
+     "xg_away": 0.42,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.48,
-       0.61
+       2.99,
+       0.42
       ],
       "shots": [
        21,
@@ -8289,14 +8289,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-02T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.72,
-     "xg_away": 2.09,
+     "xg_home": 1.48,
+     "xg_away": 1.59,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.72,
-       2.09
+       1.48,
+       1.59
       ],
       "shots": [
        9,
@@ -8364,14 +8364,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-02T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.46,
-     "xg_away": 1.36,
+     "xg_home": 1.69,
+     "xg_away": 1.09,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.46,
-       1.36
+       1.69,
+       1.09
       ],
       "shots": [
        13,
@@ -8439,14 +8439,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-02T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.97,
-     "xg_away": 0.81,
+     "xg_home": 2.05,
+     "xg_away": 0.62,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.97,
-       0.81
+       2.05,
+       0.62
       ],
       "shots": [
        17,
@@ -8514,14 +8514,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-02T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.94,
-     "xg_away": 0.87,
+     "xg_home": 2.02,
+     "xg_away": 0.72,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.94,
-       0.87
+       2.02,
+       0.72
       ],
       "shots": [
        15,
@@ -8589,14 +8589,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-03T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.42,
-     "xg_away": 0.76,
+     "xg_home": 0.98,
+     "xg_away": 0.64,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.42,
-       0.76
+       0.98,
+       0.64
       ],
       "shots": [
        8,
@@ -8664,14 +8664,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-07T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.24,
-     "xg_away": 1.7,
+     "xg_home": 0.93,
+     "xg_away": 1.51,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.24,
-       1.7
+       0.93,
+       1.51
       ],
       "shots": [
        12,
@@ -8739,14 +8739,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-08T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.11,
-     "xg_away": 2.22,
+     "xg_home": 0.81,
+     "xg_away": 1.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.11,
-       2.22
+       0.81,
+       1.57
       ],
       "shots": [
        10,
@@ -8814,14 +8814,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-08T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.01,
-     "xg_away": 1.12,
+     "xg_home": 1.64,
+     "xg_away": 0.82,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.01,
-       1.12
+       1.64,
+       0.82
       ],
       "shots": [
        10,
@@ -8889,14 +8889,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-08T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.02,
-     "xg_away": 1.79,
+     "xg_home": 2.21,
+     "xg_away": 1.18,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.02,
-       1.79
+       2.21,
+       1.18
       ],
       "shots": [
        25,
@@ -8964,14 +8964,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-08T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.76,
-     "xg_away": 1.34,
+     "xg_home": 0.67,
+     "xg_away": 0.98,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.76,
-       1.34
+       0.67,
+       0.98
       ],
       "shots": [
        14,
@@ -9039,14 +9039,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-09T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.01,
-     "xg_away": 0.51,
+     "xg_home": 2.12,
+     "xg_away": 0.36,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.01,
-       0.51
+       2.12,
+       0.36
       ],
       "shots": [
        21,
@@ -9114,14 +9114,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-09T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.83,
-     "xg_away": 1.26,
+     "xg_home": 1.32,
+     "xg_away": 1.03,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.83,
-       1.26
+       1.32,
+       1.03
       ],
       "shots": [
        13,
@@ -9189,14 +9189,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-09T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.69,
-     "xg_away": 1.77,
+     "xg_home": 1.91,
+     "xg_away": 1.21,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.69,
-       1.77
+       1.91,
+       1.21
       ],
       "shots": [
        17,
@@ -9264,14 +9264,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-09T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.79,
-     "xg_away": 1.35,
+     "xg_home": 1.19,
+     "xg_away": 1.03,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.79,
-       1.35
+       1.19,
+       1.03
       ],
       "shots": [
        6,
@@ -9339,14 +9339,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-09T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.47,
-     "xg_away": 4.3,
+     "xg_home": 0.34,
+     "xg_away": 3.24,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.47,
-       4.3
+       0.34,
+       3.24
       ],
       "shots": [
        5,
@@ -9414,14 +9414,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-21T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.62,
-     "xg_away": 0.77,
+     "xg_home": 1.83,
+     "xg_away": 0.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.62,
-       0.77
+       1.83,
+       0.57
       ],
       "shots": [
        14,
@@ -9489,14 +9489,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-22T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.38,
-     "xg_away": 1.53,
+     "xg_home": 0.31,
+     "xg_away": 1.3,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.38,
-       1.53
+       0.31,
+       1.3
       ],
       "shots": [
        5,
@@ -9564,14 +9564,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-22T16:20:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.67,
-     "xg_away": 1.88,
+     "xg_home": 1.9,
+     "xg_away": 1.36,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.67,
-       1.88
+       1.9,
+       1.36
       ],
       "shots": [
        19,
@@ -9639,14 +9639,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-22T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.27,
-     "xg_away": 1.97,
+     "xg_home": 1.0,
+     "xg_away": 1.46,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.27,
-       1.97
+       1.0,
+       1.46
       ],
       "shots": [
        14,
@@ -9714,14 +9714,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-22T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.08,
-     "xg_away": 1.88,
+     "xg_home": 2.13,
+     "xg_away": 1.28,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.08,
-       1.88
+       2.13,
+       1.28
       ],
       "shots": [
        14,
@@ -9789,14 +9789,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-23T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.79,
-     "xg_away": 1.99,
+     "xg_home": 0.58,
+     "xg_away": 1.67,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.79,
-       1.99
+       0.58,
+       1.67
       ],
       "shots": [
        8,
@@ -9864,14 +9864,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-23T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.99,
-     "xg_away": 1.56,
+     "xg_home": 1.55,
+     "xg_away": 1.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.99,
-       1.56
+       1.55,
+       1.11
       ],
       "shots": [
        23,
@@ -9939,14 +9939,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-23T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.88,
-     "xg_away": 1.84,
+     "xg_home": 0.66,
+     "xg_away": 1.33,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.88,
-       1.84
+       0.66,
+       1.33
       ],
       "shots": [
        10,
@@ -10014,14 +10014,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-23T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.77,
-     "xg_away": 4.56,
+     "xg_home": 1.3,
+     "xg_away": 3.14,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.77,
-       4.56
+       1.3,
+       3.14
       ],
       "shots": [
        15,
@@ -10089,14 +10089,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-24T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.29,
-     "xg_away": 2.12,
+     "xg_home": 0.9,
+     "xg_away": 1.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.29,
-       2.12
+       0.9,
+       1.63
       ],
       "shots": [
        9,
@@ -10164,14 +10164,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-28T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.42,
-     "xg_away": 0.64,
+     "xg_home": 1.07,
+     "xg_away": 0.54,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.42,
-       0.64
+       1.07,
+       0.54
       ],
       "shots": [
        15,
@@ -10239,14 +10239,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-29T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.76,
-     "xg_away": 1.47,
+     "xg_home": 1.48,
+     "xg_away": 1.1,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.76,
-       1.47
+       1.48,
+       1.1
       ],
       "shots": [
        7,
@@ -10314,14 +10314,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-29T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.06,
-     "xg_away": 2.4,
+     "xg_home": 2.15,
+     "xg_away": 1.62,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.06,
-       2.4
+       2.15,
+       1.62
       ],
       "shots": [
        18,
@@ -10389,14 +10389,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-29T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.24,
-     "xg_away": 2.71,
+     "xg_home": 0.94,
+     "xg_away": 1.88,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.24,
-       2.71
+       0.94,
+       1.88
       ],
       "shots": [
        11,
@@ -10464,14 +10464,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-29T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.9,
-     "xg_away": 1.21,
+     "xg_home": 1.99,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.9,
-       1.21
+       1.99,
+       0.92
       ],
       "shots": [
        14,
@@ -10539,14 +10539,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-30T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.48,
-     "xg_away": 1.36,
+     "xg_home": 1.17,
+     "xg_away": 1.0,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.48,
-       1.36
+       1.17,
+       1.0
       ],
       "shots": [
        18,
@@ -10614,14 +10614,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-30T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.83,
-     "xg_away": 1.34,
+     "xg_home": 0.62,
+     "xg_away": 0.96,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.83,
-       1.34
+       0.62,
+       0.96
       ],
       "shots": [
        9,
@@ -10689,14 +10689,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-30T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.97,
-     "xg_away": 0.67,
+     "xg_home": 0.74,
+     "xg_away": 0.52,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.97,
-       0.67
+       0.74,
+       0.52
       ],
       "shots": [
        11,
@@ -10764,14 +10764,14 @@ window.LL_DATA = {
      "kickoff": "2025-11-30T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.19,
-     "xg_away": 2.4,
+     "xg_home": 0.87,
+     "xg_away": 2.12,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.19,
-       2.4
+       0.87,
+       2.12
       ],
       "shots": [
        10,
@@ -10839,14 +10839,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-01T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.62,
-     "xg_away": 1.14,
+     "xg_home": 1.89,
+     "xg_away": 0.85,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.62,
-       1.14
+       1.89,
+       0.85
       ],
       "shots": [
        19,
@@ -10914,14 +10914,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-05T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.07,
-     "xg_away": 0.72,
+     "xg_home": 1.5,
+     "xg_away": 0.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.07,
-       0.72
+       1.5,
+       0.63
       ],
       "shots": [
        15,
@@ -10989,14 +10989,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-06T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.94,
-     "xg_away": 0.37,
+     "xg_home": 0.73,
+     "xg_away": 0.32,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.94,
-       0.37
+       0.73,
+       0.32
       ],
       "shots": [
        10,
@@ -11064,14 +11064,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-06T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.13,
-     "xg_away": 1.37,
+     "xg_home": 1.76,
+     "xg_away": 0.98,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.13,
-       1.37
+       1.76,
+       0.98
       ],
       "shots": [
        14,
@@ -11139,14 +11139,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-06T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.95,
-     "xg_away": 3.71,
+     "xg_home": 2.37,
+     "xg_away": 2.79,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.95,
-       3.71
+       2.37,
+       2.79
       ],
       "shots": [
        17,
@@ -11214,14 +11214,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-06T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.29,
-     "xg_away": 1.01,
+     "xg_home": 1.0,
+     "xg_away": 0.7,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.29,
-       1.01
+       1.0,
+       0.7
       ],
       "shots": [
        14,
@@ -11289,14 +11289,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-07T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.08,
-     "xg_away": 1.0,
+     "xg_home": 1.46,
+     "xg_away": 0.73,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.08,
-       1.0
+       1.46,
+       0.73
       ],
       "shots": [
        11,
@@ -11364,14 +11364,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-07T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.96,
-     "xg_away": 0.58,
+     "xg_home": 1.37,
+     "xg_away": 0.4,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.96,
-       0.58
+       1.37,
+       0.4
       ],
       "shots": [
        12,
@@ -11439,14 +11439,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-07T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.48,
-     "xg_away": 0.28,
+     "xg_home": 1.32,
+     "xg_away": 0.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.48,
-       0.28
+       1.32,
+       0.25
       ],
       "shots": [
        9,
@@ -11514,14 +11514,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-07T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.67,
-     "xg_away": 1.18,
+     "xg_home": 1.91,
+     "xg_away": 0.83,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.67,
-       1.18
+       1.91,
+       0.83
       ],
       "shots": [
        23,
@@ -11589,14 +11589,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-08T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.71,
-     "xg_away": 0.47,
+     "xg_home": 1.27,
+     "xg_away": 0.43,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.71,
-       0.47
+       1.27,
+       0.43
       ],
       "shots": [
        14,
@@ -11664,14 +11664,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-12T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.37,
-     "xg_away": 1.54,
+     "xg_home": 0.97,
+     "xg_away": 1.17,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.37,
-       1.54
+       0.97,
+       1.17
       ],
       "shots": [
        9,
@@ -11739,14 +11739,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-13T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.3,
-     "xg_away": 1.95,
+     "xg_home": 1.53,
+     "xg_away": 1.39,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.3,
-       1.95
+       1.53,
+       1.39
       ],
       "shots": [
        10,
@@ -11814,14 +11814,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-13T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.16,
-     "xg_away": 0.47,
+     "xg_home": 2.13,
+     "xg_away": 0.42,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.16,
-       0.47
+       2.13,
+       0.42
       ],
       "shots": [
        16,
@@ -11889,14 +11889,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-13T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.97,
-     "xg_away": 0.27,
+     "xg_home": 2.16,
+     "xg_away": 0.21,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.97,
-       0.27
+       2.16,
+       0.21
       ],
       "shots": [
        24,
@@ -11964,14 +11964,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-13T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.32,
-     "xg_away": 0.93,
+     "xg_home": 0.33,
+     "xg_away": 0.67,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.32,
-       0.93
+       0.33,
+       0.67
       ],
       "shots": [
        11,
@@ -12039,14 +12039,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-14T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.29,
-     "xg_away": 0.82,
+     "xg_home": 1.6,
+     "xg_away": 0.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.29,
-       0.82
+       1.6,
+       0.57
       ],
       "shots": [
        13,
@@ -12114,14 +12114,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-14T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.79,
-     "xg_away": 2.18,
+     "xg_home": 1.15,
+     "xg_away": 1.81,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.79,
-       2.18
+       1.15,
+       1.81
       ],
       "shots": [
        5,
@@ -12189,14 +12189,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-14T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.18,
-     "xg_away": 3.29,
+     "xg_home": 0.97,
+     "xg_away": 2.21,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.18,
-       3.29
+       0.97,
+       2.21
       ],
       "shots": [
        16,
@@ -12264,14 +12264,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-14T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.69,
-     "xg_away": 2.03,
+     "xg_home": 1.13,
+     "xg_away": 1.47,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.69,
-       2.03
+       1.13,
+       1.47
       ],
       "shots": [
        6,
@@ -12339,14 +12339,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-15T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.77,
-     "xg_away": 1.01,
+     "xg_home": 1.99,
+     "xg_away": 0.78,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.77,
-       1.01
+       1.99,
+       0.78
       ],
       "shots": [
        23,
@@ -12414,14 +12414,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-19T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.29,
-     "xg_away": 0.31,
+     "xg_home": 1.62,
+     "xg_away": 0.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.29,
-       0.31
+       1.62,
+       0.25
       ],
       "shots": [
        17,
@@ -12489,14 +12489,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-20T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.69,
-     "xg_away": 0.82,
+     "xg_home": 0.56,
+     "xg_away": 0.58,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.69,
-       0.82
+       0.56,
+       0.58
       ],
       "shots": [
        10,
@@ -12564,14 +12564,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-20T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.55,
-     "xg_away": 2.58,
+     "xg_home": 1.42,
+     "xg_away": 1.82,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.55,
-       2.58
+       1.42,
+       1.82
       ],
       "shots": [
        13,
@@ -12639,14 +12639,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-20T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.6,
-     "xg_away": 1.46,
+     "xg_home": 2.11,
+     "xg_away": 1.0,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.6,
-       1.46
+       2.11,
+       1.0
       ],
       "shots": [
        16,
@@ -12714,14 +12714,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-20T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.61,
-     "xg_away": 2.09,
+     "xg_home": 2.74,
+     "xg_away": 1.47,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.61,
-       2.09
+       2.74,
+       1.47
       ],
       "shots": [
        18,
@@ -12789,14 +12789,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-21T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.62,
-     "xg_away": 1.3,
+     "xg_home": 1.11,
+     "xg_away": 0.99,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.62,
-       1.3
+       1.11,
+       0.99
       ],
       "shots": [
        9,
@@ -12864,14 +12864,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-21T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.13,
-     "xg_away": 2.9,
+     "xg_home": 1.5,
+     "xg_away": 2.34,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.13,
-       2.9
+       1.5,
+       2.34
       ],
       "shots": [
        14,
@@ -12939,14 +12939,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-21T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.4,
-     "xg_away": 1.75,
+     "xg_home": 2.98,
+     "xg_away": 1.28,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.4,
-       1.75
+       2.98,
+       1.28
       ],
       "shots": [
        18,
@@ -13014,14 +13014,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-21T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.64,
-     "xg_away": 1.67,
+     "xg_home": 2.5,
+     "xg_away": 1.53,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.64,
-       1.67
+       2.5,
+       1.53
       ],
       "shots": [
        19,
@@ -13089,14 +13089,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-22T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.24,
-     "xg_away": 1.08,
+     "xg_home": 1.65,
+     "xg_away": 0.81,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.24,
-       1.08
+       1.65,
+       0.81
       ],
       "shots": [
        17,
@@ -13164,14 +13164,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-02T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.93,
-     "xg_away": 0.94,
+     "xg_home": 0.74,
+     "xg_away": 0.73,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.93,
-       0.94
+       0.74,
+       0.73
       ],
       "shots": [
        13,
@@ -13239,14 +13239,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-03T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.07,
-     "xg_away": 2.32,
+     "xg_home": 2.34,
+     "xg_away": 1.95,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.07,
-       2.32
+       2.34,
+       1.95
       ],
       "shots": [
        12,
@@ -13314,14 +13314,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-03T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.76,
-     "xg_away": 2.23,
+     "xg_home": 0.61,
+     "xg_away": 1.61,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.76,
-       2.23
+       0.61,
+       1.61
       ],
       "shots": [
        11,
@@ -13389,14 +13389,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-03T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.78,
-     "xg_away": 3.03,
+     "xg_home": 1.34,
+     "xg_away": 2.0,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.78,
-       3.03
+       1.34,
+       2.0
       ],
       "shots": [
        16,
@@ -13464,14 +13464,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-03T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.04,
-     "xg_away": 3.17,
+     "xg_home": 1.48,
+     "xg_away": 2.17,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.04,
-       3.17
+       1.48,
+       2.17
       ],
       "shots": [
        14,
@@ -13539,14 +13539,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-04T14:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.3,
-     "xg_away": 1.46,
+     "xg_home": 1.91,
+     "xg_away": 0.94,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.3,
-       1.46
+       1.91,
+       0.94
       ],
       "shots": [
        15,
@@ -13614,14 +13614,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-04T16:15:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.48,
-     "xg_away": 1.13,
+     "xg_home": 2.4,
+     "xg_away": 0.87,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.48,
-       1.13
+       2.4,
+       0.87
       ],
       "shots": [
        19,
@@ -13689,14 +13689,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-04T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.86,
-     "xg_away": 3.36,
+     "xg_home": 2.01,
+     "xg_away": 2.27,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.86,
-       3.36
+       2.01,
+       2.27
       ],
       "shots": [
        19,
@@ -13764,14 +13764,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-04T18:30:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.76,
-     "xg_away": 1.59,
+     "xg_home": 1.5,
+     "xg_away": 1.39,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.76,
-       1.59
+       1.5,
+       1.39
       ],
       "shots": [
        9,
@@ -13839,14 +13839,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-04T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.03,
-     "xg_away": 1.55,
+     "xg_home": 1.51,
+     "xg_away": 1.07,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.03,
-       1.55
+       1.51,
+       1.07
       ],
       "shots": [
        18,
@@ -13914,14 +13914,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-02T21:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.62,
-     "xg_away": 1.56,
+     "xg_home": 2.75,
+     "xg_away": 1.04,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.62,
-       1.56
+       2.75,
+       1.04
       ],
       "shots": [
        19,
@@ -13989,14 +13989,14 @@ window.LL_DATA = {
      "kickoff": "2025-12-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.59,
-     "xg_away": 2.52,
+     "xg_home": 1.1,
+     "xg_away": 1.73,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.59,
-       2.52
+       1.1,
+       1.73
       ],
       "shots": [
        9,
@@ -14064,14 +14064,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.31,
-     "xg_away": 1.37,
+     "xg_home": 0.27,
+     "xg_away": 0.99,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.31,
-       1.37
+       0.27,
+       0.99
       ],
       "shots": [
        6,
@@ -14139,14 +14139,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.04,
-     "xg_away": 1.32,
+     "xg_home": 0.76,
+     "xg_away": 1.0,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.04,
-       1.32
+       0.76,
+       1.0
       ],
       "shots": [
        8,
@@ -14214,14 +14214,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.53,
-     "xg_away": 1.05,
+     "xg_home": 1.11,
+     "xg_away": 0.85,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.53,
-       1.05
+       1.11,
+       0.85
       ],
       "shots": [
        11,
@@ -14289,14 +14289,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.34,
-     "xg_away": 2.91,
+     "xg_home": 1.02,
+     "xg_away": 1.98,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.34,
-       2.91
+       1.02,
+       1.98
       ],
       "shots": [
        13,
@@ -14364,14 +14364,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.39,
-     "xg_away": 1.89,
+     "xg_home": 0.33,
+     "xg_away": 1.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.39,
-       1.89
+       0.33,
+       1.6
       ],
       "shots": [
        7,
@@ -14439,14 +14439,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.32,
-     "xg_away": 0.26,
+     "xg_home": 1.93,
+     "xg_away": 0.23,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.32,
-       0.26
+       1.93,
+       0.23
       ],
       "shots": [
        16,
@@ -14514,14 +14514,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.41,
-     "xg_away": 2.2,
+     "xg_home": 0.98,
+     "xg_away": 1.64,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.41,
-       2.2
+       0.98,
+       1.64
       ],
       "shots": [
        8,
@@ -14589,14 +14589,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-11T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.16,
-     "xg_away": 1.07,
+     "xg_home": 1.82,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.16,
-       1.07
+       1.82,
+       0.77
       ],
       "shots": [
        14,
@@ -14664,14 +14664,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.45,
-     "xg_away": 1.49,
+     "xg_home": 1.07,
+     "xg_away": 1.04,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.45,
-       1.49
+       1.07,
+       1.04
       ],
       "shots": [
        15,
@@ -14739,14 +14739,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.1,
-     "xg_away": 1.65,
+     "xg_home": 1.7,
+     "xg_away": 1.23,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.1,
-       1.65
+       1.7,
+       1.23
       ],
       "shots": [
        11,
@@ -14814,14 +14814,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.42,
-     "xg_away": 3.26,
+     "xg_home": 1.02,
+     "xg_away": 2.61,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.42,
-       3.26
+       1.02,
+       2.61
       ],
       "shots": [
        10,
@@ -14889,14 +14889,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.7,
-     "xg_away": 1.88,
+     "xg_home": 1.22,
+     "xg_away": 1.82,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.7,
-       1.88
+       1.22,
+       1.82
       ],
       "shots": [
        14,
@@ -14964,14 +14964,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.78,
-     "xg_away": 0.91,
+     "xg_home": 0.7,
+     "xg_away": 0.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.78,
-       0.91
+       0.7,
+       0.66
       ],
       "shots": [
        14,
@@ -15039,14 +15039,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.17,
-     "xg_away": 1.84,
+     "xg_home": 1.59,
+     "xg_away": 1.34,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.17,
-       1.84
+       1.59,
+       1.34
       ],
       "shots": [
        16,
@@ -15114,14 +15114,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.72,
-     "xg_away": 1.33,
+     "xg_home": 2.01,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.72,
-       1.33
+       2.01,
+       0.92
       ],
       "shots": [
        23,
@@ -15189,14 +15189,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.95,
-     "xg_away": 2.68,
+     "xg_home": 3.22,
+     "xg_away": 1.93,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.95,
-       2.68
+       3.22,
+       1.93
       ],
       "shots": [
        17,
@@ -15264,14 +15264,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.55,
-     "xg_away": 4.68,
+     "xg_home": 1.05,
+     "xg_away": 3.19,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.55,
-       4.68
+       1.05,
+       3.19
       ],
       "shots": [
        7,
@@ -15339,14 +15339,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-18T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.7,
-     "xg_away": 0.54,
+     "xg_home": 2.3,
+     "xg_away": 0.48,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.7,
-       0.54
+       2.3,
+       0.48
       ],
       "shots": [
        26,
@@ -15414,14 +15414,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.97,
-     "xg_away": 2.56,
+     "xg_home": 1.43,
+     "xg_away": 1.82,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.97,
-       2.56
+       1.43,
+       1.82
       ],
       "shots": [
        17,
@@ -15489,14 +15489,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.68,
-     "xg_away": 0.45,
+     "xg_home": 1.3,
+     "xg_away": 0.36,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.68,
-       0.45
+       1.3,
+       0.36
       ],
       "shots": [
        17,
@@ -15564,14 +15564,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.16,
-     "xg_away": 0.69,
+     "xg_home": 1.56,
+     "xg_away": 0.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.16,
-       0.69
+       1.56,
+       0.6
       ],
       "shots": [
        15,
@@ -15639,14 +15639,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.7,
-     "xg_away": 2.35,
+     "xg_home": 1.47,
+     "xg_away": 1.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.7,
-       2.35
+       1.47,
+       1.66
       ],
       "shots": [
        10,
@@ -15714,14 +15714,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.1,
-     "xg_away": 2.16,
+     "xg_home": 1.71,
+     "xg_away": 1.57,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.1,
-       2.16
+       1.71,
+       1.57
       ],
       "shots": [
        10,
@@ -15789,14 +15789,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.29,
-     "xg_away": 0.78,
+     "xg_home": 3.01,
+     "xg_away": 0.55,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.29,
-       0.78
+       3.01,
+       0.55
       ],
       "shots": [
        26,
@@ -15864,14 +15864,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.9,
-     "xg_away": 2.09,
+     "xg_home": 1.58,
+     "xg_away": 1.53,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.9,
-       2.09
+       1.58,
+       1.53
       ],
       "shots": [
        11,
@@ -15939,14 +15939,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.81,
-     "xg_away": 2.0,
+     "xg_home": 0.65,
+     "xg_away": 1.37,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.81,
-       2.0
+       0.65,
+       1.37
       ],
       "shots": [
        12,
@@ -16014,14 +16014,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.9,
-     "xg_away": 1.56,
+     "xg_home": 0.68,
+     "xg_away": 1.16,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.9,
-       1.56
+       0.68,
+       1.16
       ],
       "shots": [
        12,
@@ -16089,14 +16089,14 @@ window.LL_DATA = {
      "kickoff": "2026-01-25T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.28,
-     "xg_away": 1.74,
+     "xg_home": 0.89,
+     "xg_away": 1.56,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.28,
-       1.74
+       0.89,
+       1.56
       ],
       "shots": [
        8,
@@ -16164,14 +16164,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.39,
-     "xg_away": 2.21,
+     "xg_home": 1.12,
+     "xg_away": 1.46,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.39,
-       2.21
+       1.12,
+       1.46
       ],
       "shots": [
        19,
@@ -16239,14 +16239,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.59,
-     "xg_away": 2.29,
+     "xg_home": 2.06,
+     "xg_away": 1.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.59,
-       2.29
+       2.06,
+       1.92
       ],
       "shots": [
        14,
@@ -16314,14 +16314,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.14,
-     "xg_away": 1.69,
+     "xg_home": 2.37,
+     "xg_away": 1.24,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.14,
-       1.69
+       2.37,
+       1.24
       ],
       "shots": [
        11,
@@ -16389,14 +16389,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.37,
-     "xg_away": 0.94,
+     "xg_home": 1.67,
+     "xg_away": 0.93,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.37,
-       0.94
+       1.67,
+       0.93
       ],
       "shots": [
        15,
@@ -16464,14 +16464,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.32,
-     "xg_away": 1.53,
+     "xg_home": 0.96,
+     "xg_away": 1.1,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.32,
-       1.53
+       0.96,
+       1.1
       ],
       "shots": [
        10,
@@ -16539,14 +16539,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.39,
-     "xg_away": 0.76,
+     "xg_home": 0.38,
+     "xg_away": 0.64,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.39,
-       0.76
+       0.38,
+       0.64
       ],
       "shots": [
        10,
@@ -16614,14 +16614,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.14,
-     "xg_away": 8.11,
+     "xg_home": 0.83,
+     "xg_away": 5.44,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.14,
-       8.11
+       0.83,
+       5.44
       ],
       "shots": [
        9,
@@ -16689,14 +16689,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.54,
-     "xg_away": 0.26,
+     "xg_home": 0.47,
+     "xg_away": 0.22,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.54,
-       0.26
+       0.47,
+       0.22
       ],
       "shots": [
        9,
@@ -16764,14 +16764,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.03,
-     "xg_away": 0.99,
+     "xg_home": 0.76,
+     "xg_away": 0.74,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.03,
-       0.99
+       0.76,
+       0.74
       ],
       "shots": [
        8,
@@ -16839,14 +16839,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.3,
-     "xg_away": 1.32,
+     "xg_home": 1.94,
+     "xg_away": 0.95,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.3,
-       1.32
+       1.94,
+       0.95
       ],
       "shots": [
        16,
@@ -16914,14 +16914,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.89,
-     "xg_away": 1.92,
+     "xg_home": 1.96,
+     "xg_away": 1.71,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.89,
-       1.92
+       1.96,
+       1.71
       ],
       "shots": [
        13,
@@ -16989,14 +16989,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.01,
-     "xg_away": 0.82,
+     "xg_home": 2.13,
+     "xg_away": 0.58,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.01,
-       0.82
+       2.13,
+       0.58
       ],
       "shots": [
        22,
@@ -17064,14 +17064,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.97,
-     "xg_away": 0.81,
+     "xg_home": 0.74,
+     "xg_away": 0.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.97,
-       0.81
+       0.74,
+       0.6
       ],
       "shots": [
        10,
@@ -17139,14 +17139,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.59,
-     "xg_away": 1.17,
+     "xg_home": 1.92,
+     "xg_away": 0.88,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.59,
-       1.17
+       1.92,
+       0.88
       ],
       "shots": [
        24,
@@ -17214,14 +17214,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.55,
-     "xg_away": 1.04,
+     "xg_home": 2.11,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.55,
-       1.04
+       2.11,
+       0.77
       ],
       "shots": [
        18,
@@ -17289,14 +17289,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.76,
-     "xg_away": 1.62,
+     "xg_home": 1.26,
+     "xg_away": 1.14,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.76,
-       1.62
+       1.26,
+       1.14
       ],
       "shots": [
        11,
@@ -17364,14 +17364,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.69,
-     "xg_away": 0.9,
+     "xg_home": 1.19,
+     "xg_away": 0.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.69,
-       0.9
+       1.19,
+       0.66
       ],
       "shots": [
        10,
@@ -17439,14 +17439,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.21,
-     "xg_away": 2.77,
+     "xg_home": 0.92,
+     "xg_away": 2.19,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.21,
-       2.77
+       0.92,
+       2.19
       ],
       "shots": [
        11,
@@ -17514,14 +17514,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.44,
-     "xg_away": 1.38,
+     "xg_home": 0.37,
+     "xg_away": 0.99,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.44,
-       1.38
+       0.37,
+       0.99
       ],
       "shots": [
        7,
@@ -17589,14 +17589,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.21,
-     "xg_away": 1.57,
+     "xg_home": 2.51,
+     "xg_away": 1.09,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.21,
-       1.57
+       2.51,
+       1.09
       ],
       "shots": [
        19,
@@ -17664,14 +17664,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.21,
-     "xg_away": 0.99,
+     "xg_home": 2.22,
+     "xg_away": 0.71,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.21,
-       0.99
+       2.22,
+       0.71
       ],
       "shots": [
        17,
@@ -17739,14 +17739,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.36,
-     "xg_away": 1.52,
+     "xg_home": 1.19,
+     "xg_away": 1.07,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.36,
-       1.52
+       1.19,
+       1.07
       ],
       "shots": [
        5,
@@ -17814,14 +17814,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.21,
-     "xg_away": 0.52,
+     "xg_home": 0.86,
+     "xg_away": 0.39,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.21,
-       0.52
+       0.86,
+       0.39
       ],
       "shots": [
        9,
@@ -17889,14 +17889,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.32,
-     "xg_away": 2.26,
+     "xg_home": 2.75,
+     "xg_away": 1.85,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.32,
-       2.26
+       2.75,
+       1.85
       ],
       "shots": [
        11,
@@ -17964,14 +17964,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.2,
-     "xg_away": 2.19,
+     "xg_home": 0.18,
+     "xg_away": 1.53,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.2,
-       2.19
+       0.18,
+       1.53
       ],
       "shots": [
        4,
@@ -18039,14 +18039,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.97,
-     "xg_away": 1.43,
+     "xg_home": 0.69,
+     "xg_away": 1.35,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.97,
-       1.43
+       0.69,
+       1.35
       ],
       "shots": [
        7,
@@ -18114,14 +18114,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.93,
-     "xg_away": 1.57,
+     "xg_home": 1.97,
+     "xg_away": 1.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.93,
-       1.57
+       1.97,
+       1.11
       ],
       "shots": [
        13,
@@ -18189,14 +18189,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.86,
-     "xg_away": 3.27,
+     "xg_home": 1.94,
+     "xg_away": 2.7,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.86,
-       3.27
+       1.94,
+       2.7
       ],
       "shots": [
        13,
@@ -18264,14 +18264,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.57,
-     "xg_away": 2.72,
+     "xg_home": 1.14,
+     "xg_away": 1.89,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.57,
-       2.72
+       1.14,
+       1.89
       ],
       "shots": [
        14,
@@ -18339,14 +18339,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.57,
-     "xg_away": 3.08,
+     "xg_home": 1.09,
+     "xg_away": 2.13,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.57,
-       3.08
+       1.09,
+       2.13
       ],
       "shots": [
        9,
@@ -18414,14 +18414,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.43,
-     "xg_away": 1.63,
+     "xg_home": 1.77,
+     "xg_away": 1.15,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.43,
-       1.63
+       1.77,
+       1.15
       ],
       "shots": [
        17,
@@ -18489,13 +18489,13 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.72,
+     "xg_home": 2.83,
      "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.72,
+       2.83,
        0.77
       ],
       "shots": [
@@ -18564,14 +18564,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.63,
-     "xg_away": 1.17,
+     "xg_home": 2.52,
+     "xg_away": 0.84,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.63,
-       1.17
+       2.52,
+       0.84
       ],
       "shots": [
        18,
@@ -18639,14 +18639,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.84,
-     "xg_away": 1.13,
+     "xg_home": 3.31,
+     "xg_away": 0.74,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.84,
-       1.13
+       3.31,
+       0.74
       ],
       "shots": [
        22,
@@ -18714,14 +18714,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.18,
-     "xg_away": 1.57,
+     "xg_home": 1.54,
+     "xg_away": 1.13,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.18,
-       1.57
+       1.54,
+       1.13
       ],
       "shots": [
        14,
@@ -18789,14 +18789,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.4,
-     "xg_away": 0.06,
+     "xg_home": 2.61,
+     "xg_away": 0.05,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.4,
-       0.06
+       2.61,
+       0.05
       ],
       "shots": [
        20,
@@ -18864,14 +18864,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.34,
-     "xg_away": 0.33,
+     "xg_home": 0.3,
+     "xg_away": 0.29,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.34,
-       0.33
+       0.3,
+       0.29
       ],
       "shots": [
        6,
@@ -18939,14 +18939,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.58,
-     "xg_away": 2.26,
+     "xg_home": 2.08,
+     "xg_away": 1.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.58,
-       2.26
+       2.08,
+       1.6
       ],
       "shots": [
        13,
@@ -19014,14 +19014,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.45,
-     "xg_away": 2.26,
+     "xg_home": 1.96,
+     "xg_away": 1.8,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.45,
-       2.26
+       1.96,
+       1.8
       ],
       "shots": [
        12,
@@ -19089,14 +19089,14 @@ window.LL_DATA = {
      "kickoff": "2026-02-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.37,
-     "xg_away": 1.81,
+     "xg_home": 2.27,
+     "xg_away": 1.31,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.37,
-       1.81
+       2.27,
+       1.31
       ],
       "shots": [
        15,
@@ -19164,14 +19164,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.49,
-     "xg_away": 1.8,
+     "xg_home": 2.4,
+     "xg_away": 1.22,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.49,
-       1.8
+       2.4,
+       1.22
       ],
       "shots": [
        19,
@@ -19239,14 +19239,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.2,
-     "xg_away": 0.96,
+     "xg_home": 1.47,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.2,
-       0.96
+       1.47,
+       0.77
       ],
       "shots": [
        9,
@@ -19314,14 +19314,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.56,
-     "xg_away": 0.83,
+     "xg_home": 2.1,
+     "xg_away": 0.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.56,
-       0.83
+       2.1,
+       0.63
       ],
       "shots": [
        17,
@@ -19389,14 +19389,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.89,
-     "xg_away": 1.02,
+     "xg_home": 0.64,
+     "xg_away": 0.79,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.89,
-       1.02
+       0.64,
+       0.79
       ],
       "shots": [
        6,
@@ -19464,14 +19464,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.6,
-     "xg_away": 2.5,
+     "xg_home": 2.57,
+     "xg_away": 1.8,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.6,
-       2.5
+       2.57,
+       1.8
       ],
       "shots": [
        22,
@@ -19539,14 +19539,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.93,
-     "xg_away": 0.67,
+     "xg_home": 1.37,
+     "xg_away": 0.52,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.93,
-       0.67
+       1.37,
+       0.52
       ],
       "shots": [
        15,
@@ -19614,14 +19614,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.77,
-     "xg_away": 1.0,
+     "xg_home": 1.3,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.77,
-       1.0
+       1.3,
+       0.77
       ],
       "shots": [
        16,
@@ -19689,14 +19689,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.05,
-     "xg_away": 1.61,
+     "xg_home": 1.47,
+     "xg_away": 1.07,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.05,
-       1.61
+       1.47,
+       1.07
       ],
       "shots": [
        16,
@@ -19764,14 +19764,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.75,
-     "xg_away": 0.6,
+     "xg_home": 1.94,
+     "xg_away": 0.5,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.75,
-       0.6
+       1.94,
+       0.5
       ],
       "shots": [
        18,
@@ -19839,14 +19839,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-01T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.63,
-     "xg_away": 0.43,
+     "xg_home": 1.48,
+     "xg_away": 0.38,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.63,
-       0.43
+       1.48,
+       0.38
       ],
       "shots": [
        14,
@@ -19914,14 +19914,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.84,
-     "xg_away": 0.66,
+     "xg_home": 1.26,
+     "xg_away": 0.5,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.84,
-       0.66
+       1.26,
+       0.5
       ],
       "shots": [
        10,
@@ -19989,14 +19989,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.43,
-     "xg_away": 0.35,
+     "xg_home": 3.09,
+     "xg_away": 0.32,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.43,
-       0.35
+       3.09,
+       0.32
       ],
       "shots": [
        24,
@@ -20064,14 +20064,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.23,
-     "xg_away": 0.82,
+     "xg_home": 0.9,
+     "xg_away": 0.72,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.23,
-       0.82
+       0.9,
+       0.72
       ],
       "shots": [
        8,
@@ -20139,14 +20139,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.91,
-     "xg_away": 0.96,
+     "xg_home": 1.56,
+     "xg_away": 0.7,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.91,
-       0.96
+       1.56,
+       0.7
       ],
       "shots": [
        28,
@@ -20214,14 +20214,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.36,
-     "xg_away": 1.53,
+     "xg_home": 2.62,
+     "xg_away": 1.36,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.36,
-       1.53
+       2.62,
+       1.36
       ],
       "shots": [
        19,
@@ -20289,14 +20289,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.18,
-     "xg_away": 1.21,
+     "xg_home": 0.87,
+     "xg_away": 0.95,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.18,
-       1.21
+       0.87,
+       0.95
       ],
       "shots": [
        9,
@@ -20364,14 +20364,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.95,
-     "xg_away": 1.87,
+     "xg_home": 2.07,
+     "xg_away": 1.32,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.95,
-       1.87
+       2.07,
+       1.32
       ],
       "shots": [
        16,
@@ -20439,14 +20439,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.96,
-     "xg_away": 2.6,
+     "xg_home": 0.77,
+     "xg_away": 1.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.96,
-       2.6
+       0.77,
+       1.92
       ],
       "shots": [
        14,
@@ -20514,14 +20514,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.65,
-     "xg_away": 0.95,
+     "xg_home": 2.58,
+     "xg_away": 0.69,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.65,
-       0.95
+       2.58,
+       0.69
       ],
       "shots": [
        22,
@@ -20589,13 +20589,13 @@ window.LL_DATA = {
      "kickoff": "2026-03-08T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.12,
+     "xg_home": 0.83,
      "xg_away": 0.3,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.12,
+       0.83,
        0.3
       ],
       "shots": [
@@ -20664,14 +20664,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.25,
-     "xg_away": 1.59,
+     "xg_home": 0.24,
+     "xg_away": 1.13,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.25,
-       1.59
+       0.24,
+       1.13
       ],
       "shots": [
        8,
@@ -20739,14 +20739,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.63,
-     "xg_away": 1.87,
+     "xg_home": 1.83,
+     "xg_away": 1.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.63,
-       1.87
+       1.83,
+       1.25
       ],
       "shots": [
        16,
@@ -20814,14 +20814,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.07,
-     "xg_away": 1.25,
+     "xg_home": 3.22,
+     "xg_away": 0.88,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.07,
-       1.25
+       3.22,
+       0.88
       ],
       "shots": [
        13,
@@ -20889,14 +20889,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.96,
-     "xg_away": 0.89,
+     "xg_home": 1.46,
+     "xg_away": 0.62,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.96,
-       0.89
+       1.46,
+       0.62
       ],
       "shots": [
        19,
@@ -20964,14 +20964,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.1,
-     "xg_away": 0.85,
+     "xg_home": 1.45,
+     "xg_away": 0.69,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.1,
-       0.85
+       1.45,
+       0.69
       ],
       "shots": [
        11,
@@ -21039,14 +21039,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.47,
-     "xg_away": 2.33,
+     "xg_home": 1.73,
+     "xg_away": 1.75,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.47,
-       2.33
+       1.73,
+       1.75
       ],
       "shots": [
        14,
@@ -21114,14 +21114,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.59,
-     "xg_away": 1.79,
+     "xg_home": 1.14,
+     "xg_away": 1.26,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.59,
-       1.79
+       1.14,
+       1.26
       ],
       "shots": [
        15,
@@ -21189,14 +21189,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.49,
-     "xg_away": 1.25,
+     "xg_home": 2.53,
+     "xg_away": 0.89,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.49,
-       1.25
+       2.53,
+       0.89
       ],
       "shots": [
        26,
@@ -21264,14 +21264,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.6,
-     "xg_away": 1.63,
+     "xg_home": 1.85,
+     "xg_away": 1.28,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.6,
-       1.63
+       1.85,
+       1.28
       ],
       "shots": [
        18,
@@ -21339,14 +21339,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-15T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.62,
-     "xg_away": 1.0,
+     "xg_home": 2.11,
+     "xg_away": 0.8,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.62,
-       1.0
+       2.11,
+       0.8
       ],
       "shots": [
        14,
@@ -21414,14 +21414,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.76,
-     "xg_away": 0.48,
+     "xg_home": 1.26,
+     "xg_away": 0.45,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.76,
-       0.48
+       1.26,
+       0.45
       ],
       "shots": [
        11,
@@ -21489,14 +21489,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.12,
-     "xg_away": 2.44,
+     "xg_home": 1.49,
+     "xg_away": 1.61,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.12,
-       2.44
+       1.49,
+       1.61
       ],
       "shots": [
        15,
@@ -21564,14 +21564,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.72,
-     "xg_away": 1.67,
+     "xg_home": 1.25,
+     "xg_away": 1.45,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.72,
-       1.67
+       1.25,
+       1.45
       ],
       "shots": [
        13,
@@ -21639,14 +21639,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.26,
-     "xg_away": 2.06,
+     "xg_home": 1.6,
+     "xg_away": 1.42,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.26,
-       2.06
+       1.6,
+       1.42
       ],
       "shots": [
        15,
@@ -21714,14 +21714,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.58,
-     "xg_away": 1.39,
+     "xg_home": 2.48,
+     "xg_away": 1.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.58,
-       1.39
+       2.48,
+       1.25
       ],
       "shots": [
        20,
@@ -21789,14 +21789,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.51,
-     "xg_away": 2.01,
+     "xg_home": 0.48,
+     "xg_away": 1.39,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.51,
-       2.01
+       0.48,
+       1.39
       ],
       "shots": [
        13,
@@ -21864,14 +21864,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.98,
-     "xg_away": 2.61,
+     "xg_home": 1.38,
+     "xg_away": 1.82,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.98,
-       2.61
+       1.38,
+       1.82
       ],
       "shots": [
        12,
@@ -21939,14 +21939,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.3,
-     "xg_away": 1.65,
+     "xg_home": 2.53,
+     "xg_away": 1.19,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.3,
-       1.65
+       2.53,
+       1.19
       ],
       "shots": [
        17,
@@ -22014,14 +22014,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.62,
-     "xg_away": 0.35,
+     "xg_home": 1.89,
+     "xg_away": 0.29,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.62,
-       0.35
+       1.89,
+       0.29
       ],
       "shots": [
        19,
@@ -22089,14 +22089,14 @@ window.LL_DATA = {
      "kickoff": "2026-03-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 5.03,
-     "xg_away": 1.19,
+     "xg_home": 3.41,
+     "xg_away": 0.86,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       5.03,
-       1.19
+       3.41,
+       0.86
       ],
       "shots": [
        21,
@@ -22164,14 +22164,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.15,
-     "xg_away": 1.96,
+     "xg_home": 1.86,
+     "xg_away": 1.59,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.15,
-       1.96
+       1.86,
+       1.59
       ],
       "shots": [
        18,
@@ -22239,14 +22239,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.21,
-     "xg_away": 3.51,
+     "xg_home": 0.81,
+     "xg_away": 2.48,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.21,
-       3.51
+       0.81,
+       2.48
       ],
       "shots": [
        6,
@@ -22314,14 +22314,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.66,
-     "xg_away": 0.28,
+     "xg_home": 1.92,
+     "xg_away": 0.27,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.66,
-       0.28
+       1.92,
+       0.27
       ],
       "shots": [
        19,
@@ -22389,14 +22389,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.81,
-     "xg_away": 0.6,
+     "xg_home": 0.63,
+     "xg_away": 0.49,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.81,
-       0.6
+       0.63,
+       0.49
       ],
       "shots": [
        10,
@@ -22464,14 +22464,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.33,
-     "xg_away": 1.81,
+     "xg_home": 0.9,
+     "xg_away": 1.35,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.33,
-       1.81
+       0.9,
+       1.35
       ],
       "shots": [
        6,
@@ -22539,14 +22539,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.59,
-     "xg_away": 0.81,
+     "xg_home": 0.45,
+     "xg_away": 0.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.59,
-       0.81
+       0.45,
+       0.63
       ],
       "shots": [
        7,
@@ -22614,14 +22614,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.28,
-     "xg_away": 0.55,
+     "xg_home": 1.55,
+     "xg_away": 0.41,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.28,
-       0.55
+       1.55,
+       0.41
       ],
       "shots": [
        10,
@@ -22689,14 +22689,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.75,
-     "xg_away": 1.82,
+     "xg_home": 0.65,
+     "xg_away": 1.27,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.75,
-       1.82
+       0.65,
+       1.27
       ],
       "shots": [
        13,
@@ -22764,14 +22764,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.82,
-     "xg_away": 0.76,
+     "xg_home": 1.41,
+     "xg_away": 0.59,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.82,
-       0.76
+       1.41,
+       0.59
       ],
       "shots": [
        21,
@@ -22839,14 +22839,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-05T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.32,
-     "xg_away": 0.34,
+     "xg_home": 2.28,
+     "xg_away": 0.31,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.32,
-       0.34
+       2.28,
+       0.31
       ],
       "shots": [
        18,
@@ -22914,14 +22914,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.61,
-     "xg_away": 1.81,
+     "xg_home": 1.27,
+     "xg_away": 1.28,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.61,
-       1.81
+       1.27,
+       1.28
       ],
       "shots": [
        18,
@@ -22989,14 +22989,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.11,
-     "xg_away": 1.55,
+     "xg_home": 2.22,
+     "xg_away": 1.13,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.11,
-       1.55
+       2.22,
+       1.13
       ],
       "shots": [
        20,
@@ -23064,14 +23064,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.55,
-     "xg_away": 2.4,
+     "xg_home": 1.06,
+     "xg_away": 1.62,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.55,
-       2.4
+       1.06,
+       1.62
       ],
       "shots": [
        9,
@@ -23139,14 +23139,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.17,
-     "xg_away": 3.23,
+     "xg_home": 0.8,
+     "xg_away": 2.29,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.17,
-       3.23
+       0.8,
+       2.29
       ],
       "shots": [
        7,
@@ -23214,14 +23214,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.62,
-     "xg_away": 2.32,
+     "xg_home": 2.4,
+     "xg_away": 1.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.62,
-       2.32
+       2.4,
+       1.63
       ],
       "shots": [
        12,
@@ -23289,14 +23289,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.3,
-     "xg_away": 1.41,
+     "xg_home": 0.97,
+     "xg_away": 1.05,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.3,
-       1.41
+       0.97,
+       1.05
       ],
       "shots": [
        13,
@@ -23364,14 +23364,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.2,
-     "xg_away": 0.98,
+     "xg_home": 1.78,
+     "xg_away": 0.78,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.2,
-       0.98
+       1.78,
+       0.78
       ],
       "shots": [
        11,
@@ -23439,14 +23439,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.5,
-     "xg_away": 0.32,
+     "xg_home": 1.37,
+     "xg_away": 0.29,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.5,
-       0.32
+       1.37,
+       0.29
       ],
       "shots": [
        12,
@@ -23514,14 +23514,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.36,
-     "xg_away": 0.27,
+     "xg_home": 2.9,
+     "xg_away": 0.24,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.36,
-       0.27
+       2.9,
+       0.24
       ],
       "shots": [
        22,
@@ -23589,14 +23589,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-12T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.69,
-     "xg_away": 0.45,
+     "xg_home": 2.01,
+     "xg_away": 0.43,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.69,
-       0.45
+       2.01,
+       0.43
       ],
       "shots": [
        22,
@@ -23664,14 +23664,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.38,
-     "xg_away": 0.27,
+     "xg_home": 1.05,
+     "xg_away": 0.22,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.38,
-       0.27
+       1.05,
+       0.22
       ],
       "shots": [
        15,
@@ -23739,14 +23739,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.35,
-     "xg_away": 1.88,
+     "xg_home": 1.12,
+     "xg_away": 1.33,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.35,
-       1.88
+       1.12,
+       1.33
       ],
       "shots": [
        19,
@@ -23814,14 +23814,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.34,
-     "xg_away": 1.39,
+     "xg_home": 0.95,
+     "xg_away": 0.96,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.34,
-       1.39
+       0.95,
+       0.96
       ],
       "shots": [
        9,
@@ -23889,14 +23889,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.65,
-     "xg_away": 0.59,
+     "xg_home": 1.83,
+     "xg_away": 0.46,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.65,
-       0.59
+       1.83,
+       0.46
       ],
       "shots": [
        15,
@@ -23964,14 +23964,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.35,
-     "xg_away": 2.91,
+     "xg_home": 2.37,
+     "xg_away": 2.25,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.35,
-       2.91
+       2.37,
+       2.25
       ],
       "shots": [
        24,
@@ -24039,14 +24039,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.77,
-     "xg_away": 1.83,
+     "xg_home": 1.76,
+     "xg_away": 1.29,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.77,
-       1.83
+       1.76,
+       1.29
       ],
       "shots": [
        6,
@@ -24114,14 +24114,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.85,
-     "xg_away": 2.29,
+     "xg_home": 0.59,
+     "xg_away": 1.6,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.85,
-       2.29
+       0.59,
+       1.6
       ],
       "shots": [
        4,
@@ -24189,14 +24189,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.12,
-     "xg_away": 2.81,
+     "xg_home": 1.77,
+     "xg_away": 2.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.12,
-       2.81
+       1.77,
+       2.11
       ],
       "shots": [
        13,
@@ -24264,14 +24264,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.05,
-     "xg_away": 0.6,
+     "xg_home": 0.81,
+     "xg_away": 0.41,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.05,
-       0.6
+       0.81,
+       0.41
       ],
       "shots": [
        12,
@@ -24339,14 +24339,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-19T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.75,
-     "xg_away": 1.77,
+     "xg_home": 1.88,
+     "xg_away": 1.2,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.75,
-       1.77
+       1.88,
+       1.2
       ],
       "shots": [
        12,
@@ -24414,14 +24414,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.62,
-     "xg_away": 1.6,
+     "xg_home": 0.49,
+     "xg_away": 1.38,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.62,
-       1.6
+       0.49,
+       1.38
       ],
       "shots": [
        7,
@@ -24489,14 +24489,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.41,
-     "xg_away": 1.03,
+     "xg_home": 1.28,
+     "xg_away": 0.71,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.41,
-       1.03
+       1.28,
+       0.71
       ],
       "shots": [
        10,
@@ -24564,14 +24564,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.59,
-     "xg_away": 0.27,
+     "xg_home": 1.11,
+     "xg_away": 0.26,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.59,
-       0.27
+       1.11,
+       0.26
       ],
       "shots": [
        8,
@@ -24639,14 +24639,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.89,
-     "xg_away": 1.61,
+     "xg_home": 2.05,
+     "xg_away": 1.14,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.89,
-       1.61
+       2.05,
+       1.14
       ],
       "shots": [
        20,
@@ -24714,14 +24714,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.19,
-     "xg_away": 1.69,
+     "xg_home": 0.96,
+     "xg_away": 1.43,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.19,
-       1.69
+       0.96,
+       1.43
       ],
       "shots": [
        15,
@@ -24789,14 +24789,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.52,
-     "xg_away": 2.17,
+     "xg_home": 1.27,
+     "xg_away": 1.62,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.52,
-       2.17
+       1.27,
+       1.62
       ],
       "shots": [
        24,
@@ -24864,14 +24864,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.36,
-     "xg_away": 0.97,
+     "xg_home": 3.16,
+     "xg_away": 0.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.36,
-       0.97
+       3.16,
+       0.66
       ],
       "shots": [
        14,
@@ -24939,14 +24939,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.82,
-     "xg_away": 1.2,
+     "xg_home": 1.52,
+     "xg_away": 0.82,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.82,
-       1.2
+       1.52,
+       0.82
       ],
       "shots": [
        9,
@@ -25014,14 +25014,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.04,
-     "xg_away": 2.0,
+     "xg_home": 1.46,
+     "xg_away": 1.72,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.04,
-       2.0
+       1.46,
+       1.72
       ],
       "shots": [
        17,
@@ -25089,14 +25089,14 @@ window.LL_DATA = {
      "kickoff": "2026-04-22T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.35,
-     "xg_away": 0.11,
+     "xg_home": 1.89,
+     "xg_away": 0.12,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.35,
-       0.11
+       1.89,
+       0.12
       ],
       "shots": [
        14,
@@ -25164,14 +25164,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.72,
-     "xg_away": 0.74,
+     "xg_home": 0.53,
+     "xg_away": 0.59,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.72,
-       0.74
+       0.53,
+       0.59
       ],
       "shots": [
        7,
@@ -25239,14 +25239,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.0,
-     "xg_away": 1.79,
+     "xg_home": 1.36,
+     "xg_away": 1.33,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.0,
-       1.79
+       1.36,
+       1.33
       ],
       "shots": [
        10,
@@ -25314,14 +25314,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.41,
-     "xg_away": 2.13,
+     "xg_home": 0.94,
+     "xg_away": 1.79,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.41,
-       2.13
+       0.94,
+       1.79
       ],
       "shots": [
        6,
@@ -25389,14 +25389,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.29,
-     "xg_away": 1.84,
+     "xg_home": 1.03,
+     "xg_away": 1.37,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.29,
-       1.84
+       1.03,
+       1.37
       ],
       "shots": [
        17,
@@ -25464,14 +25464,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.52,
-     "xg_away": 1.02,
+     "xg_home": 1.42,
+     "xg_away": 0.77,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.52,
-       1.02
+       1.42,
+       0.77
       ],
       "shots": [
        13,
@@ -25539,14 +25539,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.87,
-     "xg_away": 1.27,
+     "xg_home": 1.94,
+     "xg_away": 0.9,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.87,
-       1.27
+       1.94,
+       0.9
       ],
       "shots": [
        14,
@@ -25614,14 +25614,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.41,
-     "xg_away": 2.28,
+     "xg_home": 1.06,
+     "xg_away": 1.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.41,
-       2.28
+       1.06,
+       1.66
       ],
       "shots": [
        12,
@@ -25689,14 +25689,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.82,
-     "xg_away": 2.03,
+     "xg_home": 1.24,
+     "xg_away": 1.42,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.82,
-       2.03
+       1.24,
+       1.42
       ],
       "shots": [
        9,
@@ -25764,14 +25764,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.95,
-     "xg_away": 0.82,
+     "xg_home": 2.1,
+     "xg_away": 0.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.95,
-       0.82
+       2.1,
+       0.66
       ],
       "shots": [
        20,
@@ -25839,13 +25839,13 @@ window.LL_DATA = {
      "kickoff": "2026-05-03T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.71,
+     "xg_home": 1.29,
      "xg_away": 0.21,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.71,
+       1.29,
        0.21
       ],
       "shots": [
@@ -25914,14 +25914,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.34,
-     "xg_away": 1.4,
+     "xg_home": 1.03,
+     "xg_away": 1.23,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.34,
-       1.4
+       1.03,
+       1.23
       ],
       "shots": [
        14,
@@ -25989,14 +25989,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.05,
-     "xg_away": 0.38,
+     "xg_home": 2.17,
+     "xg_away": 0.27,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.05,
-       0.38
+       2.17,
+       0.27
       ],
       "shots": [
        20,
@@ -26064,14 +26064,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.9,
-     "xg_away": 1.0,
+     "xg_home": 1.31,
+     "xg_away": 0.74,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.9,
-       1.0
+       1.31,
+       0.74
       ],
       "shots": [
        10,
@@ -26139,14 +26139,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.67,
-     "xg_away": 0.77,
+     "xg_home": 2.73,
+     "xg_away": 0.54,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.67,
-       0.77
+       2.73,
+       0.54
       ],
       "shots": [
        36,
@@ -26214,14 +26214,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.78,
-     "xg_away": 1.13,
+     "xg_home": 1.36,
+     "xg_away": 1.08,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.78,
-       1.13
+       1.36,
+       1.08
       ],
       "shots": [
        18,
@@ -26289,14 +26289,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.55,
-     "xg_away": 2.69,
+     "xg_home": 1.79,
+     "xg_away": 2.11,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.55,
-       2.69
+       1.79,
+       2.11
       ],
       "shots": [
        16,
@@ -26364,14 +26364,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.84,
-     "xg_away": 1.96,
+     "xg_home": 2.23,
+     "xg_away": 1.39,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.84,
-       1.96
+       2.23,
+       1.39
       ],
       "shots": [
        14,
@@ -26439,14 +26439,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.92,
-     "xg_away": 1.18,
+     "xg_home": 1.5,
+     "xg_away": 0.87,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.92,
-       1.18
+       1.5,
+       0.87
       ],
       "shots": [
        21,
@@ -26514,14 +26514,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.78,
-     "xg_away": 1.89,
+     "xg_home": 0.58,
+     "xg_away": 1.49,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.78,
-       1.89
+       0.58,
+       1.49
       ],
       "shots": [
        8,
@@ -26589,14 +26589,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-10T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.54,
-     "xg_away": 1.56,
+     "xg_home": 1.17,
+     "xg_away": 1.09,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.54,
-       1.56
+       1.17,
+       1.09
       ],
       "shots": [
        18,
@@ -26664,14 +26664,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.58,
-     "xg_away": 0.55,
+     "xg_home": 1.11,
+     "xg_away": 0.45,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.58,
-       0.55
+       1.11,
+       0.45
       ],
       "shots": [
        9,
@@ -26739,14 +26739,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.96,
-     "xg_away": 0.38,
+     "xg_home": 1.43,
+     "xg_away": 0.35,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.96,
-       0.38
+       1.43,
+       0.35
       ],
       "shots": [
        16,
@@ -26814,14 +26814,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.01,
-     "xg_away": 1.98,
+     "xg_home": 2.04,
+     "xg_away": 1.36,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.01,
-       1.98
+       2.04,
+       1.36
       ],
       "shots": [
        11,
@@ -26889,14 +26889,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.78,
-     "xg_away": 0.46,
+     "xg_home": 1.17,
+     "xg_away": 0.42,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.78,
-       0.46
+       1.17,
+       0.42
       ],
       "shots": [
        6,
@@ -26964,14 +26964,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.45,
-     "xg_away": 0.97,
+     "xg_home": 2.57,
+     "xg_away": 0.7,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.45,
-       0.97
+       2.57,
+       0.7
       ],
       "shots": [
        29,
@@ -27039,14 +27039,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.94,
-     "xg_away": 1.17,
+     "xg_home": 0.74,
+     "xg_away": 0.9,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.94,
-       1.17
+       0.74,
+       0.9
       ],
       "shots": [
        12,
@@ -27114,14 +27114,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.52,
-     "xg_away": 1.78,
+     "xg_home": 2.51,
+     "xg_away": 1.43,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.52,
-       1.78
+       2.51,
+       1.43
       ],
       "shots": [
        23,
@@ -27189,14 +27189,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.14,
-     "xg_away": 1.65,
+     "xg_home": 0.85,
+     "xg_away": 1.37,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.14,
-       1.65
+       0.85,
+       1.37
       ],
       "shots": [
        12,
@@ -27264,14 +27264,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.93,
-     "xg_away": 1.19,
+     "xg_home": 0.67,
+     "xg_away": 0.92,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.93,
-       1.19
+       0.67,
+       0.92
       ],
       "shots": [
        6,
@@ -27339,14 +27339,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-13T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.93,
-     "xg_away": 1.63,
+     "xg_home": 1.43,
+     "xg_away": 1.13,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.93,
-       1.63
+       1.43,
+       1.13
       ],
       "shots": [
        19,
@@ -27414,14 +27414,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.36,
-     "xg_away": 0.44,
+     "xg_home": 2.48,
+     "xg_away": 0.3,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.36,
-       0.44
+       2.48,
+       0.3
       ],
       "shots": [
        27,
@@ -27489,14 +27489,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.42,
-     "xg_away": 2.38,
+     "xg_home": 1.75,
+     "xg_away": 1.84,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.42,
-       2.38
+       1.75,
+       1.84
       ],
       "shots": [
        17,
@@ -27564,13 +27564,13 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.49,
+     "xg_home": 1.14,
      "xg_away": 0.96,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.49,
+       1.14,
        0.96
       ],
       "shots": [
@@ -27639,14 +27639,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.01,
-     "xg_away": 0.15,
+     "xg_home": 0.74,
+     "xg_away": 0.14,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.01,
-       0.15
+       0.74,
+       0.14
       ],
       "shots": [
        10,
@@ -27714,14 +27714,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.67,
-     "xg_away": 0.59,
+     "xg_home": 2.16,
+     "xg_away": 0.46,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.67,
-       0.59
+       2.16,
+       0.46
       ],
       "shots": [
        15,
@@ -27789,14 +27789,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.35,
-     "xg_away": 0.98,
+     "xg_home": 1.65,
+     "xg_away": 0.75,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.35,
-       0.98
+       1.65,
+       0.75
       ],
       "shots": [
        15,
@@ -27864,14 +27864,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.68,
-     "xg_away": 1.92,
+     "xg_home": 1.13,
+     "xg_away": 1.33,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.68,
-       1.92
+       1.13,
+       1.33
       ],
       "shots": [
        8,
@@ -27939,14 +27939,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.74,
-     "xg_away": 1.02,
+     "xg_home": 0.54,
+     "xg_away": 0.74,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.74,
-       1.02
+       0.54,
+       0.74
       ],
       "shots": [
        7,
@@ -28014,14 +28014,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.77,
-     "xg_away": 0.86,
+     "xg_home": 2.09,
+     "xg_away": 0.63,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.77,
-       0.86
+       2.09,
+       0.63
       ],
       "shots": [
        24,
@@ -28089,14 +28089,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-17T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.79,
-     "xg_away": 1.83,
+     "xg_home": 0.69,
+     "xg_away": 1.31,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.79,
-       1.83
+       0.69,
+       1.31
       ],
       "shots": [
        14,
@@ -28164,14 +28164,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.17,
-     "xg_away": 2.08,
+     "xg_home": 1.59,
+     "xg_away": 1.44,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.17,
-       2.08
+       1.59,
+       1.44
       ],
       "shots": [
        19,
@@ -28239,14 +28239,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.4,
-     "xg_away": 2.97,
+     "xg_home": 1.71,
+     "xg_away": 2.04,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.4,
-       2.97
+       1.71,
+       2.04
       ],
       "shots": [
        19,
@@ -28314,14 +28314,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.6,
-     "xg_away": 0.88,
+     "xg_home": 1.15,
+     "xg_away": 0.66,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.6,
-       0.88
+       1.15,
+       0.66
       ],
       "shots": [
        12,
@@ -28389,14 +28389,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.49,
-     "xg_away": 1.37,
+     "xg_home": 1.76,
+     "xg_away": 0.97,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.49,
-       1.37
+       1.76,
+       0.97
       ],
       "shots": [
        17,
@@ -28464,14 +28464,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.36,
-     "xg_away": 0.98,
+     "xg_home": 0.32,
+     "xg_away": 0.73,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.36,
-       0.98
+       0.32,
+       0.73
       ],
       "shots": [
        7,
@@ -28539,14 +28539,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 4.31,
-     "xg_away": 0.31,
+     "xg_home": 2.98,
+     "xg_away": 0.29,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       4.31,
-       0.31
+       2.98,
+       0.29
       ],
       "shots": [
        23,
@@ -28614,14 +28614,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 2.39,
-     "xg_away": 1.6,
+     "xg_home": 1.68,
+     "xg_away": 1.08,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       2.39,
-       1.6
+       1.68,
+       1.08
       ],
       "shots": [
        13,
@@ -28689,14 +28689,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 3.34,
-     "xg_away": 1.99,
+     "xg_home": 2.51,
+     "xg_away": 1.33,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       3.34,
-       1.99
+       2.51,
+       1.33
       ],
       "shots": [
        14,
@@ -28764,14 +28764,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 1.56,
-     "xg_away": 2.53,
+     "xg_home": 1.24,
+     "xg_away": 1.71,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       1.56,
-       2.53
+       1.24,
+       1.71
       ],
       "shots": [
        19,
@@ -28839,14 +28839,14 @@ window.LL_DATA = {
      "kickoff": "2026-05-24T19:00:00+00:00",
      "has_stats": true,
      "has_events": true,
-     "xg_home": 0.93,
-     "xg_away": 0.55,
+     "xg_home": 0.71,
+     "xg_away": 0.38,
      "xg_estimated": true,
      "png": null,
      "stats": {
       "xg": [
-       0.93,
-       0.55
+       0.71,
+       0.38
       ],
       "shots": [
        10,

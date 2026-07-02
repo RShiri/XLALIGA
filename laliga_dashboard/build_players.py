@@ -16,7 +16,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 from build_match_details import norm, _match_extras, _player_rating, is_match_file
-from xg_model import ascii_name, SHOT_TYPES, shot_xg, is_shootout
+from xg_model import ascii_name, SHOT_TYPES, shot_xg, is_shootout, player_xa_from_events
 
 MATCH_DIR = os.path.join(ROOT, "laliga", "matches")
 OUT = os.path.join(HERE, "players.js")
@@ -42,7 +42,7 @@ def _sum_stat(stats, key):
 def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
-               rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0)
+               rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0, xa=0.0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -83,6 +83,7 @@ def aggregate(match_dir=MATCH_DIR):
     for mid, d in _iter_played(match_dir):
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
+        xa_map = player_xa_from_events(d)
         for side in ("home", "away"):
             team = norm(d[side].get("name", ""))
             for p in d[side].get("players", []):
@@ -107,6 +108,7 @@ def aggregate(match_dir=MATCH_DIR):
                 rec["yc"] += ex["yellow"].get(pid, 0)
                 rec["rc"] += ex["red"].get(pid, 0)
                 rec["xg"] += shot_xg_map.get(pid, 0.0)
+                rec["xa"] += xa_map.get(pid, 0.0)
                 rt = _player_rating(p)
                 if rt is not None:
                     rec["rating_sum"] += rt
@@ -123,7 +125,10 @@ def aggregate(match_dir=MATCH_DIR):
         r["rating_best"] = round(r["rating_best"], 2) if r["rating_best"] else None
         r["pass_pct"] = round(100 * r["passAcc"] / r["passes"]) if r["passes"] else None
         r["xg"] = round(r["xg"], 2)
+        r["xa"] = round(r["xa"], 2)
         r["xg_diff"] = round(r["g"] - r["xg"], 2)
+        r["xa_diff"] = round(r["a"] - r["xa"], 2)   # assists over/under expected
+        r["xgi"] = round(r["xg"] + r["xa"], 2)       # xG involvement (xG + xA)
         for v in list(SUM_STATS.values()) + ["mins"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)
@@ -138,6 +143,7 @@ def per_match_rows():
     for mid, d in _iter_played():
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
+        xa_map = player_xa_from_events(d)
         date = d.get("meta", {}).get("date", "") or mid[:10].replace("_", "-")
         for side in ("home", "away"):
             team = norm(d[side].get("name", ""))
@@ -156,7 +162,8 @@ def per_match_rows():
                            position=p.get("position", ""), started=int(started), minutes=int(mins),
                            goals=ex["goals"].get(pid, 0), assists=ex["assists"].get(pid, 0),
                            yellow=ex["yellow"].get(pid, 0), red=ex["red"].get(pid, 0),
-                           rating=_player_rating(p), xg=round(shot_xg_map.get(pid, 0.0), 2))
+                           rating=_player_rating(p), xg=round(shot_xg_map.get(pid, 0.0), 2),
+                           xa=round(xa_map.get(pid, 0.0), 2))
                 for src, dst in SUM_STATS.items():
                     row[dst] = int(round(_sum_stat(stats, src)))
                 yield row

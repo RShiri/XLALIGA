@@ -12,6 +12,21 @@ import unicodedata
 SCALE_Y = 0.80
 SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
 
+# Platt (logistic) recalibration of the raw geometric xG. The bare geometry
+# over-counts ~1.34x (1344 xG for 1000 goals across 2025/26), which made every
+# team's goals − xG negative. These coefficients map the raw estimate onto actual
+# La Liga conversion via  p_cal = sigmoid(_CAL_A + _CAL_B * logit(p_raw))  so summed
+# xG ≈ goals. Fitted by tools/fit_xg_calibration.py on 9,486 non-penalty shots.
+# Penalties are excluded (kept at the fixed 0.76). Re-fit if the geometry changes.
+_CAL_A = -0.783772
+_CAL_B = 0.755401
+
+
+def _calibrate(xg):
+    xg = min(max(xg, 1e-4), 1 - 1e-4)
+    z = math.log(xg / (1.0 - xg))
+    return 1.0 / (1.0 + math.exp(-(_CAL_A + _CAL_B * z)))
+
 
 def is_shootout(ev):
     """True for penalty-SHOOTOUT events (WhoScored period 5 / "PenaltyShootout").
@@ -51,6 +66,7 @@ def estimate_xg(x_sb, y_sb, is_penalty, is_big_chance, body_part):
         xg = min(0.65, xg)
     if distance > 18:
         xg *= (18 / distance) ** 2
+    xg = _calibrate(xg)   # scale to actual conversion (see _CAL_A/_CAL_B above)
     return round(min(max(xg, 0.01), 0.95), 3)
 
 
@@ -101,6 +117,31 @@ def shot_xg(ev):
     xg = estimate_xg(x_sb, y_sb, is_penalty, big_chance, body)
     return xg, dict(body=body, situation=situation, zone=zone,
                     big_chance=big_chance, penalty=is_penalty)
+
+
+def player_xa_from_events(match_data):
+    """playerId -> summed xA (expected assists).
+
+    Each non-penalty shot's xG is credited to the team-mate who set it up. WhoScored
+    tags that player on the shot event as ``relatedPlayerId`` (the same field that
+    names the assister on a goal), so xA is just "the xG of the shots you created" —
+    the shot-quality analogue of assists. Penalties (unassisted) and shootout kicks
+    are excluded."""
+    out = {}
+    for ev in match_data.get("events", []):
+        t = ev.get("type", {})
+        if not isinstance(t, dict) or t.get("displayName") not in SHOT_TYPES:
+            continue
+        if is_shootout(ev):
+            continue
+        assister = ev.get("relatedPlayerId")
+        if assister is None:
+            continue
+        xg, meta = shot_xg(ev)
+        if meta["penalty"]:
+            continue  # penalties aren't assisted
+        out[assister] = out.get(assister, 0.0) + xg
+    return out
 
 
 def team_xg_from_events(match_data):

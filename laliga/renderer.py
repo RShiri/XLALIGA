@@ -39,6 +39,19 @@ from laliga.team_colors import get_team_colors
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 SCALE_Y = 0.80
 
+# Platt recalibration of the raw geometric xG so summed xG tracks actual goals
+# (the bare geometry over-counts ~1.34x). Mirror of xg_model._CAL_A/_CAL_B — keep
+# the two in sync so the PNG infographics and the website report identical xG.
+# Fitted by laliga_dashboard/tools/fit_xg_calibration.py. Penalties keep 0.76.
+_CAL_A = -0.783772
+_CAL_B = 0.755401
+
+
+def _calibrate_xg(xg: float) -> float:
+    xg = min(max(xg, 1e-4), 1 - 1e-4)
+    z = math.log(xg / (1.0 - xg))
+    return 1.0 / (1.0 + math.exp(-(_CAL_A + _CAL_B * z)))
+
 
 def _ws_to_sb_x(ws_x: float) -> float:
     if ws_x <= 50:   return ws_x * (60.0 / 50.0)
@@ -62,6 +75,7 @@ def _estimate_xg(x_sb: float, y_sb: float,
         xg = min(0.65, xg)
     if distance > 18:
         xg *= (18 / distance) ** 2
+    xg = _calibrate_xg(xg)   # scale to actual conversion (see _CAL_A/_CAL_B above)
     return round(min(max(xg, 0.01), 0.95), 3)
 
 

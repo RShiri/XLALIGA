@@ -23,7 +23,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 
-from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shootout)
+from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shootout,
+                      player_xa_from_events)
 
 MATCH_DIR = os.path.join(ROOT, "laliga", "matches")
 OUT_DIR = os.path.join(HERE, "matches_detail")
@@ -106,7 +107,9 @@ def _player_rating(p):
         return None
 
 
-def _lineup(side, ex):
+def _lineup(side, ex, xg_map=None, xa_map=None):
+    xg_map = xg_map or {}
+    xa_map = xa_map or {}
     starters, subs = [], []
     for p in side.get("players", []):
         pid = p.get("playerId")
@@ -128,6 +131,8 @@ def _lineup(side, ex):
             "rating": _player_rating(p),
             "g": ex["goals"].get(pid, 0),
             "a": ex["assists"].get(pid, 0),
+            "xg": round(xg_map.get(pid, 0.0), 2),
+            "xa": round(xa_map.get(pid, 0.0), 2),
             "yc": ex["yellow"].get(pid, 0),
             "rc": ex["red"].get(pid, 0),
             "on": on_m,
@@ -222,6 +227,17 @@ def extract(match_data):
     hid, aid = home.get("teamId"), away.get("teamId")
     side_of = {hid: "home", aid: "away"}
     ex = _match_extras(match_data)
+    # per-player shot xG + expected assists (xA) for the line-up cards
+    xa_map = player_xa_from_events(match_data)
+    xg_map = {}
+    for _ev in match_data.get("events", []):
+        _t = _ev.get("type", {})
+        if not isinstance(_t, dict) or _t.get("displayName") not in SHOT_TYPES:
+            continue
+        if is_shootout(_ev) or _ev.get("playerId") is None:
+            continue
+        _xg, _ = shot_xg(_ev)
+        xg_map[_ev["playerId"]] = xg_map.get(_ev["playerId"], 0.0) + _xg
 
     # Receiver of each successful pass = the next same-team successful event's player
     # (mirrors the renderer's pass-network method). Keyed by event index.
@@ -403,7 +419,8 @@ def extract(match_data):
         "saves": saves,
         "goals": sorted(goals, key=lambda g: g["min"]),
         "shootout": _shootout(match_data, side_of),
-        "lineups": {"home": _lineup(home, ex), "away": _lineup(away, ex)},
+        "lineups": {"home": _lineup(home, ex, xg_map, xa_map),
+                    "away": _lineup(away, ex, xg_map, xa_map)},
     }
 
 
