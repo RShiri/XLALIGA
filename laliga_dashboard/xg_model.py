@@ -12,20 +12,35 @@ import unicodedata
 SCALE_Y = 0.80
 SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
 
-# Platt (logistic) recalibration of the raw geometric xG. The bare geometry
-# over-counts ~1.34x (1344 xG for 1000 goals across 2025/26), which made every
-# team's goals − xG negative. These coefficients map the raw estimate onto actual
-# La Liga conversion via  p_cal = sigmoid(_CAL_A + _CAL_B * logit(p_raw))  so summed
-# xG ≈ goals. Fitted by tools/fit_xg_calibration.py on 9,486 non-penalty shots.
-# Penalties are excluded (kept at the fixed 0.76). Re-fit if the geometry changes.
-_CAL_A = -0.783772
-_CAL_B = 0.755401
+# Unified, data-driven xG model — one logistic regression fit on ALL La Liga +
+# World Cup shots (11,830 non-penalty shots, 1,166 goals) by
+# tools/fit_unified_xg.py. Brier 0.071, log-loss 0.253; summed xG tracks actual
+# goals per competition. This SAME model (identical coefficients) is deployed in
+# XLALIGA, the World Cup dashboard and BCN so all three report consistent xG.
+# Features: distance & the angle the goal-mouth subtends, header, WhoScored
+# big-chance flag, and shot situation (free kick / corner / set piece / fast break
+# vs open play). Mirror any change in renderer._estimate_xg. Re-fit with the tool.
+_INTERCEPT = -3.379503
+_COEF = {
+    "dist": -0.004175, "angle": 1.421131, "header": -0.580616, "big": 1.891534,
+    "freekick": 0.278088, "corner": -0.303916, "setpiece": -0.345961, "fastbreak": 0.455797,
+}
+# Per-league finishing calibration, added to the logit so summed xG == goals for
+# this competition (La Liga finishing; World Cup uses +0.162084). Fit on this
+# league's own shot outcomes by the tool.
+_CAL_SHIFT = -0.044712
+_PENALTY_XG = 0.76
 
 
-def _calibrate(xg):
-    xg = min(max(xg, 1e-4), 1 - 1e-4)
-    z = math.log(xg / (1.0 - xg))
-    return 1.0 / (1.0 + math.exp(-(_CAL_A + _CAL_B * z)))
+def _shot_angle(x_sb, y_sb):
+    """Angle (radians) the goal mouth subtends from the shot location; posts at
+    (120, 36) and (120, 44) in StatsBomb coords. Bigger angle = better chance."""
+    a = math.hypot(120.0 - x_sb, 36.0 - y_sb)
+    b = math.hypot(120.0 - x_sb, 44.0 - y_sb)
+    if a <= 0.0 or b <= 0.0:
+        return math.pi
+    c = max(-1.0, min(1.0, (a * a + b * b - 64.0) / (2.0 * a * b)))
+    return math.acos(c)
 
 
 def is_shootout(ev):
@@ -51,22 +66,23 @@ def ws_to_sb_x(ws_x):
         return 108.0 + (ws_x - 89) * (12.0 / 11.0)
 
 
-def estimate_xg(x_sb, y_sb, is_penalty, is_big_chance, body_part):
+def estimate_xg(x_sb, y_sb, is_penalty, is_big_chance, body_part, situation="Open Play"):
+    """Calibrated xG via the unified logistic model (see _INTERCEPT/_COEF).
+    Penalties are fixed at _PENALTY_XG. Coords in StatsBomb metres."""
     if is_penalty:
-        return 0.76
+        return _PENALTY_XG
     dx = 120.0 - x_sb
     dy = 40.0 - y_sb
-    distance = max(math.sqrt(dx ** 2 + dy ** 2), 0.5)
-    angle = math.atan2(4.0, distance)
-    xg = (angle / (math.pi / 2)) * (1 / (1 + distance / 30))
+    dist = max(math.hypot(dx, dy), 0.5)
+    z = _INTERCEPT + _CAL_SHIFT
+    z += _COEF["dist"] * dist + _COEF["angle"] * _shot_angle(x_sb, y_sb)
     if body_part == "Header":
-        xg *= 0.4
+        z += _COEF["header"]
     if is_big_chance:
-        xg = max(0.35, xg * 3.5)
-        xg = min(0.65, xg)
-    if distance > 18:
-        xg *= (18 / distance) ** 2
-    xg = _calibrate(xg)   # scale to actual conversion (see _CAL_A/_CAL_B above)
+        z += _COEF["big"]
+    z += {"Free Kick": _COEF["freekick"], "Corner": _COEF["corner"],
+          "Set Piece": _COEF["setpiece"], "Fast Break": _COEF["fastbreak"]}.get(situation, 0.0)
+    xg = 1.0 / (1.0 + math.exp(-z))
     return round(min(max(xg, 0.01), 0.95), 3)
 
 
@@ -114,7 +130,7 @@ def shot_xg(ev):
     is_penalty = situation == "Penalty"
     if is_penalty:
         x_sb, y_sb = 108.0, 40.0
-    xg = estimate_xg(x_sb, y_sb, is_penalty, big_chance, body)
+    xg = estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation)
     return xg, dict(body=body, situation=situation, zone=zone,
                     big_chance=big_chance, penalty=is_penalty)
 
