@@ -368,6 +368,56 @@
     });
   }
 
+  // Distribution companion to the scatter: bucket every team-game by its xG and
+  // show how many games landed in each bucket + whether those chances converted
+  // (avg goals vs avg xG per bucket — green over-delivered, red under, blue ≈ even).
+  function renderXgDist() {
+    var host = document.getElementById("xgDist");
+    if (!host) return;
+    if (!R.length) { host.innerHTML = '<p class="hint">Not enough data yet — deep-scrape matches to populate xG.</p>'; return; }
+    var BW = 0.5, NB = 9;                      // eight half-goal buckets + a "4+" catch-all
+    var buckets = [];
+    for (var b = 0; b < NB; b++) buckets.push({ n: 0, xg: 0, g: 0 });
+    R.forEach(function (r) {
+      var i = Math.min(Math.floor(r.xgf / BW), NB - 1);
+      buckets[i].n++; buckets[i].xg += r.xgf; buckets[i].g += r.gf;
+    });
+    var maxN = Math.max.apply(null, buckets.map(function (bk) { return bk.n; }).concat([1]));
+    var W = 560, H = 300, padL = 14, padB = 44, padT = 26;
+    var slot = (W - padL - 12) / NB, bw = slot - 8;
+    function by(n) { return H - padB - (n / maxN) * (H - padB - padT); }
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
+    svg.push('<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - 8) + '" y2="' + (H - padB) + '" stroke="#26304d" stroke-width="1.2"/>');
+    buckets.forEach(function (bk, i) {
+      var x = padL + i * slot + 4;
+      var lab = (i === NB - 1) ? (BW * (NB - 1)).toFixed(1) + "+" : (BW * i).toFixed(1) + "–" + (BW * (i + 1)).toFixed(1);
+      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 14) + '" fill="#93a0bd" font-size="9.5" text-anchor="middle">' + lab + "</text>");
+      if (!bk.n) return;
+      var ax = bk.xg / bk.n, ag = bk.g / bk.n, d = ag - ax;
+      var col = d > 0.15 ? "#3ddc97" : d < -0.15 ? "#ff6b81" : "#4ea1ff";
+      var y = by(bk.n);
+      var info = lab + " xG · " + bk.n + " team-games · avg xG " + ax.toFixed(2) + " → avg goals " + ag.toFixed(2) +
+                 " (" + (d >= 0 ? "+" : "") + d.toFixed(2) + ")";
+      svg.push('<rect class="xd" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) +
+        '" height="' + (H - padB - y).toFixed(1) + '" rx="4" fill="' + col + '" fill-opacity="0.55" stroke="' + col +
+        '" stroke-width="1" data-info="' + esc(info) + '"/>');
+      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="middle">' + bk.n + "</text>");
+      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 27) + '" fill="' + col + '" font-size="9.5" text-anchor="middle">' + ax.toFixed(1) + "→" + ag.toFixed(1) + "</text>");
+    });
+    svg.push('<text x="' + (W / 2) + '" y="' + (H - 3) + '" fill="#93a0bd" font-size="11" text-anchor="middle">xG created in the game · below each bar: avg xG → avg goals actually scored</text>');
+    svg.push("</svg>");
+    host.innerHTML = svg.join("");
+    host.querySelectorAll("rect.xd").forEach(function (c) {
+      c.addEventListener("mousemove", function (e) {
+        tooltip.innerHTML = '<div class="t-line">' + c.getAttribute("data-info") + "</div>";
+        tooltip.style.opacity = "1";
+        tooltip.style.left = (e.clientX + 14) + "px";
+        tooltip.style.top = (e.clientY + 14) + "px";
+      });
+      c.addEventListener("mouseleave", function () { tooltip.style.opacity = "0"; });
+    });
+  }
+
   function renderCorr() {
     var box = document.getElementById("corrBox"), ins = document.getElementById("corrInsight");
     if (!R.length) { box.innerHTML = '<p class="hint">No xG data yet.</p>'; ins.innerHTML = ""; return; }
@@ -638,6 +688,7 @@
     renderXgStats();
     renderScatter();
     renderCorr();
+    renderXgDist();
     renderFinishingBars();
     renderQuadrant();
     renderXpts();
