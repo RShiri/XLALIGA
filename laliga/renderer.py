@@ -1329,7 +1329,9 @@ def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | No
     for modname, filename, label in (
         ("wc_dashboard_build", "build_data.py", "data.js"),
         ("wc_dashboard_players", "build_players.py", "players.js"),
+        ("wc_dashboard_shots", "build_shots.py", "shots.js (Team Lab)"),
         ("wc_dashboard_database", "build_database.py", "database export"),
+        ("wc_dashboard_player_lab", "build_player_lab.py", "player_lab per-team events"),
     ):
         try:
             mod = _load_dashboard_module(modname, filename)
