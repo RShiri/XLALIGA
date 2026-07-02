@@ -22,6 +22,7 @@
         <button data-view="players">Players</button>
         <button data-view="standouts">Standouts</button>
         <button data-view="teamlab">Team Lab</button>
+        <button data-view="playerlab">Player Lab</button>
         <button data-view="xg">xG Analysis</button>
         <button data-view="data">Data</button>
         <button data-view="projection">Projection</button>
@@ -399,6 +400,39 @@
   </section>
 
   <!-- PROJECTION -->
+  <!-- PLAYER LAB (choose a team, then a player; optional compare) -->
+  <section id="view-playerlab" class="view">
+    <div class="section-head">
+      <h2>Player Lab</h2>
+      <p>Pick a <b>team</b>, then a <b>player</b> — and optionally a second player from any club to compare.
+         Season totals, a percentile radar vs the league, head-to-head bars, and shot / take-on / pass maps.</p>
+    </div>
+    <div class="controls pl-controls">
+      <label>Team <select id="plTeam"></select></label>
+      <label>Player <select id="plMain"></select></label>
+      <label>Compare <select id="plCompare"></select></label>
+    </div>
+    <div class="stats-strip" id="plStats"></div>
+    <div class="pl-grid">
+      <div class="card">
+        <h3 class="pl-h">Percentile radar <span class="pl-sub">vs league players (450+ min)</span></h3>
+        <div id="plRadar"></div>
+        <div class="pl-legend" id="plRadarLegend"></div>
+      </div>
+      <div class="card" id="plBarsCard" style="display:none">
+        <h3 class="pl-h" id="plCompareTitle"></h3>
+        <div id="plCompareBody"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pl-maps-head">
+        <span class="pl-name-a" id="plHeatNameA"></span>
+        <span class="pl-name-b" id="plHeatNameB"></span>
+      </div>
+      <div class="pl-heat-grid" id="plHeatGrid"></div>
+    </div>
+  </section>
+
   <section id="view-projection" class="view">
     <div class="section-head">
       <h2>Season Projection</h2>

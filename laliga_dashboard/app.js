@@ -1698,10 +1698,11 @@
   // Standouts + Team Lab are dot-heavy (the all-teams shot map alone is thousands of
   // circles), so we render them lazily the first time their tab is opened and re-mark
   // them dirty on a season switch rather than redrawing on every renderAll.
-  var heavyDirty = { standouts: true, teamlab: true };
+  var heavyDirty = { standouts: true, teamlab: true, playerlab: true };
   function renderHeavyIfNeeded(view) {
     if (view === "standouts" && heavyDirty.standouts) { refreshStandouts(); heavyDirty.standouts = false; }
     else if (view === "teamlab" && heavyDirty.teamlab) { refreshTeamLab(); heavyDirty.teamlab = false; }
+    else if (view === "playerlab" && heavyDirty.playerlab) { refreshPlayerLab(); heavyDirty.playerlab = false; }
   }
 
   function renderAll() {
@@ -1717,13 +1718,297 @@
     renderData();
     renderDownloads();
     // defer the heavy views; redraw now only if one is already on screen
-    heavyDirty.standouts = true; heavyDirty.teamlab = true;
+    heavyDirty.standouts = true; heavyDirty.teamlab = true; heavyDirty.playerlab = true;
     var active = document.querySelector("nav.tabs button.active");
     if (active) renderHeavyIfNeeded(active.dataset.view);
     var foot = document.getElementById("footNote");
     if (foot) foot.textContent = "Season " + season + " · generated " + ALL.generated + " · " +
       (D.counts.played || 0) + " matches played · " + (D.counts.with_xg || 0) + " with xG · La Liga analytics pipeline.";
   }
+
+  /* ======================= PLAYER LAB ======================= */
+  // Ported from the BCN dashboard, adapted to the whole league: pick a TEAM, then a
+  // player (+ optional compare from any club). Stat cards / radar / head-to-head bars
+  // read the season aggregates already in players.js; the action maps read a per-team
+  // event file (player_lab/<slug>.js) fetched on demand — like match pages load their
+  // matches_detail. No tackles map (league matches_detail carries no tackle events).
+  var PL_ACC = "#3ddc97", PL_BLUE = "#4ea1ff", PL_MUTED = "#93a0bd", PL_RED = "#ff5e7a";
+  var PL = { team: null, main: null, cmp: null };
+  var PL_MAPS = [["shots", "Shots"], ["dribbles", "Take-ons"], ["passes", "Passes"], ["prog", "Progressive passes"]];
+  var PL_RADAR = [
+    { k: "g", t: "Finishing" }, { k: "ga", t: "G+A" }, { k: "shots", t: "Shooting" },
+    { k: "keyPasses", t: "Creativity" }, { k: "dribbles", t: "Dribbling" },
+    { k: "def", t: "Defending" }, { k: "aerials", t: "Aerials" }, { k: "rating", t: "Rating", raw: true }
+  ];
+  function plN2(x) { return (Math.round((x || 0) * 100) / 100).toFixed(2); }
+  function plSgn(x) { x = Math.round((x || 0) * 100) / 100; return (x > 0 ? "+" : "") + x.toFixed(2); }
+  function plSlug(t) { return t.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, ""); }
+  function plFind(team, name) {
+    for (var i = 0; i < PLAYERS.length; i++) if (PLAYERS[i].team === team && PLAYERS[i].name === name) return PLAYERS[i];
+    return null;
+  }
+  function plPer90(p, k) {
+    var m = p.mins || 0;
+    if (k === "def") return m ? ((p.tackles || 0) + (p.interceptions || 0)) / m * 90 : 0;
+    return m ? (p[k] || 0) / m * 90 : 0;
+  }
+  function plVal(p, mt) { return mt.raw ? (p[mt.k] || 0) : plPer90(p, mt.k); }
+  function plPct(pool, val, getter) {
+    var below = 0;
+    for (var i = 0; i < pool.length; i++) if (getter(pool[i]) <= val) below++;
+    return pool.length ? Math.round(100 * below / pool.length) : 0;
+  }
+  // hover tooltip on the SVG marks — reuses the shared floating #tooltip + tipHTML
+  function plTipWire(host) {
+    if (!host || host._plTip) return;
+    host._plTip = 1;
+    host.addEventListener("pointermove", function (e) {
+      var t = e.target, inf = t && t.getAttribute && t.getAttribute("data-info");
+      if (inf) {
+        tooltip.innerHTML = tipHTML(inf); tooltip.style.opacity = "1";
+        tooltip.style.left = (e.clientX + 14) + "px"; tooltip.style.top = (e.clientY + 14) + "px";
+      } else tooltip.style.opacity = "0";
+    });
+    host.addEventListener("pointerleave", function () { tooltip.style.opacity = "0"; });
+  }
+
+  // stat card; shows a second (compare) player's value SIDE BY SIDE when picked
+  function plCard(mv, cv, k, cls) {
+    if (cv == null) return '<div class="stat"><div class="v ' + (cls || "") + '">' + mv + '</div><div class="k">' + k + "</div></div>";
+    return '<div class="stat"><div class="cmp-vals"><div class="v accent">' + mv +
+      '</div><div class="v2">' + cv + '</div></div><div class="k">' + k + "</div></div>";
+  }
+
+  function plRadar(host, players, pool) {
+    var W = 360, H = 340, cx = W / 2, cy = H / 2 + 6, R = 118, N = PL_RADAR.length, i, g;
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
+    for (g = 1; g <= 4; g++) {
+      var ring = [];
+      for (i = 0; i < N; i++) { var a = -Math.PI / 2 + i / N * 2 * Math.PI, rr = R * g / 4; ring.push((cx + rr * Math.cos(a)).toFixed(1) + "," + (cy + rr * Math.sin(a)).toFixed(1)); }
+      svg.push('<polygon points="' + ring.join(" ") + '" fill="none" stroke="#26304d" stroke-width="0.8"/>');
+    }
+    for (i = 0; i < N; i++) {
+      var a2 = -Math.PI / 2 + i / N * 2 * Math.PI;
+      var lx = cx + (R + 16) * Math.cos(a2), ly = cy + (R + 16) * Math.sin(a2);
+      var anc = Math.abs(Math.cos(a2)) < 0.3 ? "middle" : (Math.cos(a2) > 0 ? "start" : "end");
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a2)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a2)).toFixed(1) + '" stroke="#26304d" stroke-width="0.8"/>');
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 3).toFixed(1) + '" fill="' + PL_MUTED + '" font-size="10.5" text-anchor="' + anc + '">' + PL_RADAR[i].t + "</text>");
+    }
+    var cols = [PL_ACC, PL_BLUE];
+    players.forEach(function (p, pi) {
+      var pts = [], dots = "";
+      for (i = 0; i < N; i++) {
+        var mt = PL_RADAR[i], val = plVal(p, mt);
+        var pct = plPct(pool, val, (function (m) { return function (q) { return plVal(q, m); }; })(mt)) / 100;
+        var a3 = -Math.PI / 2 + i / N * 2 * Math.PI, rr2 = R * Math.max(0.04, pct);
+        var vx = cx + rr2 * Math.cos(a3), vy = cy + rr2 * Math.sin(a3);
+        pts.push(vx.toFixed(1) + "," + vy.toFixed(1));
+        var info = p.name + " — " + mt.t + ": " + Math.round(pct * 100) + " pctl (" + val.toFixed(2) + (mt.raw ? "" : "/90") + ")";
+        dots += '<circle cx="' + vx.toFixed(1) + '" cy="' + vy.toFixed(1) + '" r="3.4" fill="' + cols[pi] + '" stroke="#0b0f1a" stroke-width="1" data-info="' + esc(info) + '"/>';
+      }
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="' + cols[pi] + '" fill-opacity="0.18" stroke="' + cols[pi] + '" stroke-width="2"/>');
+      svg.push(dots);
+    });
+    svg.push("</svg>");
+    host.innerHTML = svg.join("");
+    plTipWire(host);
+    var leg = document.getElementById("plRadarLegend");
+    if (leg) leg.innerHTML = players.map(function (p, pi) { return '<span class="pl-leg"><i class="pl-sw" style="background:' + cols[pi] + '"></i>' + esc(p.name) + "</span>"; }).join("");
+  }
+
+  // --- action maps: shots on a vertical HALF pitch (goal on top); rest on the full pitch
+  var _plGid = 0, PL_HPW = 68, PL_HPH = 52;
+  function plMapX(wy) { return (100 - wy) / 100 * PL_HPW; }
+  function plMapY(wx) { return Math.max(-1, Math.min(1.03, (100 - wx) / 50)) * PL_HPH; }
+  function plPitchHalf(inner) {
+    var midx = PL_HPW / 2, boxW = 40.3, boxD = 16.5, sixW = 18.32, sixD = 5.5, goalW = 7.32;
+    var s = '<svg viewBox="-1 -3 ' + (PL_HPW + 2) + " " + (PL_HPH + 5) + '" width="100%" style="display:block;background:#101a2e;border-radius:6px">';
+    s += '<rect x="0.3" y="0.3" width="' + (PL_HPW - 0.6) + '" height="' + (PL_HPH - 0.6) + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
+    s += '<rect x="' + (midx - boxW / 2).toFixed(1) + '" y="0.3" width="' + boxW + '" height="' + boxD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
+    s += '<rect x="' + (midx - sixW / 2).toFixed(1) + '" y="0.3" width="' + sixW + '" height="' + sixD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
+    s += '<rect x="' + (midx - goalW / 2).toFixed(1) + '" y="-1.6" width="' + goalW + '" height="1.6" fill="none" stroke="#43e8a0" stroke-width="0.5"/>';
+    s += '<path d="M ' + (midx - 7.3) + " " + boxD + " A 9.15 9.15 0 0 0 " + (midx + 7.3) + " " + boxD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
+    return s + inner + "</svg>";
+  }
+  function plPitchFull(inner) {
+    return '<svg viewBox="0 0 100 64" width="100%" style="display:block;background:#101a2e;border-radius:6px">' +
+      '<rect x="0.4" y="0.4" width="99.2" height="63.2" fill="none" stroke="#26304d" stroke-width="0.4"/>' +
+      '<line x1="50" y1="0" x2="50" y2="64" stroke="#26304d" stroke-width="0.4"/>' +
+      '<circle cx="50" cy="32" r="7" fill="none" stroke="#26304d" stroke-width="0.4"/>' +
+      '<rect x="83" y="18" width="17" height="28" fill="none" stroke="#26304d" stroke-width="0.4"/>' +
+      '<rect x="0" y="18" width="17" height="28" fill="none" stroke="#26304d" stroke-width="0.4"/>' + inner + "</svg>";
+  }
+  function plGraph(host, events, kind, color) {
+    if (!host) return;
+    events = events || [];
+    if (events.length > 400) { var st = Math.ceil(events.length / 400); events = events.filter(function (_, ix) { return ix % st === 0; }); }
+    var gid = "plg" + (_plGid++), GREEN = "#43e8a0", RED = PL_RED, half = kind === "shots";
+    function di(t) { return ' data-info="' + esc(t) + '"'; }
+    function opp(e) { var o = e[e.length - 1]; return o ? " — vs " + o : ""; }
+    function pt(wx, wy) { return half ? [plMapX(wy), plMapY(wx)] : [wx, 64 - wy * 0.64]; }
+    var s = '<defs><marker id="' + gid + 'g" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="' + GREEN + '"/></marker>' +
+      '<marker id="' + gid + 'r" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="' + RED + '"/></marker></defs>';
+    if (kind === "shots") {
+      events.forEach(function (e) { // [x,y,gy,xg,goal,ot,min,opp]
+        var a = pt(e[0], e[1]), b = pt(100, e[2]), xg = e[3], goal = e[4], ot = e[5];
+        var r = 0.25 + Math.sqrt(xg) * 0.7, col = goal ? GREEN : RED, solid = goal || ot;
+        var out = goal ? "GOAL" : ot ? "On target" : "Off target / blocked";
+        var info = e[6] + "' — xG " + xg.toFixed(2) + " · " + out + opp(e);
+        s += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) +
+          '" stroke="' + col + '" stroke-width="' + (goal ? 0.3 : 0.2) + '" stroke-opacity="' + (goal ? 0.8 : 0.28) + '"/>';
+        s += '<circle cx="' + a[0].toFixed(1) + '" cy="' + a[1].toFixed(1) + '" r="' + r.toFixed(1) +
+          '" fill="' + (solid ? col : "none") + '" fill-opacity="0.6" stroke="' + col + '" stroke-width="' + (solid ? 0 : 0.32) + '"' + di(info) + "/>";
+      });
+    } else { // dribbles / passes / prog on the full pitch (attacking right)
+      events.forEach(function (e) {
+        var a = pt(e[0], e[1]), ok, ex, ey, prog = 0, mn, info, b;
+        if (kind === "dribbles") { // [x,y,-1,-1,ok,min,opp]
+          ok = e[4]; mn = e[5]; info = mn + "' — Take-on " + (ok ? "won" : "lost") + opp(e);
+          var c0 = ok ? GREEN : RED;
+          s += '<circle cx="' + a[0].toFixed(1) + '" cy="' + a[1].toFixed(1) + '" r="0.9" fill="' + (ok ? c0 : "none") +
+            '" stroke="' + c0 + '" stroke-width="0.4"' + di(info) + "/>"; return;
+        }
+        b = pt(e[2], e[3]); ex = b[0]; ey = b[1]; ok = e[4]; prog = kind === "prog" ? 1 : e[5]; mn = e[6];
+        info = mn + "' — " + (ok ? "Complete" : "Incomplete") + (prog ? " · progressive" : "") + opp(e);
+        var col = ok ? (prog ? GREEN : "#1f9d5e") : RED, mk = "url(#" + gid + (ok ? "g" : "r") + ")";
+        s += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + ex.toFixed(1) + '" y2="' + ey.toFixed(1) +
+          '" stroke="' + col + '" stroke-width="' + (prog ? 0.45 : 0.28) + '" stroke-opacity="0.72"' + (ok ? "" : ' stroke-dasharray="0.9 0.9"') + ' marker-end="' + mk + '"' + di(info) + "/>";
+      });
+    }
+    host.innerHTML = half ? plPitchHalf(s) : plPitchFull(s);
+    plTipWire(host);
+  }
+  function plMapSummary(arr, kind, passes) {
+    arr = arr || []; var n = arr.length, i;
+    if (kind === "shots") {
+      var g = 0, ot = 0;
+      for (i = 0; i < n; i++) { if (arr[i][4]) g++; if (arr[i][5]) ot++; }
+      return n + " shots · " + ot + " on target · " + g + " goals · " + (n ? Math.round(100 * g / n) : 0) + "% conv";
+    }
+    if (kind === "prog") { var tp = passes ? passes.length : 0; return n + " progressive · " + (tp ? Math.round(100 * n / tp) : 0) + "% of passes"; }
+    var oi = 4, ok = 0;
+    for (i = 0; i < n; i++) if (arr[i][oi]) ok++;
+    var w = { dribbles: ["take-ons", "won", "lost"], passes: ["passes", "complete", "incomplete"] }[kind] || ["", "ok", "fail"];
+    return n + " " + w[0] + " · " + ok + " " + w[1] + " · " + (n - ok) + " " + w[2] + " · " + (n ? Math.round(100 * ok / n) : 0) + "%";
+  }
+
+  function plEvents(team, name) { var t = (window.LL_PLAYERLAB || {})[team] || {}; return t[name] || { shots: [], dribbles: [], passes: [] }; }
+  function plDataFor(ev, kind) { return kind === "prog" ? (ev.passes || []).filter(function (q) { return q[5]; }) : (ev[kind] || []); }
+  function plLoadTeam(team, cb) {
+    if ((window.LL_PLAYERLAB || {})[team]) { cb(); return; }
+    var sc = document.createElement("script");
+    sc.src = "player_lab/" + plSlug(team) + ".js";
+    sc.onload = cb; sc.onerror = function () { cb(); };
+    document.head.appendChild(sc);
+  }
+  function plDrawMaps(main, pc, cmpTeam) {
+    var ea = plEvents(PL.team, main.name), eb = pc ? plEvents(cmpTeam, pc.name) : null;
+    var cols = pc ? "1fr 1fr" : "1fr", host = document.getElementById("plHeatGrid");
+    host.innerHTML = PL_MAPS.map(function (mt, i) {
+      var sumA = '<div class="pl-map-sum" style="color:' + PL_ACC + '">' + (pc ? "<b>" + esc(main.name) + "</b> · " : "") + plMapSummary(plDataFor(ea, mt[0]), mt[0], ea.passes) + "</div>";
+      var sumB = pc ? '<div class="pl-map-sum" style="color:' + PL_BLUE + '"><b>' + esc(pc.name) + "</b> · " + plMapSummary(plDataFor(eb, mt[0]), mt[0], eb.passes) + "</div>" : "";
+      return '<div class="pl-map"><div class="pl-map-title">' + mt[1] + "</div>" + sumA + sumB +
+        '<div class="pl-map-cols" style="grid-template-columns:' + cols + '"><div id="plg_a_' + i + '"></div>' + (pc ? '<div id="plg_b_' + i + '"></div>' : "") + "</div></div>";
+    }).join("");
+    PL_MAPS.forEach(function (mt, i) {
+      plGraph(document.getElementById("plg_a_" + i), plDataFor(ea, mt[0]), mt[0], PL_ACC);
+      if (pc) plGraph(document.getElementById("plg_b_" + i), plDataFor(eb, mt[0]), mt[0], PL_BLUE);
+    });
+  }
+  function plRender() {
+    if (!PLAYERS.length || !PL.team) { var h = document.getElementById("plStats"); if (h) h.innerHTML = ""; return; }
+    var main = plFind(PL.team, PL.main); if (!main) return;
+    var cmpTeam = null, cmpName = null;
+    if (PL.cmp) { var parts = PL.cmp.split(" @@ "); cmpTeam = parts[0]; cmpName = parts[1]; }
+    var pc = cmpName ? plFind(cmpTeam, cmpName) : null;
+    function rtg(q) { return q.rating ? q.rating.toFixed(2) : "&ndash;"; }
+    var s = "";
+    s += plCard(main.mp, pc ? pc.mp : null, "Apps");
+    s += plCard(main.mins, pc ? pc.mins : null, "Minutes");
+    s += plCard(main.g, pc ? pc.g : null, "Goals", "accent");
+    s += plCard(main.a, pc ? pc.a : null, "Assists", "blue");
+    s += plCard(plN2(main.xg), pc ? plN2(pc.xg) : null, "xG");
+    s += plCard(plSgn(main.xg_diff), pc ? plSgn(pc.xg_diff) : null, "xG&plusmn;", main.xg_diff >= 0 ? "pos" : "neg");
+    s += plCard(plN2(main.xa), pc ? plN2(pc.xa) : null, "xA", "blue");
+    s += plCard(plN2(main.xgi), pc ? plN2(pc.xgi) : null, "xGI", "accent");
+    s += plCard(main.shots, pc ? pc.shots : null, "Shots");
+    s += plCard(main.keyPasses, pc ? pc.keyPasses : null, "Key Passes");
+    s += plCard(rtg(main), pc ? rtg(pc) : null, "Avg Rating", "accent");
+    document.getElementById("plStats").innerHTML = s;
+
+    var pool = PLAYERS.filter(function (q) { return (q.mins || 0) >= 450; });
+    var players = [main]; if (pc) players.push(pc);
+    plRadar(document.getElementById("plRadar"), players, pool.length ? pool : PLAYERS);
+
+    var barsCard = document.getElementById("plBarsCard");
+    if (pc) {
+      document.getElementById("plCompareTitle").innerHTML = esc(main.name) + " vs " + esc(pc.name);
+      var mets = [["g", "Goals"], ["a", "Assists"], ["shots", "Shots"], ["keyPasses", "Key passes"],
+                  ["dribbles", "Take-ons"], ["tackles", "Tackles"], ["interceptions", "Interceptions"], ["passes", "Passes"]];
+      document.getElementById("plCompareBody").innerHTML = mets.map(function (mt) {
+        var av = main[mt[0]] || 0, bv = pc[mt[0]] || 0, t = (av + bv) || 1, ap = Math.round(100 * av / t);
+        return '<div class="stat-cmp"><div class="sc-val' + (av >= bv ? " win" : "") + '">' + av + "</div>" +
+          '<div><div class="sc-label">' + mt[1] + '</div><div class="sc-bar">' +
+          '<div class="sc-fill h" style="width:' + ap + '%"></div><div class="sc-fill a" style="width:' + (100 - ap) + '%"></div></div></div>' +
+          '<div class="sc-val' + (bv > av ? " win" : "") + '">' + bv + "</div></div>";
+      }).join("");
+      barsCard.style.display = "";
+    } else barsCard.style.display = "none";
+
+    document.getElementById("plHeatNameA").textContent = main.name;
+    document.getElementById("plHeatNameB").textContent = pc ? pc.name : "";
+    plLoadTeam(PL.team, function () {
+      if (pc) plLoadTeam(cmpTeam, function () { plDrawMaps(main, pc, cmpTeam); });
+      else plDrawMaps(main, null, null);
+    });
+  }
+  function plTeamList() {
+    var seen = {}, out = [];
+    PLAYERS.forEach(function (p) { if (p.team && !seen[p.team]) { seen[p.team] = 1; out.push(p.team); } });
+    return out.sort();
+  }
+  function plBuildPlayers() {
+    var mainSel = document.getElementById("plMain");
+    var roster = PLAYERS.filter(function (p) { return p.team === PL.team && (p.mp || 0) > 0; }).sort(function (a, b) { return (b.ga || 0) - (a.ga || 0); });
+    mainSel.innerHTML = roster.map(function (p) { return '<option value="' + esc(p.name) + '">' + esc(p.name) + "</option>"; }).join("");
+    if (!(PL.main && roster.some(function (p) { return p.name === PL.main; }))) PL.main = (roster[0] || {}).name || null;
+    mainSel.value = PL.main || "";
+  }
+  function plBuildCompare() {
+    var cmpSel = document.getElementById("plCompare"), byTeam = {};
+    PLAYERS.filter(function (p) { return (p.mp || 0) > 0; }).forEach(function (p) { (byTeam[p.team] = byTeam[p.team] || []).push(p); });
+    var opts = '<option value="">&mdash; none &mdash;</option>';
+    Object.keys(byTeam).sort().forEach(function (t) {
+      opts += '<optgroup label="' + esc(t) + '">';
+      byTeam[t].sort(function (a, b) { return (b.ga || 0) - (a.ga || 0); }).forEach(function (p) {
+        opts += '<option value="' + esc(t + " @@ " + p.name) + '">' + esc(p.name) + "</option>";
+      });
+      opts += "</optgroup>";
+    });
+    cmpSel.innerHTML = opts;
+    cmpSel.value = PL.cmp || "";
+    if (cmpSel.value !== (PL.cmp || "")) PL.cmp = null;
+  }
+  function plBuild() {
+    var teamSel = document.getElementById("plTeam");
+    if (!teamSel) return;
+    var teams = plTeamList();
+    if (!teams.length) return;
+    PL.team = (PL.team && teams.indexOf(PL.team) >= 0) ? PL.team : teams[0];
+    teamSel.innerHTML = teams.map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + "</option>"; }).join("");
+    teamSel.value = PL.team;
+    plBuildPlayers();
+    plBuildCompare();
+  }
+  function wirePlayerLab() {
+    var teamSel = document.getElementById("plTeam"), mainSel = document.getElementById("plMain"), cmpSel = document.getElementById("plCompare");
+    if (!teamSel || teamSel._wired) return;
+    teamSel._wired = 1;
+    teamSel.addEventListener("change", function () { PL.team = teamSel.value; plBuildPlayers(); plRender(); });
+    mainSel.addEventListener("change", function () { PL.main = mainSel.value; plRender(); });
+    cmpSel.addEventListener("change", function () { PL.cmp = cmpSel.value || null; plRender(); });
+  }
+  function refreshPlayerLab() { plBuild(); plRender(); }
 
   function initControls() {
     // tabs
@@ -1767,6 +2052,7 @@
     // Standouts + Team Lab one-time control wiring (renders happen per season in renderAll)
     wireStandouts();
     wireTeamLab();
+    wirePlayerLab();
   }
 
   initControls();
