@@ -1733,7 +1733,7 @@
   // event file (player_lab/<slug>.js) fetched on demand — like match pages load their
   // matches_detail. No tackles map (league matches_detail carries no tackle events).
   var PL_ACC = "#3ddc97", PL_BLUE = "#4ea1ff", PL_MUTED = "#93a0bd", PL_RED = "#ff5e7a";
-  var PL = { team: null, main: null, cmp: null, cmpTeams: {} };
+  var PL = { main: null, cmp: null, teams: {} };   // main/cmp store "Team @@ Player"
   var PL_MAPS = [["shots", "Shots"], ["dribbles", "Take-ons"], ["passes", "Passes"], ["prog", "Progressive passes"]];
   var PL_RADAR = [
     { k: "g", t: "Finishing" }, { k: "ga", t: "G+A" }, { k: "shots", t: "Shooting" },
@@ -1902,7 +1902,7 @@
     document.head.appendChild(sc);
   }
   function plDrawMaps(main, pc, cmpTeam) {
-    var ea = plEvents(PL.team, main.name), eb = pc ? plEvents(cmpTeam, pc.name) : null;
+    var ea = plEvents(main.team, main.name), eb = pc ? plEvents(cmpTeam, pc.name) : null;
     var cols = pc ? "1fr 1fr" : "1fr", host = document.getElementById("plHeatGrid");
     host.innerHTML = PL_MAPS.map(function (mt, i) {
       var sumA = '<div class="pl-map-sum" style="color:' + PL_ACC + '">' + (pc ? "<b>" + esc(main.name) + "</b> · " : "") + plMapSummary(plDataFor(ea, mt[0]), mt[0], ea.passes) + "</div>";
@@ -1916,8 +1916,9 @@
     });
   }
   function plRender() {
-    if (!PLAYERS.length || !PL.team) { var h = document.getElementById("plStats"); if (h) h.innerHTML = ""; return; }
-    var main = plFind(PL.team, PL.main); if (!main) return;
+    if (!PLAYERS.length || !PL.main) { var h = document.getElementById("plStats"); if (h) h.innerHTML = ""; return; }
+    var mparts = PL.main.split(" @@ ");
+    var main = plFind(mparts[0], mparts[1]); if (!main) return;
     var cmpTeam = null, cmpName = null;
     if (PL.cmp) { var parts = PL.cmp.split(" @@ "); cmpTeam = parts[0]; cmpName = parts[1]; }
     var pc = cmpName ? plFind(cmpTeam, cmpName) : null;
@@ -1957,33 +1958,31 @@
 
     document.getElementById("plHeatNameA").textContent = main.name;
     document.getElementById("plHeatNameB").textContent = pc ? pc.name : "";
-    plLoadTeam(PL.team, function () {
-      if (pc) plLoadTeam(cmpTeam, function () { plDrawMaps(main, pc, cmpTeam); });
-      else plDrawMaps(main, null, null);
+    // stamp the render so a slower earlier load can't overdraw a newer selection
+    var seq = ++_plRenderSeq;
+    plLoadTeam(main.team, function () {
+      if (pc) plLoadTeam(cmpTeam, function () { if (seq === _plRenderSeq) plDrawMaps(main, pc, cmpTeam); });
+      else if (seq === _plRenderSeq) plDrawMaps(main, null, null);
     });
   }
+  var _plRenderSeq = 0;
   function plTeamList() {
     var seen = {}, out = [];
     PLAYERS.forEach(function (p) { if (p.team && !seen[p.team]) { seen[p.team] = 1; out.push(p.team); } });
     return out.sort();
   }
-  function plBuildPlayers() {
-    var mainSel = document.getElementById("plMain");
-    var roster = PLAYERS.filter(function (p) { return p.team === PL.team && (p.mp || 0) > 0; }).sort(function (a, b) { return (b.ga || 0) - (a.ga || 0); });
-    mainSel.innerHTML = roster.map(function (p) { return '<option value="' + esc(p.name) + '">' + esc(p.name) + "</option>"; }).join("");
-    if (!(PL.main && roster.some(function (p) { return p.name === PL.main; }))) PL.main = (roster[0] || {}).name || null;
-    mainSel.value = PL.main || "";
+  function plTeamsActive() {
+    return Object.keys(PL.teams || {}).filter(function (k) { return PL.teams[k]; });
   }
-  function plCmpTeamsActive() {
-    return Object.keys(PL.cmpTeams || {}).filter(function (k) { return PL.cmpTeams[k]; });
+  function plPool() {
+    // players from the badge-selected teams (none selected = the whole league)
+    var filtered = plTeamsActive().length > 0;
+    return PLAYERS.filter(function (p) { return (p.mp || 0) > 0 && (!filtered || PL.teams[p.team]); });
   }
-  function plBuildCompare() {
-    // Compare-player list: filtered to the badge-selected teams (none selected = all).
-    var cmpSel = document.getElementById("plCompare"), byTeam = {};
-    var filtered = plCmpTeamsActive().length > 0;
-    PLAYERS.filter(function (p) { return (p.mp || 0) > 0 && (!filtered || PL.cmpTeams[p.team]); })
-      .forEach(function (p) { (byTeam[p.team] = byTeam[p.team] || []).push(p); });
-    var opts = '<option value="">&mdash; none &mdash;</option>';
+  function plGroupedOptions(pool, withNone) {
+    var byTeam = {};
+    pool.forEach(function (p) { (byTeam[p.team] = byTeam[p.team] || []).push(p); });
+    var opts = withNone ? '<option value="">&mdash; none &mdash;</option>' : "";
     Object.keys(byTeam).sort().forEach(function (t) {
       opts += '<optgroup label="' + esc(t) + '">';
       byTeam[t].sort(function (a, b) { return (b.ga || 0) - (a.ga || 0); }).forEach(function (p) {
@@ -1991,19 +1990,33 @@
       });
       opts += "</optgroup>";
     });
-    cmpSel.innerHTML = opts;
+    return opts;
+  }
+  function plBuildPlayers() {
+    var mainSel = document.getElementById("plMain"), pool = plPool();
+    mainSel.innerHTML = plGroupedOptions(pool, false);
+    var ok = PL.main && pool.some(function (p) { return (p.team + " @@ " + p.name) === PL.main; });
+    if (!ok) {
+      var top = pool.slice().sort(function (a, b) { return (b.ga || 0) - (a.ga || 0); })[0];
+      PL.main = top ? (top.team + " @@ " + top.name) : null;
+    }
+    mainSel.value = PL.main || "";
+  }
+  function plBuildCompare() {
+    var cmpSel = document.getElementById("plCompare");
+    cmpSel.innerHTML = plGroupedOptions(plPool(), true);
     cmpSel.value = PL.cmp || "";
     if (cmpSel.value !== (PL.cmp || "")) PL.cmp = null;
   }
-  // Clickable team badges filtering where the compare player comes from. Multi-select
-  // (click to toggle); "All" clears. Rebuilt per season; one delegated click handler.
+  // Clickable team badges — THE team filter for the whole lab (replaces the old Team
+  // dropdown). Toggle one or more clubs to narrow BOTH player lists; "All" clears.
   function plBuildBadges() {
     var host = document.getElementById("plBadges");
     if (!host) return;
-    var any = plCmpTeamsActive().length > 0;
+    var any = plTeamsActive().length > 0;
     host.innerHTML = '<button type="button" class="pl-badge pl-badge-all' + (any ? "" : " on") + '" data-team="">All</button>' +
       plTeamList().map(function (t) {
-        return '<button type="button" class="pl-badge' + (PL.cmpTeams[t] ? " on" : "") +
+        return '<button type="button" class="pl-badge' + (PL.teams[t] ? " on" : "") +
           '" data-team="' + esc(t) + '" title="' + esc(t) + '">' + logoImg(t) + "</button>";
       }).join("");
     if (!host._wired) {
@@ -2012,36 +2025,27 @@
         var btn = e.target && e.target.closest ? e.target.closest(".pl-badge") : null;
         if (!btn) return;
         var t = btn.getAttribute("data-team");
-        if (!t) PL.cmpTeams = {};                      // "All" resets the filter
-        else PL.cmpTeams[t] = !PL.cmpTeams[t];
-        // drop the current compare pick if its team fell out of the filter
-        if (PL.cmp) {
-          var ct = PL.cmp.split(" @@ ")[0];
-          if (plCmpTeamsActive().length && !PL.cmpTeams[ct]) PL.cmp = null;
-        }
+        if (!t) PL.teams = {};                      // "All" resets the filter
+        else PL.teams[t] = !PL.teams[t];
+        // drop the compare pick if its club fell out; the main pick re-defaults in build
+        if (PL.cmp && plTeamsActive().length && !PL.teams[PL.cmp.split(" @@ ")[0]]) PL.cmp = null;
         plBuildBadges();
+        plBuildPlayers();
         plBuildCompare();
         plRender();
       });
     }
   }
   function plBuild() {
-    var teamSel = document.getElementById("plTeam");
-    if (!teamSel) return;
-    var teams = plTeamList();
-    if (!teams.length) return;
-    PL.team = (PL.team && teams.indexOf(PL.team) >= 0) ? PL.team : teams[0];
-    teamSel.innerHTML = teams.map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + "</option>"; }).join("");
-    teamSel.value = PL.team;
-    plBuildPlayers();
+    if (!document.getElementById("plMain") || !PLAYERS.length) return;
     plBuildBadges();
+    plBuildPlayers();
     plBuildCompare();
   }
   function wirePlayerLab() {
-    var teamSel = document.getElementById("plTeam"), mainSel = document.getElementById("plMain"), cmpSel = document.getElementById("plCompare");
-    if (!teamSel || teamSel._wired) return;
-    teamSel._wired = 1;
-    teamSel.addEventListener("change", function () { PL.team = teamSel.value; plBuildPlayers(); plRender(); });
+    var mainSel = document.getElementById("plMain"), cmpSel = document.getElementById("plCompare");
+    if (!mainSel || mainSel._wired) return;
+    mainSel._wired = 1;
     mainSel.addEventListener("change", function () { PL.main = mainSel.value; plRender(); });
     cmpSel.addEventListener("change", function () { PL.cmp = cmpSel.value || null; plRender(); });
   }

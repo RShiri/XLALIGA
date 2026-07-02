@@ -65,7 +65,9 @@
   <section id="view-players" class="view">
     <div class="section-head">
       <h2>Player Statistics</h2>
-      <p>Goals, assists, xG and ratings aggregated across every deep-scraped match. Pick a leaderboard.</p>
+      <p>Goals, assists, xG and ratings aggregated across every deep-scraped match. Pick a leaderboard.
+         xG and xA come from <b>our own shot model</b>, trained on 11,830 real shots — the xG Analysis tab
+         explains how it's built.</p>
     </div>
     <div class="controls">
       <div class="seg">
@@ -282,7 +284,15 @@
       <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. A tap-in might be
          0.7 xG; a hopeful 30-metre strike 0.03. Sum a team's shots and you get how many goals an <i>average</i>
          finisher would score from those chances — a better "who deserved it" number than the scoreline alone.</p>
-      <p class="explainer-note">La Liga xG is layered in from the deep-scrape (Understat + WhoScored). Until a match is
+      <p><b>Where does the xG itself come from? We built the model ourselves.</b> Every shot is scored by a
+         logistic-regression model trained on <b>11,830 real shots</b> — the whole 2025/26 La Liga season plus the
+         2026 World Cup — against what actually happened to them. It weighs the shot's <b>distance</b>, the
+         <b>angle the goal mouth opens up</b> from that spot, whether it was a <b>header</b>, an Opta
+         <b>big chance</b>, and the <b>situation</b> (open play, free kick, corner, set piece or fast break). A
+         per-league finishing calibration then keeps summed xG in line with goals actually scored — penalties are
+         fixed at 0.76. The same model runs across our La Liga, World Cup and FC Barcelona dashboards, so the
+         numbers compare cleanly everywhere.</p>
+      <p class="explainer-note">La Liga xG is computed from the deep-scraped WhoScored shot data. Until a match is
          deep-scraped it contributes to the table but not to these charts.</p>
     </div>
     <div class="stats-strip" id="xgStats"></div>
@@ -404,17 +414,18 @@
   <section id="view-playerlab" class="view">
     <div class="section-head">
       <h2>Player Lab</h2>
-      <p>Pick a <b>team</b>, then a <b>player</b> — and optionally a second player from any club to compare.
-         Season totals, a percentile radar vs the league, head-to-head bars, and shot / take-on / pass maps.</p>
-    </div>
-    <div class="controls pl-controls">
-      <label>Team <select id="plTeam"></select></label>
-      <label>Player <select id="plMain"></select></label>
-      <label>Compare <select id="plCompare"></select></label>
+      <p>Click the <b>club badges</b> to filter, then pick a <b>player</b> — and optionally a second player
+         to compare. Season totals, a percentile radar vs the league, head-to-head bars, and
+         shot / take-on / pass maps. xG, xA and xGI come from <b>our own shot model</b> — see the
+         xG Analysis tab for how it's built.</p>
     </div>
     <div class="pl-badges-wrap">
-      <span class="pl-badges-label">Compare from</span>
+      <span class="pl-badges-label">Teams</span>
       <div class="pl-badges" id="plBadges"></div>
+    </div>
+    <div class="controls pl-controls">
+      <label>Player <select id="plMain"></select></label>
+      <label>Compare <select id="plCompare"></select></label>
     </div>
     <div class="stats-strip" id="plStats"></div>
     <div class="pl-grid">
