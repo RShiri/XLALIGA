@@ -964,12 +964,12 @@
   var soSc = { x: "xg", y: "g", size: "shots", pos: "all", mins: 900 };
   var SO_PRESETS = [
     { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 450 },
-    { label: "🎨 Creators", x: "keyPasses", y: "passes", size: "dribbles", pos: "all", mins: 900 },
+    { label: "🎨 Creators", x: "xa", y: "a", size: "keyPasses", pos: "all", mins: 900 },
     { label: "⚡ Dribble & create", x: "dribbles", y: "keyPasses", size: "touches", pos: "all", mins: 900 },
     { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 900 },
     { label: "🧱 Defensive rock", x: "clearances", y: "aerials", size: "tackles", pos: "DEF", mins: 900 },
     { label: "🎽 Sharpshooters", x: "shots", y: "sot", size: "xg", pos: "all", mins: 450 },
-    { label: "⭐ Complete player", x: "ga", y: "rating", size: "xg", pos: "all", mins: 900 }
+    { label: "⭐ Complete player", x: "xgi", y: "rating", size: "ga", pos: "all", mins: 900 }
   ];
   function soStatLabel(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[1] : k; }
   function soStatDp(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[2] : 0; }
