@@ -29,7 +29,10 @@ laliga_dashboard/              the website (static, no build step at view time)
   matches_detail/<id>.js       per-match shots/passes/dribbles/goals/lineups ← generated (SHIPPED)
   database/                    CSV + sqlite exports ← generated
   build_data.py build_players.py build_match_details.py build_database.py build_shots.py  builders
-  xg_model.py                  shared shot-extraction + xG model (matches the PNGs)
+  xg_model.py                  shared shot-extraction + xG/xA (routes through xg_core/)
+xg_core/                       THE CANONICAL calibrated models: v2 xG + pass-level xA
+                               artifacts + XGScorer/XAScorer + training CLIs (see its
+                               README; XWORLDCUPTWIT + BCNPROJECT carry vendored copies)
 laliga/                        the pipeline
   build_schedule.py            FotMob token-free sweep → schedules/SCHEDULE_<season>.json
   scrape_whoscored.py          bulk WhoScored crawler (the main backfill tool — see below)
@@ -96,6 +99,14 @@ Resumable (skips matches already saved with events).
 - `run_match.py` auto-pushes generated files via `git_ops.py` when `GIT_TOKEN` is set.
 
 ## Gotchas (hard-won — don't re-break these)
+- **Rebuilding derived data in THIS clone needs `LALIGA_MATCH_DIR`** — the raw scrapes are
+  git-ignored and absent here; point it at the dev copy before running the builders:
+  `$env:LALIGA_MATCH_DIR = "..\XWORLDCUPTWIT\laliga\matches"`. The old
+  `tools/regen_unified.py` path can't feed the pass-level xA model (derived files lack
+  full pass qualifiers) — use the canonical builders.
+- **xG/xA come from `xg_core/` artifacts** (no hard-coded coefficients anywhere anymore).
+  Retrain with `py -m xg_core.train` / `py -m xg_core.train_xa`, then copy `xg_core/` to
+  XWORLDCUPTWIT and BCNPROJECT-main so all three stay on identical models.
 - **undetected-chromedriver is broken on Chrome 149** (SessionNotCreatedException). The scraper
   falls back to **plain Selenium** (Selenium Manager) which works. The fallback catches
   `except Exception` (not just `ImportError`) — keep it that way.
