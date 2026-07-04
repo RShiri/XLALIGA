@@ -231,7 +231,7 @@ def build_season(season):
 
 def main():
     seasons = {}
-    for season in ("2025-26", "2026-27"):
+    for season in ("2024-25", "2025-26", "2026-27"):
         s = build_season(season)
         if s is not None:
             seasons[season] = s

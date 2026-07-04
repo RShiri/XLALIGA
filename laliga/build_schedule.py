@@ -52,6 +52,7 @@ FOTMOB_LEAGUE_NAMES = {"laliga", "laliga ea sports", "la liga"}
 # Season → (start, end) sweep window. Wide enough to catch pre-season openers and any
 # rescheduled final-round games; extra empty days just cost a cheap HTTP request.
 SEASON_WINDOWS: dict[str, tuple[str, str]] = {
+    "2024-25": ("2024-08-01", "2025-06-30"),
     "2025-26": ("2025-08-01", "2026-06-15"),
     "2026-27": ("2026-08-01", "2027-06-15"),
 }
