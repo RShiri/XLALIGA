@@ -3,12 +3,68 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>La Liga — Match Analytics</title>
-  <meta http-equiv="refresh" content="0; url=laliga_dashboard/index.html">
-  <link rel="canonical" href="laliga_dashboard/index.html">
+  <title>Match Analytics — La Liga &amp; Premier League</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 50% -10%, #1b2440 0%, #0b0f1a 60%);
+      color: #e8edf7; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 32px 20px;
+    }
+    header { text-align: center; margin-bottom: 40px; }
+    header h1 { margin: 0 0 8px; font-size: clamp(26px, 5vw, 40px); letter-spacing: .3px; }
+    header p { margin: 0; color: #93a0bd; font-size: 16px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+             gap: 24px; width: 100%; max-width: 760px; }
+    .card {
+      display: block; text-decoration: none; color: inherit;
+      background: #161d31; border: 1px solid #26304d; border-radius: 18px;
+      padding: 34px 28px; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      box-shadow: 0 8px 28px rgba(0,0,0,.35);
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.45); }
+    .card .badge { font-size: 44px; line-height: 1; margin-bottom: 16px; }
+    .card h2 { margin: 0 0 6px; font-size: 24px; }
+    .card h2 span { font-weight: 800; }
+    .card p { margin: 0; color: #93a0bd; font-size: 14px; line-height: 1.5; }
+    .card .go { display: inline-block; margin-top: 18px; font-weight: 700; font-size: 14px; }
+    .laliga { --c: #3ddc97; }
+    .epl    { --c: #e90052; }
+    .card:hover { border-color: var(--c); }
+    .card h2 span, .card .go { color: var(--c); }
+    footer { margin-top: 40px; color: #5b6784; font-size: 13px; text-align: center; }
+    footer a { color: #93a0bd; }
+  </style>
 </head>
 <body>
-  <p>Redirecting to the <a href="laliga_dashboard/index.html">La Liga dashboard</a>…</p>
-  <script>location.replace("laliga_dashboard/index.html");</script>
+  <header>
+    <h1>Match Analytics</h1>
+    <p>Interactive standings, xG labs, shot maps and season projections. Pick a league.</p>
+  </header>
+
+  <div class="cards">
+    <a class="card laliga" href="laliga_dashboard/index.html">
+      <div class="badge">🇪🇸</div>
+      <h2>La<span>Liga</span></h2>
+      <p>Spain's top flight — full 2025/26 season, 380 matches, 600 players, interactive
+         match centres and a Poisson projection.</p>
+      <span class="go">Open La Liga dashboard →</span>
+    </a>
+
+    <a class="card epl" href="epl_dashboard/index.html">
+      <div class="badge">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+      <h2>Premier<span>League</span></h2>
+      <p>England's top flight — same dashboard, standings, xG lab, Team &amp; Player labs
+         and season projection.</p>
+      <span class="go">Open Premier League dashboard →</span>
+    </a>
+  </div>
+
+  <footer>
+    Built from scraped match data (FotMob schedule + WhoScored events) · one shared xG model.
+  </footer>
 </body>
 </html>

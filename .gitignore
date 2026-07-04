@@ -1,9 +1,11 @@
-# Rendered infographic PNGs are produced locally into laliga/output (git-ignored);
-# the tracked, published copies live in laliga_png/.
+# Rendered infographic PNGs are produced locally into laliga/output & epl/output
+# (git-ignored); the tracked, published copies live in laliga_png/ & epl_png/.
 laliga/output/
+epl/output/
 
 # Internal scraper cookie / matchCentre caches
 laliga/matches/**/match_*_cache.json
+epl/matches/**/match_*_cache.json
 
 # Private configuration / credentials
 .env
@@ -20,7 +22,9 @@ env/
 # Logs
 *.log
 
-# Raw WhoScored match JSONs are huge (~2MB each); the dashboard uses the derived
-# laliga_dashboard/matches_detail/*.js instead. Keep raw scrapes local only.
+# Raw WhoScored match JSONs are huge (~2MB each); the dashboards use the derived
+# <league>_dashboard/matches_detail/*.js instead. Keep raw scrapes local only.
 laliga/matches/20*/*.json
+epl/matches/20*/*.json
 laliga_dashboard/matches_detail/.calibrated
+epl_dashboard/matches_detail/.calibrated

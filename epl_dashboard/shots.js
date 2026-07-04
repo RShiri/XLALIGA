@@ -1,0 +1,1 @@
+window.LL_SHOTS = {};
