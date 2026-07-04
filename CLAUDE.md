@@ -80,8 +80,11 @@ powershell -File laliga/register_tasks.ps1 -Season 2026-27   # arm per-match liv
 # (re)scrape rich per-match data (needs Chrome; ~1h for a full season)
 py laliga/scrape_whoscored.py --season 2025-26                # full season (resumable)
 py laliga/scrape_whoscored.py --season 2025-26 --ids 1914240  # specific WhoScored id(s)
-# then rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
-py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_players.py \
+# then rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab;
+# build_player_lab.py reads matches_detail → player_lab/<slug>.js for the Player Lab action maps,
+# season-nested so the maps stay season-scoped like the stat cards/bars):
+py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_player_lab.py \
+  && py laliga_dashboard/build_players.py \
   && py laliga_dashboard/build_database.py && py laliga_dashboard/build_shots.py \
   && py laliga_dashboard/build_data.py
 ```

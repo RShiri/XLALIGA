@@ -9,7 +9,9 @@ progressive passes) need per-player event locations. Those would be huge for all
 demand — we write ONE file per team (player_lab/<slug>.js) that the Player Lab
 fetches when that team is picked.
 
-Each file:  window.LL_PLAYERLAB[<Team>] = { "<player>": {shots, dribbles, passes} }
+Each file:  window.LL_PLAYERLAB[<Team>] = { "<season>": { "<player>": {shots, dribbles, passes} } }
+Events are bucketed by SEASON (derived from each match's date) so the maps stay
+season-scoped — matching the season-keyed stat cards / bars / radar in players.js.
 Event arrays are compact and ordered to match app.js `playerGraph`:
   shots    [x, y, gy, xg, goal, ontarget, min, opp]
   dribbles [x, y, -1, -1, ok, min, opp]        (WhoScored take-ons carry no end point)
@@ -28,6 +30,16 @@ def slug(team):
     return re.sub(r"[^A-Za-z0-9]+", "_", team).strip("_")
 
 
+def season_of(date):
+    """La Liga season label for an ISO match date ("YYYY-MM-DD"). A season starts
+    in July: start year = year if month>=7 else year-1; label "YYYY-YY"."""
+    if not date or len(date) < 7:
+        return None
+    y, mo = int(date[0:4]), int(date[5:7])
+    start = y if mo >= 7 else y - 1
+    return "%d-%02d" % (start, (start + 1) % 100)
+
+
 def _read(path):
     m = re.search(r"=\s*(\{.*\})\s*;?\s*$", open(path, encoding="utf-8").read(), re.S)
     return json.loads(m.group(1)) if m else None
@@ -35,7 +47,7 @@ def _read(path):
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    teams = {}   # team name -> {player -> {"shots":[], "dribbles":[], "passes":[]}}
+    teams = {}   # team -> season -> {player -> {"shots":[], "dribbles":[], "passes":[]}}
 
     for f in sorted(glob.glob(os.path.join(DETAIL_DIR, "*.js"))):
         if os.path.basename(f).startswith("_"):
@@ -43,11 +55,14 @@ def main():
         d = _read(f)
         if not d:
             continue
+        season = season_of(d.get("date"))
+        if not season:
+            continue
         tn = {"home": d["home"]["name"], "away": d["away"]["name"]}
         opp = {"home": d["away"]["name"], "away": d["home"]["name"]}
 
         def rec(team, player):
-            t = teams.setdefault(team, {})
+            t = teams.setdefault(team, {}).setdefault(season, {})
             return t.setdefault(player, {"shots": [], "dribbles": [], "passes": []})
 
         for s in d.get("shots", []):
@@ -84,20 +99,27 @@ def main():
                 int(pa.get("min", 0) or 0), opp[side],
             ])
 
-    # drop empty players; write one file per team
+    # drop empty players; write one season-nested file per team
     idx = {}
-    for team, players in teams.items():
-        players = {p: v for p, v in players.items()
-                   if v["shots"] or v["dribbles"] or v["passes"]}
-        if not players:
+    for team, seasons in teams.items():
+        clean = {}
+        for season, players in seasons.items():
+            players = {p: v for p, v in players.items()
+                       if v["shots"] or v["dribbles"] or v["passes"]}
+            if players:
+                clean[season] = players
+        if not clean:
             continue
         path = os.path.join(OUT_DIR, slug(team) + ".js")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write("window.LL_PLAYERLAB = window.LL_PLAYERLAB || {};\n")
             fh.write("window.LL_PLAYERLAB[" + json.dumps(team, ensure_ascii=False) + "] = ")
-            json.dump(players, fh, ensure_ascii=False, separators=(",", ":"))
+            json.dump(clean, fh, ensure_ascii=False, separators=(",", ":"))
             fh.write(";\n")
-        idx[team] = {"slug": slug(team), "players": len(players)}
+        distinct = set()
+        for players in clean.values():
+            distinct.update(players)
+        idx[team] = {"slug": slug(team), "players": len(distinct), "seasons": sorted(clean)}
 
     with open(os.path.join(OUT_DIR, "_index.js"), "w", encoding="utf-8") as fh:
         fh.write("window.LL_PLAYERLAB_TEAMS = ")
@@ -105,7 +127,8 @@ def main():
         fh.write(";\n")
 
     tot = sum(v["players"] for v in idx.values())
-    print(f"wrote {len(idx)} team files to {OUT_DIR}  ({tot} players total)")
+    nseasons = len({s for v in teams.values() for s in v})
+    print(f"wrote {len(idx)} team files to {OUT_DIR}  ({tot} players across {nseasons} seasons)")
 
 
 if __name__ == "__main__":

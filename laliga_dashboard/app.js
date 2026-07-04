@@ -1958,7 +1958,8 @@
     return n + " " + w[0] + " · " + ok + " " + w[1] + " · " + (n - ok) + " " + w[2] + " · " + (n ? Math.round(100 * ok / n) : 0) + "%";
   }
 
-  function plEvents(team, name) { var t = (window.LL_PLAYERLAB || {})[team] || {}; return t[name] || { shots: [], dribbles: [], passes: [] }; }
+  // season-scoped: index by the currently selected season so the maps match the season-keyed cards/bars
+  function plEvents(team, name) { var t = ((window.LL_PLAYERLAB || {})[team] || {})[season] || {}; return t[name] || { shots: [], dribbles: [], passes: [] }; }
   function plDataFor(ev, kind) { return kind === "prog" ? (ev.passes || []).filter(function (q) { return q[5]; }) : (ev[kind] || []); }
   function plLoadTeam(team, cb) {
     if ((window.LL_PLAYERLAB || {})[team]) { cb(); return; }
@@ -1970,10 +1971,12 @@
   function plDrawMaps(main, pc, cmpTeam) {
     var ea = plEvents(main.team, main.name), eb = pc ? plEvents(cmpTeam, pc.name) : null;
     var cols = pc ? "1fr 1fr" : "1fr", host = document.getElementById("plHeatGrid");
+    host.classList.toggle("compare", !!pc);   // comparing → stack the four maps one per row
     host.innerHTML = PL_MAPS.map(function (mt, i) {
       var sumA = '<div class="pl-map-sum" style="color:' + PL_ACC + '">' + (pc ? "<b>" + esc(main.name) + "</b> · " : "") + plMapSummary(plDataFor(ea, mt[0]), mt[0], ea.passes) + "</div>";
       var sumB = pc ? '<div class="pl-map-sum" style="color:' + PL_BLUE + '"><b>' + esc(pc.name) + "</b> · " + plMapSummary(plDataFor(eb, mt[0]), mt[0], eb.passes) + "</div>" : "";
-      return '<div class="pl-map"><div class="pl-map-title">' + mt[1] + "</div>" + sumA + sumB +
+      return '<div class="pl-map"><div class="pl-map-title">' + mt[1] + "</div>" +
+        '<div class="pl-map-sums" style="grid-template-columns:' + cols + '">' + sumA + sumB + "</div>" +
         '<div class="pl-map-cols" style="grid-template-columns:' + cols + '"><div id="plg_a_' + i + '"></div>' + (pc ? '<div id="plg_b_' + i + '"></div>' : "") + "</div></div>";
     }).join("");
     PL_MAPS.forEach(function (mt, i) {
