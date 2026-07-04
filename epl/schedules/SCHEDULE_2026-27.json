@@ -1,0 +1,8 @@
+{
+  "season": "2026-27",
+  "competition": "Premier League",
+  "fotmob_league_id": "47",
+  "generated_utc": "",
+  "_note": "Placeholder. Fixtures not released yet. Once FotMob lists the 2026/27 Premier League schedule, run:  py epl/build_schedule.py --season 2026-27  to fill this in, then rebuild the dashboard.",
+  "matches": []
+}

@@ -10,8 +10,16 @@ Ported from the WorldCup2026 analytics system to a round-robin league.
 fixtures). New here? Read [`CLAUDE.md`](CLAUDE.md) — the full project guide, current state,
 commands, and gotchas.
 
-**Live dashboard:** `laliga_dashboard/index.html` (root `index.html` redirects there).
-On GitHub Pages: `https://rshiri.github.io/XLALIGA/`.
+**Live dashboard:** root `index.html` is a **league chooser** → `laliga_dashboard/index.html`
+(La Liga) or `epl_dashboard/index.html` (Premier League). On GitHub Pages:
+`https://rshiri.github.io/XLALIGA/`.
+
+**Premier League:** the same system is cloned into `epl/` (pipeline) + `epl_dashboard/` (site),
+FotMob league **47**, WhoScored Region 252/Tournament 2, Understat slug `EPL`. It ships
+**pipeline-ready and empty** — fill it with `py epl/build_schedule.py --season 2025-26` then the
+WhoScored scrape + `epl_dashboard/build_*.py` builders (needs network + Chrome; run locally). The
+EPL standings shade top-**5** → Champions League, 6th → Europa, 7th → Conference, bottom 3 →
+relegation (England's 2025/26 five-CL-place allocation).
 
 ## How it works
 Two data layers:

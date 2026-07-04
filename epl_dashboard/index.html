@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Premier League — Dashboard &amp; xG Lab</title>
+<script>document.write('<link rel="stylesheet" href="styles.css?v=' + Date.now() + '">');</script>
+<noscript><link rel="stylesheet" href="styles.css" /></noscript>
+</head>
+<body class="epl">
+<header class="site">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="title">Premier<span>League</span> · Dashboard</div>
+      <div class="sub">Standings · fixtures &amp; results · xG lab · season projection</div>
+    </div>
+    <div class="header-right">
+      <label class="season-pick">Season <select id="seasonSel"></select></label>
+      <nav class="tabs">
+        <button data-view="standings" class="active">Standings</button>
+        <button data-view="matches">Matches</button>
+        <button data-view="players">Players</button>
+        <button data-view="standouts">Standouts</button>
+        <button data-view="teamlab">Team Lab</button>
+        <button data-view="playerlab">Player Lab</button>
+        <button data-view="xg">xG Analysis</button>
+        <button data-view="data">Data</button>
+        <button data-view="projection">Projection</button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- STANDINGS -->
+  <section id="view-standings" class="view active">
+    <div class="section-head">
+      <h2>League Table</h2>
+      <p>Live standings built from played matches — ranked by points, then goal difference, then goals for.
+         European and relegation zones are shaded; recent form shows the last five results.</p>
+    </div>
+    <div class="stats-strip" id="overviewStats"></div>
+    <div class="card" style="padding:0;overflow:hidden"><div class="table-scroll" id="standings"></div></div>
+  </section>
+
+  <!-- MATCHES -->
+  <section id="view-matches" class="view">
+    <div class="section-head">
+      <h2>Matches</h2>
+      <p>Every fixture and result, grouped by matchday. Deep-scraped games link into the interactive Match Centre.</p>
+    </div>
+    <div class="controls">
+      <input id="mSearch" type="text" placeholder="Search a team…" />
+      <select id="mStatus">
+        <option value="all">All matches</option>
+        <option value="played">Played only</option>
+        <option value="upcoming">Upcoming only</option>
+      </select>
+      <select id="mMatchday"></select>
+    </div>
+    <div id="matchList"></div>
+  </section>
+
+  <!-- PLAYERS -->
+  <section id="view-players" class="view">
+    <div class="section-head">
+      <h2>Player Statistics</h2>
+      <p>Goals, assists, xG and ratings aggregated across every deep-scraped match. Pick a leaderboard.
+         xG and xA come from <b>our own shot model</b>, trained on 11,830 real shots — the xG Analysis tab
+         explains how it's built.</p>
+    </div>
+    <div class="controls">
+      <div class="seg">
+        <button class="seg-btn active" data-preset="ga">G + A</button>
+        <button class="seg-btn" data-preset="g">Goals</button>
+        <button class="seg-btn" data-preset="a">Assists</button>
+        <button class="seg-btn" data-preset="xg">xG</button>
+        <button class="seg-btn" data-preset="xa">xA</button>
+        <button class="seg-btn" data-preset="rating">Rating</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden"><div class="table-scroll" id="playersTable"></div></div>
+  </section>
+
+  <!-- STANDOUTS (player distributions) -->
+  <section id="view-standouts" class="view">
+    <div class="section-head">
+      <h2>Standouts — Every Dot Is a Player</h2>
+      <p>Pick a stat and see the <b>whole league's distribution</b> at once. The curve is how all players
+         spread out, the dashed line is the <b>average</b>, and each dot is one player. The names way out on the
+         right are the <b>anomalies</b> — the ones breaking from the pack.</p>
+    </div>
+
+    <div class="explainer">
+      <h3>How to read this</h3>
+      <p>This is a <b>density plot</b>: where the curve is tall, lots of players sit on that value; where it's
+         flat, hardly anyone does. Most players cluster near the average, so the curve peaks there and tails off.
+         A player <b>far to the right</b> of the crowd is doing something rare — we measure exactly how rare in
+         <b>σ (sigma) over average</b>: +1σ beats ~84% of players, +2σ beats ~98%, +3σ is a genuine outlier.</p>
+      <p class="explainer-note">Dots are coloured <span style="color:#ff3d8b;font-weight:700">pink</span> once a
+         player is 2σ or more above average. Pick a player to spotlight them in <span
+         style="color:#ffd24d;font-weight:700">gold</span> and see their percentile.</p>
+    </div>
+
+    <div class="so-controls">
+      <label>Stat
+        <select id="soStat"></select>
+      </label>
+      <label>Position
+        <select id="soPos">
+          <option value="all">All outfield + GK</option>
+          <option value="FWD">Attackers</option>
+          <option value="MID">Midfielders</option>
+          <option value="DEF">Defenders</option>
+          <option value="GK">Goalkeepers</option>
+        </select>
+      </label>
+      <label>Minimum minutes
+        <select id="soMins">
+          <option value="0">Any</option>
+          <option value="450" selected>450+</option>
+          <option value="900">900+</option>
+          <option value="1800">1800+</option>
+        </select>
+      </label>
+      <label>Spotlight player
+        <input id="soPlayer" list="soPlayerList" placeholder="Type a name…" autocomplete="off">
+        <datalist id="soPlayerList"></datalist>
+      </label>
+    </div>
+
+    <div class="stats-strip" id="soStats"></div>
+
+    <div class="card full-card">
+      <h3 id="soChartTitle">Distribution</h3>
+      <p class="hint" id="soChartHint">Every qualifying player placed by their value for the chosen stat.</p>
+      <div class="so-chart-wrap" id="soChart"></div>
+      <div class="chart-tip" id="soChartTip">Tap any dot to see the player.</div>
+      <div class="insight" id="soSpotlight"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>The unique ones — biggest anomalies</h3>
+      <p class="hint">The players furthest above the field for the chosen stat, ranked by <b>σ over average</b>.
+         The longer the bar, the more they break from the pack.</p>
+      <div id="soStandouts"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Two-stat scatter — find the complete players</h3>
+      <p class="hint">Plot every player on <b>two stats at once</b> and let the <b>dot size</b> carry a third.
+         Top-right = strong in both; a dot that's big <i>and</i> top-right is a genuinely complete player. The
+         dashed lines are the averages. <span style="color:#ff3d8b;font-weight:700">Pink</span> = above average
+         in both; the player you spotlight above shows here in <span
+         style="color:#ffd24d;font-weight:700">gold</span> too. Start from a preset:</p>
+      <div class="so-presets" id="soPresets"></div>
+      <div class="so-controls">
+        <label>X axis<select id="soScX"></select></label>
+        <label>Y axis<select id="soScY"></select></label>
+        <label>Dot size<select id="soScSize"></select></label>
+        <label>Position
+          <select id="soScPos">
+            <option value="all">All outfield + GK</option>
+            <option value="FWD">Attackers</option>
+            <option value="MID">Midfielders</option>
+            <option value="DEF">Defenders</option>
+            <option value="GK">Goalkeepers</option>
+          </select>
+        </label>
+        <label>Minimum minutes
+          <select id="soScMins">
+            <option value="0">Any</option>
+            <option value="450">450+</option>
+            <option value="900" selected>900+</option>
+            <option value="1800">1800+</option>
+          </select>
+        </label>
+      </div>
+      <div class="so-chart-wrap" id="soScatter"></div>
+      <div class="chart-tip" id="soScatterTip">Tap any dot to see the player.</div>
+      <div class="insight" id="soScInsight"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Player radar — percentile profile</h3>
+      <p class="hint">How the <b>spotlight player</b> (picked at the top) ranks against peers in the same position
+         (450+ minutes) across every key area. Each spoke is a <b>percentile</b> — further out = better than more
+         of their peers (100% = best in that role). Outfielders and goalkeepers get the profile that fits the job.</p>
+      <div class="so-radar-wrap" id="soRadar"></div>
+    </div>
+
+    <h2 style="margin:34px 0 4px;font-size:20px">Leaderboards</h2>
+    <p class="hint" style="margin:0 0 16px">Top eight in each category. Per-90 boards use a 450-minute minimum so
+       cameo appearances don't skew them.</p>
+    <div class="stats-strip" id="playerLeaders"></div>
+    <div class="lboards" id="playerBoards"></div>
+  </section>
+
+  <!-- TEAM LAB (shot map + style fingerprint) -->
+  <section id="view-teamlab" class="view">
+    <div class="section-head">
+      <h2>Team Lab — Shot Maps &amp; Style</h2>
+      <p>Where every chance comes from, and how each team likes to play. Pick a team to see <b>its shot map</b>
+         and a <b>style fingerprint</b> against the rest of the league — or leave it on <i>All teams</i> for the
+         whole-league picture of where goals are made. Counts here are <b>shots only</b> — own goals
+         aren't shots, so goal totals run slightly below the match scores used elsewhere.</p>
+    </div>
+
+    <div class="so-controls">
+      <label>Team
+        <select id="tlTeam"></select>
+      </label>
+      <label>Compare
+        <select id="tlTeamB"></select>
+      </label>
+      <label>Compare
+        <select id="tlTeamC"></select>
+      </label>
+      <label>Shots
+        <select id="tlFilter">
+          <option value="all">All shots</option>
+          <option value="ot">On target</option>
+          <option value="goal">Goals only</option>
+        </select>
+      </label>
+      <label>Situation
+        <select id="tlSit">
+          <option value="all">All situations</option>
+          <option value="open">Open play</option>
+          <option value="set">Set pieces</option>
+          <option value="pen">Penalties</option>
+        </select>
+      </label>
+      <label>View
+        <select id="tlMode">
+          <option value="dots">Shot dots</option>
+          <option value="heat">xG heatmap</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="stats-strip" id="tlStats"></div>
+
+    <div class="card full-card">
+      <h3 id="tlMapTitle">Shot map</h3>
+      <p class="hint">Attacking <b>↑</b> (toward the top goal). In <b>Shot dots</b> mode each dot is a shot,
+         sized by xG: <span style="color:#ff3d8b;font-weight:700">goals pink</span>,
+         <span style="color:#4ea1ff;font-weight:700">on-target blue</span>, off-target grey. Switch to
+         <b>xG heatmap</b> to shade the pitch by where chance-quality is concentrated. Pick a
+         <b>Compare</b> team (or two) to line up shot maps side by side.</p>
+      <div class="tl-maps" id="tlMaps"></div>
+      <div class="chart-tip" id="tlMapTip">Tap any shot to see its details.</div>
+    </div>
+
+    <div class="card full-card" id="tlStyleCard">
+      <h3 id="tlStyleTitle">Style fingerprint</h3>
+      <p class="hint">Each spoke is a <b>percentile</b> versus all other teams (further out = more of that trait).
+         A team's shape tells you how they win: possession sides bulge top-left, direct/clinical sides bulge
+         toward shot quality and set-piece threat, stingy sides toward defensive solidity. Comparing teams
+         overlays them in different colours.</p>
+      <div class="so-radar-wrap" id="tlRadar"></div>
+      <div class="tl-legend" id="tlLegend"></div>
+    </div>
+
+    <h2 style="margin:34px 0 4px;font-size:20px">Season totals</h2>
+    <p class="hint" style="margin:0 0 12px">Every club's season aggregate — sortable. Per-game rates (Sh/g, SoT/g,
+       BigCh/g) and averages (Poss%, Pass%) count only deep-scraped games; goals/points count every played match.</p>
+    <div class="controls">
+      <input id="tlSearch" type="text" placeholder="Search a team…" />
+    </div>
+    <div class="card" style="padding:0; overflow:hidden">
+      <div class="table-scroll"><div id="teamTable"></div></div>
+    </div>
+  </section>
+
+  <!-- XG -->
+  <section id="view-xg" class="view">
+    <div class="section-head">
+      <h2>xG Efficiency Lab</h2>
+      <p>Do teams score as much as the quality of their chances says they should? These charts compare
+         <b>expected goals (xG)</b> with what actually happened. <span id="xgNote" class="hint"></span></p>
+    </div>
+    <div class="explainer">
+      <h3>New here? What is xG?</h3>
+      <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. A tap-in might be
+         0.7 xG; a hopeful 30-metre strike 0.03. Sum a team's shots and you get how many goals an <i>average</i>
+         finisher would score from those chances — a better "who deserved it" number than the scoreline alone.</p>
+      <p><b>Where does the xG itself come from? We built the model ourselves.</b> Every shot is scored by a
+         logistic-regression model trained on <b>11,830 real shots</b> — the whole 2025/26 La Liga season plus the
+         2026 World Cup — against what actually happened to them. It weighs the shot's <b>distance</b>, the
+         <b>angle the goal mouth opens up</b> from that spot, whether it was a <b>header</b>, an Opta
+         <b>big chance</b>, and the <b>situation</b> (open play, free kick, corner, set piece or fast break). A
+         per-league finishing calibration then keeps summed xG in line with goals actually scored — penalties are
+         fixed at 0.76. The same model runs across our Premier League, La Liga and World Cup dashboards, so the
+         numbers compare cleanly everywhere.</p>
+      <p class="explainer-note">Premier League xG is computed from the deep-scraped WhoScored shot data. Until a match is
+         deep-scraped it contributes to the table but not to these charts.</p>
+    </div>
+    <div class="stats-strip" id="xgStats"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Did chances turn into goals?</h3>
+        <p class="hint">Every dot is one team's performance in one match: how many goals an average team would expect
+           from their chances (across →) versus how many they actually scored (up ↑). The dashed line is "scored exactly
+           what the chances were worth". <b>Above the line = clinical finishing; below = chances wasted.</b> The green
+           line is the overall trend.</p>
+        <div class="scatter-wrap" id="scatter"></div>
+      </div>
+      <div class="card">
+        <h3>How closely do goals follow xG?</h3>
+        <p class="hint">If xG were perfect, goals would track it exactly. This measures how strong that link has been
+           this season — and how much finishing skill or luck is adding noise on top.</p>
+        <div id="corrBox"></div>
+        <div class="insight" id="corrInsight"></div>
+      </div>
+    </div>
+
+    <div class="card full-card">
+      <h3>The same story as a distribution — games by chance quality</h3>
+      <p class="hint">Every team-match sorted into a bucket by how much xG it produced. The bar is <b>how many
+         games</b> created that much chance quality; under each bar, <b>avg xG → avg goals</b> actually scored from
+         those games. <b style="color:var(--good)">Green = those chances over-delivered</b>,
+         <b style="color:var(--bad)">red = under-delivered</b>, blue ≈ spot on. Most football lives in the low
+         buckets — big-chance games are rarer, and this shows whether they were cashed in.</p>
+      <div id="xgDist"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Finishing: goals scored minus xG</h3>
+      <p class="hint">For each club, total goals minus total xG. <b style="color:var(--good)">Green = clinical</b>
+         (scored more than their chances were worth — sharp finishing or good luck);
+         <b style="color:var(--bad)">red = wasteful</b> (scored fewer — poor finishing or unlucky).
+         Around zero means they scored about what was expected.</p>
+      <div class="bars" id="finishingBars"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Who's good at both ends? — attack vs. defence quality</h3>
+      <p class="hint">Each club is placed by how dangerous its <b>attack</b> is (further right = more/better chances
+         <b>created</b> per game) and how mean its <b>defence</b> is (higher up = fewer/worse chances <b>allowed</b>
+         per game). The dashed lines are the league average, splitting the pitch into four types of team — the
+         colour key below explains each. Top-right = strong both ways; bottom-left = leaky and blunt.</p>
+      <div class="scatter-wrap" id="quadrant"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Are teams getting the points they deserve?</h3>
+      <p class="hint"><b>Expected points</b> turns each game's xG into the points an average team would win from
+         those chances. Compare it with real points: above the line = winning more than the performances merit
+         (clinical or lucky); below = deserved more than they've got.</p>
+      <div class="scatter-wrap" id="xpts"></div>
+      <div class="insight" id="xptsInsight"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Quality vs quantity of shots</h3>
+      <p class="hint">Shots per game (across →) vs average xG per shot (up ↑ = better chances). <b>Top-right</b> =
+         lots of good chances; <b>top-left</b> = few but excellent looks; <b>bottom-right</b> = high-volume
+         long-range shooting; <b>bottom-left</b> = struggling to create anything.</p>
+      <div class="scatter-wrap" id="shotquality"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Is there a home advantage?</h3>
+      <p class="hint">Average xG created by clubs playing at home vs away. A clear gap suggests the home side tends to
+         create better chances — the classic home advantage, in chance-quality terms.</p>
+      <div id="homeAway"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Team-by-team xG ledger</h3>
+      <p class="hint">The full breakdown — click any column header to sort. <b>xG</b> = quality of chances created;
+         <b>xGA</b> = quality of chances allowed; <b>G−xG</b> = attacking finishing (＋ = clinical);
+         <b>xGA−GA</b> = goalkeeping/defending vs the chances faced (＋ = kept out more than expected);
+         <b>xGD</b> = xG minus xGA, i.e. how much a team out-chanced opponents overall ("deserved" goal difference).</p>
+      <div class="table-scroll" id="ledger"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Did the team that "deserved" it actually win?</h3>
+      <p class="hint">For every game with xG, we check whether the side with more xG (the better chances) got the
+         result. A high match rate means xG is tracking reality; mismatches (✘) are the games that defied the
+         underlying play — often decided by a worldie, a penalty, or a red card.</p>
+      <div class="table-scroll" id="agreement"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Unluckiest results (deserved more)</h3>
+      <p class="hint">Games where the side that <b>out-created</b> their opponent by the most xG still failed to win —
+         they made the better chances but didn't get the result. The biggest "should have won this" performances.</p>
+      <div class="table-scroll" id="unlucky"></div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section id="view-data" class="view">
+    <div class="section-head">
+      <h2>Full Database</h2>
+      <p>The complete dataset behind this site — game results, per-game team stats and league standings, exported
+         from the scraped sources (FotMob schedule + WhoScored events). Download the tables as CSV, the whole thing
+         as a SQLite database, or browse every result below.</p>
+    </div>
+    <div class="data-grid" id="dataDownloads"></div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>SQLite database</h3>
+      <p class="hint">One file with every table (matches, team_match_stats, players, standings), ready for SQL
+         queries in any tool (DB Browser for SQLite, Python, etc.).</p>
+      <a class="png-btn" id="sqliteLink" href="database/epl.sqlite" download>⬇ epl.sqlite</a>
+    </div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>Raw match files</h3>
+      <p class="hint" id="rawNote">The original scraped WhoScored JSON for every match — including the full event
+         stream — lives in <code>epl/matches/</code> in the pipeline (git-ignored due to size).</p>
+    </div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>Every result</h3>
+      <p class="hint">Every played match with score, xG (where deep-scraped) and a link to its infographic PNG.</p>
+      <div class="table-scroll" id="dataTable"></div>
+    </div>
+  </section>
+
+  <!-- PROJECTION -->
+  <!-- PLAYER LAB (choose a team, then a player; optional compare) -->
+  <section id="view-playerlab" class="view">
+    <div class="section-head">
+      <h2>Player Lab</h2>
+      <p>Click the <b>club badges</b> to filter, then pick a <b>player</b> — and optionally a second player
+         to compare. Season totals, a percentile radar vs the league, head-to-head bars, and
+         shot / take-on / pass maps. xG, xA and xGI come from <b>our own shot model</b> — see the
+         xG Analysis tab for how it's built.</p>
+    </div>
+    <div class="pl-badges-wrap">
+      <span class="pl-badges-label">Teams</span>
+      <div class="pl-badges" id="plBadges"></div>
+    </div>
+    <div class="controls pl-controls">
+      <label>Player <select id="plMain"></select></label>
+      <label>Compare <select id="plCompare"></select></label>
+    </div>
+    <div class="stats-strip" id="plStats"></div>
+    <div class="pl-grid">
+      <div class="card">
+        <h3 class="pl-h">Percentile radar <span class="pl-sub">vs league players (450+ min)</span></h3>
+        <div id="plRadar"></div>
+        <div class="pl-legend" id="plRadarLegend"></div>
+      </div>
+      <div class="card" id="plBarsCard" style="display:none">
+        <h3 class="pl-h" id="plCompareTitle"></h3>
+        <div id="plCompareBody"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pl-maps-head">
+        <span class="pl-name-a" id="plHeatNameA"></span>
+        <span class="pl-name-b" id="plHeatNameB"></span>
+      </div>
+      <div class="pl-heat-grid" id="plHeatGrid"></div>
+    </div>
+  </section>
+
+  <section id="view-projection" class="view">
+    <div class="section-head">
+      <h2>Season Projection</h2>
+      <p>Where does the table finish? A Poisson model built from this season's goals (home/away attack &amp; defence
+         strengths) simulates the remaining fixtures thousands of times to estimate final points and the odds of the
+         title, a top-five/European finish, and relegation.</p>
+    </div>
+    <div id="projChamp"></div>
+    <div class="card" style="padding:0;overflow:hidden;margin-top:16px"><div class="table-scroll" id="projTable"></div></div>
+  </section>
+
+  <div class="footer-note" id="footNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  (function () {
+    var v = Date.now();
+    document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="shots.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="database/manifest.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
+  })();
+</script>
+</body>
+</html>
