@@ -1,8 +1,0 @@
-{
-  "season": "2025-26",
-  "competition": "Premier League",
-  "fotmob_league_id": "47",
-  "generated_utc": "",
-  "_note": "Placeholder. This cloud session cannot reach FotMob/WhoScored (egress policy blocks them). On a machine with network + Chrome, run:  py epl/build_schedule.py --season 2025-26  to fill the fixtures/results spine, then the WhoScored scrape + builders to add the rich layer.",
-  "matches": []
-}

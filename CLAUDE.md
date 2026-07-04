@@ -16,38 +16,9 @@ dashboard** (`laliga_dashboard/`, static site) and a per-match **PNG infographic
   When FotMob publishes the fixtures, one command fills it (see below) and the dashboard's
   season switcher shows it.
 
-## ENGLISH PREMIER LEAGUE (`epl/` + `epl_dashboard/`) — parallel clone
-A second league using the **same code**, cloned from `laliga/` → `epl/` and
-`laliga_dashboard/` → `epl_dashboard/`. Root `index.html` is now a **league chooser** (La Liga |
-Premier League). `xg_core/` is shared (EPL passed as the league key; falls back to the `_global`
-shift until an EPL corpus is trained).
-- **EPL config vs La Liga:** FotMob league **47** (`EPL_FOTMOB_LEAGUE_ID`); WhoScored
-  `Regions/252/Tournaments/2/England-Premier-League` (`EPL_WHOSCORED_URLS`); Understat slug `EPL`;
-  crests `team_logos/epl/`; PNGs `epl_png/` (`EPL_PNG_SUBDIR`); raw scrapes `epl/matches/`
-  (`EPL_MATCH_DIR` for rebuilds); Windows tasks in the `\EPL` folder.
-- **European zones (2025/26-accurate):** top **5** → Champions League, 6th → Europa, 7th →
-  Conference, bottom 3 → relegation (England had a 5th CL place via its UEFA coefficient). Lives
-  in `epl_dashboard/app.js` `zoneOf()` **and** the projection Monte-Carlo — both were edited.
-- **STATE: pipeline-ready, EMPTY.** The scaffold was built in a cloud session whose egress policy
-  **blocks FotMob / WhoScored / Understat** (only GitHub + PyPI reachable), so no data could be
-  scraped there. `epl/schedules/SCHEDULE_2025-26.json` is an empty placeholder and the shipped
-  `epl_dashboard/{data.js,players.js,shots.js}` are valid-but-empty. Fill it on a machine with
-  network + Chrome:
-  ```bash
-  py epl/build_schedule.py --season 2025-26            # FotMob 47 → standings/results spine
-  py epl/download_crests.py                             # crests → team_logos/epl/
-  py epl/scrape_whoscored.py --season 2025-26           # ~1h, Chrome (rich xG/shot/player layer)
-  py epl_dashboard/build_match_details.py && py epl_dashboard/build_players.py \
-    && py epl_dashboard/build_database.py && py epl_dashboard/build_shots.py \
-    && py epl_dashboard/build_data.py
-  git add -A && git commit -m "EPL 2025/26 data" && git push
-  ```
-
 ## Repo layout
 ```
-index.html                     league chooser → laliga_dashboard/ | epl_dashboard/
-epl/  epl_dashboard/           Premier League clone of laliga/ + laliga_dashboard/ (see EPL section)
-team_logos/epl/  epl_png/      EPL crests + published PNGs
+index.html                     chooser/redirect → laliga_dashboard/
 laliga_dashboard/              the website (static, no build step at view time)
   index.html match.html        main dashboard + per-match "Match Centre"
   app.js match.js              front-end (app.js = league views; match.js = match centre)
