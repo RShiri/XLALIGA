@@ -138,9 +138,9 @@ def aggregate(match_dir=MATCH_DIR):
     return out
 
 
-def per_match_rows():
+def per_match_rows(match_dir=MATCH_DIR):
     """Yield one flat dict per player per match (for the database export)."""
-    for mid, d in _iter_played():
+    for mid, d in _iter_played(match_dir):
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
         xa_map = player_xa_from_events(d)

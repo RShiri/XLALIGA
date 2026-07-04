@@ -152,15 +152,20 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     payload = _load_data_js()
     # data.js is season-keyed now; export the default (current) season's tables.
-    data = payload["seasons"][payload["defaultSeason"]]
+    season = payload["defaultSeason"]
+    data = payload["seasons"][season]
     data["generated"] = payload.get("generated", "")
+    # Player aggregates read the raw match JSONs, which live in matches/<season>/ subdirs
+    # — point at the default season's dir so the player exports match the other tables
+    # (a bare aggregate()/per_match_rows() globs matches/*.json and finds nothing).
+    season_match_dir = os.path.join(MATCH_DIR, season)
 
     results = list(results_rows(data))
     team_stats = list(team_match_stat_rows(data))
     team_stats_src = list(team_match_stat_by_source_rows(data))
     standings = list(standings_rows(data))
-    player_match = list(build_players.per_match_rows())
-    players = build_players.aggregate()
+    player_match = list(build_players.per_match_rows(season_match_dir))
+    players = build_players.aggregate(season_match_dir)
 
     counts = {
         "results.csv": _write_csv("results.csv", results),
@@ -180,7 +185,7 @@ def main():
     })
 
     # a small manifest the Data tab reads to list downloads + counts
-    raw_files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(MATCH_DIR, "*.json"))
+    raw_files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(MATCH_DIR, "**", "*.json"), recursive=True)
                        if is_match_file(f))
     manifest = {
         "generated": data.get("generated", ""),
