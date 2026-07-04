@@ -145,7 +145,7 @@ def harvest_ids(driver, max_back, want=None):
                 seen.add(i); ids.append(i)
             print(f"  week {step} ({_cal_label(driver)}): +{len(new)} ids (total {len(ids)})")
             empty_streak = empty_streak + 1 if not new else 0
-            if empty_streak >= 6:
+            if empty_streak >= 16:
                 print("  6 empty weeks in a row — reached season start, stopping.")
                 break
             if want and len(ids) >= want:
