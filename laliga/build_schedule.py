@@ -52,12 +52,30 @@ FOTMOB_LEAGUE_NAMES = {"laliga", "laliga ea sports", "la liga"}
 # Season → (start, end) sweep window. Wide enough to catch pre-season openers and any
 # rescheduled final-round games; extra empty days just cost a cheap HTTP request.
 SEASON_WINDOWS: dict[str, tuple[str, str]] = {
+    "2022-23": ("2022-08-01", "2023-06-30"),
+    "2023-24": ("2023-08-01", "2024-06-30"),
     "2024-25": ("2024-08-01", "2025-06-30"),
     "2025-26": ("2025-08-01", "2026-06-15"),
     "2026-27": ("2026-08-01", "2027-06-15"),
 }
 
 _UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+
+# FotMob's team names drift across (esp. older) seasons — e.g. 2023-24 tags Athletic as
+# both "Athletic Bilbao" and "Athletic Club", and Atlético with/without the accent. Left
+# alone, one club splits into two half-rows in the standings and misses its crest/colour.
+# Collapse the known variant spellings to the one canonical name team_colors.py / the
+# crests use. Keyed on the *variant*; the canonical spellings are never keys, so re-running
+# a clean season (24/25, 25/26) is a no-op.
+TEAM_NAME_CANON: dict[str, str] = {
+    "Athletic Bilbao": "Athletic Club",
+    "Atlético Madrid": "Atletico Madrid",
+    "Atletico de Madrid": "Atletico Madrid",
+}
+
+
+def _canon_team(name: str) -> str:
+    return TEAM_NAME_CANON.get((name or "").strip(), (name or "").strip())
 
 
 def _daterange(start: date, end: date):
@@ -147,8 +165,8 @@ def build_schedule(season: str, start: str | None = None, end: str | None = None
                     "matchday": matchday,
                     "date": _parse_utc(m.get("time", ""))[:10] or None,
                     "kickoff_utc": _parse_utc(m.get("time", "")),
-                    "home": m.get("hTeam", ""),
-                    "away": m.get("aTeam", ""),
+                    "home": _canon_team(m.get("hTeam", "")),
+                    "away": _canon_team(m.get("aTeam", "")),
                     "home_id": m.get("hId"),
                     "away_id": m.get("aId"),
                     "home_score": int(hs) if finished and hs not in (None, "") else None,
