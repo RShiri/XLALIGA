@@ -9,19 +9,23 @@ dashboard** (`laliga_dashboard/`, static site) and a per-match **PNG infographic
 - **This folder** is a git clone linked to that repo (`origin` → XLALIGA.git). Commit + push here.
 
 ## CURRENT STATE (as of 2026-07)
-- **Two full seasons live.** Both are 380/380 played, **380 with xG**, full standings + season
-  projection, and a per-match Match Centre — **761** interactive match-centre pages across the
-  two. Pick either from the dashboard's season switcher:
+- **Four full seasons live.** Each is 380/380 played, **380 with xG**, full standings + season
+  projection, and a per-match Match Centre — **1520** interactive match-centre pages across the
+  four. Pick any from the dashboard's season switcher:
   - **2025/26** — complete, **600 players**. The default season.
   - **2024/25** — complete, **589 players** (added via an archived-season WhoScored scrape).
+  - **2023/24** — complete, **598 players** (Real Madrid champions; added 2026-07 same way).
+  - **2022/23** — complete, **583 players** (Barcelona champions; added 2026-07 same way).
 - **2026/27 = pipeline-ready, empty.** `laliga/schedules/SCHEDULE_2026-27.json` is a placeholder.
   When FotMob publishes the fixtures, one command fills it (see below) and the dashboard's
   season switcher shows it.
-- **Caveat — the 2025/26 schedule spine in this clone is stale.** The shipped
-  `data.js`/`players.js`/`shots.js` (rebuilt 2026-07-04) carry the full 380-match 2025/26, but
-  `schedules/SCHEDULE_2025-26.json` here is an older 151-match spine. Re-run
-  `build_schedule.py --season 2025-26` before rebuilding derived data, or 2025/26 will regress
-  to 151 played.
+- **FotMob 0-0 glitch handling.** FotMob's historical feed occasionally reports a real result
+  as 0-0 (2 in 2023/24, 6 in 2024/25). `build_data.py` now prefers the scraped WhoScored
+  fulltime score over the schedule score whenever a match has a rich file, so standings stay
+  correct. This ALSO makes the stale-2025/26-spine caveat moot: even if
+  `schedules/SCHEDULE_2025-26.json` is an older 151-scored spine, the rich files fill every
+  played match, so 25/26 stays 380/380 (still fine to re-run `build_schedule.py --season 2025-26`
+  to refresh the spine itself).
 
 ## Repo layout
 ```
