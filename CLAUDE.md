@@ -9,12 +9,19 @@ dashboard** (`laliga_dashboard/`, static site) and a per-match **PNG infographic
 - **This folder** is a git clone linked to that repo (`origin` → XLALIGA.git). Commit + push here.
 
 ## CURRENT STATE (as of 2026-07)
-- **2025/26 season = COMPLETE and live.** All **380** matches scraped (WhoScored event stream):
-  380/380 played, **380 with xG**, **600 players**, **380 interactive match-centre pages**,
-  full standings + season projection. Verified live.
+- **Two full seasons live.** Both are 380/380 played, **380 with xG**, full standings + season
+  projection, and a per-match Match Centre — **761** interactive match-centre pages across the
+  two. Pick either from the dashboard's season switcher:
+  - **2025/26** — complete, **600 players**. The default season.
+  - **2024/25** — complete, **589 players** (added via an archived-season WhoScored scrape).
 - **2026/27 = pipeline-ready, empty.** `laliga/schedules/SCHEDULE_2026-27.json` is a placeholder.
   When FotMob publishes the fixtures, one command fills it (see below) and the dashboard's
   season switcher shows it.
+- **Caveat — the 2025/26 schedule spine in this clone is stale.** The shipped
+  `data.js`/`players.js`/`shots.js` (rebuilt 2026-07-04) carry the full 380-match 2025/26, but
+  `schedules/SCHEDULE_2025-26.json` here is an older 151-match spine. Re-run
+  `build_schedule.py --season 2025-26` before rebuilding derived data, or 2025/26 will regress
+  to 151 played.
 
 ## Repo layout
 ```
@@ -132,7 +139,8 @@ Resumable (skips matches already saved with events).
 ## Ideas / next steps (optional)
 - Backfill the PNG infographics (`renderer.py`) for each match into `laliga_png/`.
 - Update `laliga/understat.py` to the new Understat AJAX structure for a second xG source.
-- Add earlier seasons (24/25, …) — `build_schedule.py --season 2024-25` + a WhoScored scrape.
+- Add earlier seasons (23/24, …) — `build_schedule.py --season 2023-24` + a WhoScored scrape
+  (24/25 is already done; follow the same archived-season path).
 - Wire the `database/` CSV/sqlite downloads into the Data tab UI.
 
 ## Two local copies (avoid confusion)

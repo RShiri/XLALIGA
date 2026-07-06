@@ -5,8 +5,9 @@ efficiency lab, a per-match "Match Centre" (shot/pass/dribble maps, all-goals re
 a player leaderboard, and a Poisson **season projection** (title / European / relegation odds).
 Ported from the WorldCup2026 analytics system to a round-robin league.
 
-**Status:** **2025/26 is complete** — all **380** matches scraped (380 with xG, 600 players,
-380 interactive match-centre pages). **2026/27** is pipeline-ready (empty until FotMob lists the
+**Status:** **two complete seasons are live** — **2025/26** (default) and **2024/25**, each with
+all **380** matches scraped (380 with xG; 600 / 589 players) and a per-match Match Centre
+(**761** pages across the two). **2026/27** is pipeline-ready (empty until FotMob lists the
 fixtures). New here? Read [`CLAUDE.md`](CLAUDE.md) — the full project guide, current state,
 commands, and gotchas.
 

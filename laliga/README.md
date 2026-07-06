@@ -1,7 +1,8 @@
 # La Liga analytics — pipeline & dashboard
 
-A port of the WC2026 system to Spanish **La Liga**, covering season **2025/26** (live /
-in‑progress) and **2026/27** (pipeline‑ready, awaiting fixtures). Same idea: scrape each
+A port of the WC2026 system to Spanish **La Liga**, covering two complete seasons —
+**2025/26** and **2024/25** (both fully scraped) — plus **2026/27** (pipeline‑ready, awaiting
+fixtures). Same idea: scrape each
 match from multiple sources → render a PNG → refresh a static web dashboard → auto‑deploy.
 The structural difference is that a league is a **round‑robin table**, not a group+knockout
 tournament — so there is a single standings table and a season projection instead of a
