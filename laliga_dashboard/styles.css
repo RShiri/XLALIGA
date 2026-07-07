@@ -824,9 +824,9 @@ tr.z-rel  { background: rgba(255,107,129,0.06); }
 .pl-badge .crest { width: 24px; height: 24px; object-fit: contain; }
 .pl-badge-all { width: auto; padding: 0 12px; font-size: 12px; font-weight: 700; color: var(--text); font-family: inherit; }
 /* comparing: the two players' values sit SIDE BY SIDE (main gold | compare blue) */
-.stat .cmp-vals { display: flex; gap: 10px; justify-content: center; align-items: baseline; }
-.stat .cmp-vals .v { font-size: 24px; }
-.stat .v2 { font-size: 24px; font-weight: 800; color: var(--accent-2); font-variant-numeric: tabular-nums; }
+.stat .cmp-vals { display: flex; gap: 12px; justify-content: center; align-items: baseline; }
+.stat .cmp-vals .v { font-size: 30px; }
+.stat .v2 { font-size: 30px; font-weight: 800; color: var(--accent-2); font-variant-numeric: tabular-nums; }
 .pl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .pl-grid > .card { margin: 0; }
 .pl-h { margin: 0 0 8px; font-size: 15px; }
@@ -834,11 +834,11 @@ tr.z-rel  { background: rgba(255,107,129,0.06); }
 .pl-legend { display: flex; gap: 16px; justify-content: center; margin-top: 8px; font-size: 13px; flex-wrap: wrap; }
 .pl-legend .pl-leg { display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
 .pl-legend .pl-sw { width: 11px; height: 11px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
-.stat-cmp { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin-bottom: 9px; }
-.sc-val { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 13.5px; color: var(--muted); text-align: center; }
+.stat-cmp { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; gap: 12px; margin-bottom: 12px; }
+.sc-val { font-weight: 800; font-variant-numeric: tabular-nums; font-size: 18px; color: var(--muted); text-align: center; }
 .sc-val.win { color: var(--text); }
-.sc-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-.sc-bar { display: flex; height: 8px; border-radius: 5px; overflow: hidden; background: var(--line); }
+.sc-label { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+.sc-bar { display: flex; height: 9px; border-radius: 5px; overflow: hidden; background: var(--line); }
 .sc-fill.h { background: var(--accent); }
 .sc-fill.a { background: var(--accent-2); }
 .pl-maps-head { display: flex; gap: 18px; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
