@@ -214,7 +214,8 @@
     return '<span class="sc up">' + (time || "vs") + "</span>";
   }
   function matchRow(m) {
-    var link = m.has_events ? ("match.html?season=" + encodeURIComponent(season) + "&id=" + encodeURIComponent(m.id)) : null;
+    var targetPage = window.location.pathname.includes("classic.html") ? "match_classic.html" : "match.html";
+    var link = m.has_events ? (targetPage + "?season=" + encodeURIComponent(season) + "&id=" + encodeURIComponent(m.id)) : null;
     var inner =
       '<div class="mc-side home"><span class="nm">' + esc(m.home) + "</span>" + logoImg(m.home) + "</div>" +
       '<div class="mc-score">' + scoreCell(m) + "</div>" +

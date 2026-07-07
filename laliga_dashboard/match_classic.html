@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Match Dashboard — La Liga (Classic)</title>
+<script>var _v=Date.now();document.write('<link rel="stylesheet" href="styles_classic.css?v='+_v+'"><link rel="stylesheet" href="match.css?v='+_v+'">');</script>
+<noscript><link rel="stylesheet" href="styles_classic.css" /><link rel="stylesheet" href="match.css" /></noscript>
+</head>
+<body>
+<header class="site">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="title">La<span>Liga</span> · Match Centre <span style="font-size:11px;background:var(--accent);color:var(--bg);padding:2px 6px;border-radius:4px;vertical-align:middle;margin-left:8px;font-weight:700">Classic View</span></div>
+      <div class="sub">Interactive shot &amp; pass explorer</div>
+    </div>
+    <nav class="tabs">
+      <a class="back-link" href="classic.html">← All matches</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="matchRoot">
+    <p class="footer-note" id="loadingMsg">Loading match…</p>
+  </div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- data.js gives match.js the head-to-head team stats; the match-specific
+     event file is injected by match.js based on ?id= -->
+<script>var _mv=Date.now();
+  document.write('<scr'+'ipt src="data.js?v='+_mv+'"></scr'+'ipt>');
+  document.write('<scr'+'ipt src="match.js?v='+_mv+'"></scr'+'ipt>');</script>
+</body>
+</html>
