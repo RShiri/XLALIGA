@@ -1,15 +1,19 @@
-"""Shot extraction + xG/xA scoring, routed through the shared xg_core models.
+"""Shot extraction + xG/xA scoring, routed through the shared models.
 
-The models live in <repo root>/xg_core: the v2 calibrated xG artifact
-(LR + monotone-GBM blend + isotonic map, trained on La Liga 25/26 + WC 2026)
-and the pass-level xA artifact (P(pass becomes an assist), two-stage +
-isotonic). Scoring is pure python (stdlib); if lightgbm is installed the
-scorers silently upgrade to the full blends — both paths are calibrated.
+xG comes from <repo root>/xg_core_v3: the 23-feature v3 artifact (LR + monotone-GBM
++ market-distill blend + isotonic map, retrained on La Liga + EPL 4 seasons each +
+WC, ~77k shots). Five of its features come from the shot's assisting pass, so shots
+are scored a whole match at a time via match_xg_by_event(match_data) and read back
+per shot — NOT from isolated coordinates (that path silently degrades). xA comes from
+xg_core's pass-level artifact (P(pass becomes an assist), two-stage + isotonic).
+Scoring is pure python (stdlib); with lightgbm installed both upgrade to the full
+blends — every path is calibrated (Sum xG ~= goals, Sum xA ~= assists per season).
 
-This module keeps the same public surface the builders import (estimate_xg,
-shot_xg, player_xa_from_events, team_xg_from_events, ...); only the engine
-behind it changed. renderer._estimate_xg routes through the same scorer, so
-the site and the PNGs still agree. Retrain with xg_core/train.py + train_xa.py.
+Public surface the builders import is unchanged except shot_xg(ev, xg_by_event) now
+takes the per-match lookup. renderer.build_shot_df scores through the same v3 engine,
+so the site and the PNGs still agree. The legacy scalar estimate_xg() (v2 xg_core)
+survives only for the offline tools/. Retrain xG with xg_core_v3's training CLI and
+xA with xg_core/train_xa.py.
 """
 import math
 import os
@@ -17,11 +21,16 @@ import sys
 import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from xg_core.score import XGScorer
+from xg_core.score import XGScorer            # legacy v2 scalar xG (offline tools only)
 from xg_core.xa_score import XAScorer
+from xg_core_v3 import XGScorer as XGScorerV3  # v3 23-feature xG (assist-context aware)
+from xg_core_v3.features import (SHOT_TYPES as _V3_SHOT_TYPES,   # mirror iter_match_xg's
+                                 is_shootout as _v3_is_shootout,  # exact shot filter, so
+                                 _qual_set as _v3_qual_set)       # we score the same set
 
 _LEAGUE = "LaLiga"           # per-league calibration shift inside the artifacts
-_XG = XGScorer()
+_XG = XGScorer()             # scalar estimate_xg() — kept for tools/, NOT the live path
+_XG_V3 = XGScorerV3()        # the live engine: scores a whole match, keyed by id(event)
 _XA = XAScorer()
 
 SCALE_Y = 0.80
@@ -64,10 +73,44 @@ def ws_to_sb_x(ws_x):
 
 def estimate_xg(x_sb, y_sb, is_penalty, is_big_chance, body_part,
                 situation="Open Play", assisted=False):
-    """Calibrated xG via the shared xg_core v2 artifact. Penalties are the
-    artifact's empirical constant. Coords in StatsBomb metres."""
+    """LEGACY scalar xG via the v2 xg_core artifact — kept only for the offline
+    tools/ scripts. The live pipeline scores shots through match_xg_by_event()
+    below: the v3 model needs the assisting pass, which a scalar can't supply
+    (its 9 assist-context features would silently default to 0). Do NOT route
+    shipped data through this. Coords in StatsBomb metres."""
     return _XG.estimate_xg(x_sb, y_sb, is_penalty, is_big_chance, body_part,
                            situation, assisted=assisted, league=_LEAGUE)
+
+
+def match_xg_by_event(match_data):
+    """id(event) -> calibrated v3 xG for every real shot in the match.
+
+    Score ONCE per match, then look each shot up by object identity via shot_xg().
+    The v3 model derives 5 of its 23 features from the shot's assisting pass, so it
+    must see the whole match's events — scoring from isolated coordinates silently
+    zeroes those features and returns degraded xG.
+
+    KEY IS id(event), NOT WhoScored eventId. eventId is never unique across a match's
+    events, and in ~15% of La Liga games two *shots* even share one; a dict keyed on
+    eventId (e.g. dict(iter_match_xg(...))) silently drops or mis-assigns those shots.
+    Every caller passes the same event objects from this match_data to shot_xg(), so
+    id() matches and is unique. Penalties are valued inside (~0.79); own goals and
+    penalty-shootout kicks are excluded. Single source of shot xG for site AND PNGs."""
+    evs = match_data.get("events", [])
+    byid = {e.get("eventId"): e for e in evs}   # for relatedEventId -> assist pass
+    prev_pass = None
+    out = {}
+    for ev in evs:
+        t = ev.get("type", {})
+        dn = t.get("displayName") if isinstance(t, dict) else None
+        if dn == "Pass":
+            prev_pass = ev
+        if not isinstance(t, dict) or dn not in _V3_SHOT_TYPES:
+            continue
+        if _v3_is_shootout(ev) or "OwnGoal" in _v3_qual_set(ev):
+            continue
+        out[id(ev)] = _XG_V3.xg_from_shot_event(ev, byid, prev_pass, league=_LEAGUE)
+    return out
 
 
 def ascii_name(name):
@@ -106,16 +149,17 @@ def extract_qualifiers(ev):
     return body, situation, zone, big_chance, quals
 
 
-def shot_xg(ev):
-    """Return (xg, meta) for a single shot event using the renderer's model."""
-    x_sb = ws_to_sb_x(ev.get("x", 0))
-    y_sb = 80 - ev.get("y", 0) * SCALE_Y
+def shot_xg(ev, xg_by_event):
+    """Return (xg, meta) for one shot event. `xg_by_event` is the per-match lookup
+    from match_xg_by_event(match_data): v3 xG is scored once with the whole match in
+    hand (so the assisting-pass features are populated), then read back here by the
+    event's object identity (id(ev)) — NOT eventId, which collides. A shot absent
+    from the map (own goal / penalty-shootout kick) scores 0.0. `meta`
+    (body/situation/zone/big_chance/penalty) is derived from the event's own
+    qualifiers, unchanged."""
     body, situation, zone, big_chance, quals = extract_qualifiers(ev)
     is_penalty = situation == "Penalty"
-    if is_penalty:
-        x_sb, y_sb = 108.0, 40.0
-    xg = estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
-                     assisted=ev.get("relatedPlayerId") is not None)
+    xg = xg_by_event.get(id(ev), 0.0)   # object identity — see match_xg_by_event
     return xg, dict(body=body, situation=situation, zone=zone,
                     big_chance=big_chance, penalty=is_penalty)
 
@@ -137,6 +181,7 @@ def team_xg_from_events(match_data):
     events = match_data.get("events") or []
     home_id = match_data.get("home", {}).get("teamId")
     away_id = match_data.get("away", {}).get("teamId")
+    xg_by_event = match_xg_by_event(match_data)   # score the whole match once
     totals = {home_id: 0.0, away_id: 0.0}
     n = 0
     for ev in events:
@@ -148,7 +193,7 @@ def team_xg_from_events(match_data):
         tid = ev.get("teamId")
         if tid not in totals:
             continue
-        xg, _ = shot_xg(ev)
+        xg, _ = shot_xg(ev, xg_by_event)
         totals[tid] += xg
         n += 1
     if n == 0:

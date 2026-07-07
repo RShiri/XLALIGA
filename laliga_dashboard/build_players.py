@@ -16,7 +16,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 from build_match_details import norm, _match_extras, _player_rating, is_match_file
-from xg_model import ascii_name, SHOT_TYPES, shot_xg, is_shootout, player_xa_from_events
+from xg_model import (ascii_name, SHOT_TYPES, shot_xg, match_xg_by_event,
+                      is_shootout, player_xa_from_events)
 
 MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")
 OUT = os.path.join(HERE, "players.js")
@@ -50,6 +51,7 @@ def _new_player(pid, name, team, pos):
 
 def _player_shot_xg(match_data):
     """playerId -> summed shot xG for the match."""
+    xg_by_event = match_xg_by_event(match_data)   # score the whole match once (v3)
     out = {}
     for ev in match_data.get("events", []):
         t = ev.get("type", {})
@@ -60,7 +62,7 @@ def _player_shot_xg(match_data):
         pid = ev.get("playerId")
         if pid is None:
             continue
-        xg, _ = shot_xg(ev)
+        xg, _ = shot_xg(ev, xg_by_event)
         out[pid] = out.get(pid, 0.0) + xg
     return out
 

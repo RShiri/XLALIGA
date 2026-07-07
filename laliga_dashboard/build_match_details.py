@@ -23,8 +23,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 
-from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shootout,
-                      player_xa_from_events)
+from xg_model import (SHOT_TYPES, shot_xg, match_xg_by_event, player_full_name,
+                      ascii_name, is_shootout, player_xa_from_events)
 
 # raw scrapes are git-ignored and absent in this clone; LALIGA_MATCH_DIR lets a
 # rebuild point at the dev copy (Desktop\XWORLDCUPTWIT\laliga\matches)
@@ -229,8 +229,10 @@ def extract(match_data):
     hid, aid = home.get("teamId"), away.get("teamId")
     side_of = {hid: "home", aid: "away"}
     ex = _match_extras(match_data)
-    # per-player shot xG + expected assists (xA) for the line-up cards
+    # per-player shot xG + expected assists (xA) for the line-up cards.
+    # Score the match's shots once (v3 needs whole-match context), look up per shot.
     xa_map = player_xa_from_events(match_data)
+    xg_by_event = match_xg_by_event(match_data)
     xg_map = {}
     for _ev in match_data.get("events", []):
         _t = _ev.get("type", {})
@@ -238,7 +240,7 @@ def extract(match_data):
             continue
         if is_shootout(_ev) or _ev.get("playerId") is None:
             continue
-        _xg, _ = shot_xg(_ev)
+        _xg, _ = shot_xg(_ev, xg_by_event)
         xg_map[_ev["playerId"]] = xg_map.get(_ev["playerId"], 0.0) + _xg
 
     # Receiver of each successful pass = the next same-team successful event's player
@@ -298,7 +300,7 @@ def extract(match_data):
                     "y": round(100 - ev.get("y", 0), 1),
                 })
                 continue
-            xg, meta = shot_xg(ev)
+            xg, meta = shot_xg(ev, xg_by_event)
             # goal-mouth landing spot (where the shot crossed/was aimed at the goal line):
             # GoalMouthY = across the goal, GoalMouthZ = height. Powers the on-target
             # "where in the goal" map. Absent on some events → null.

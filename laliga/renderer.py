@@ -44,10 +44,37 @@ SCALE_Y = 0.80
 # through, so the PNG infographics and the website report identical xG.
 # (Replaces the hard-coded unified-LR coefficients; retrain with xg_core/train.py.)
 sys.path.insert(0, str(_REPO_ROOT))
-from xg_core.score import XGScorer
+from xg_core.score import XGScorer            # legacy v2 scalar — kept for _estimate_xg
+from xg_core_v3 import XGScorer as XGScorerV3  # v3 23-feature xG — the live shot path
+from xg_core_v3.features import (SHOT_TYPES as _V3_SHOT_TYPES,   # mirror the dashboard's
+                                 is_shootout as _v3_is_shootout,  # match_xg_by_event so
+                                 _qual_set as _v3_qual_set)       # PNG == site exactly
 
 _XG_SCORER = XGScorer()
+_XG_SCORER_V3 = XGScorerV3()   # scores a whole match at once (needs the assisting pass)
 _XG_LEAGUE = "LaLiga"
+
+
+def _match_xg_by_objid(match_data: dict) -> dict:
+    """id(event) -> v3 xG for each real shot, mirroring laliga_dashboard/xg_model.
+    match_xg_by_event so the PNG and the site report identical xG. Keyed by object
+    identity, NOT WhoScored eventId: eventId is not unique within a match (it collides
+    in ~15% of games), so a dict keyed on it silently drops/mis-assigns shots."""
+    evs = match_data.get("events", [])
+    byid = {e.get("eventId"): e for e in evs}   # for relatedEventId -> assist pass
+    prev_pass = None
+    out = {}
+    for ev in evs:
+        t = ev.get("type", {})
+        dn = t.get("displayName") if isinstance(t, dict) else None
+        if dn == "Pass":
+            prev_pass = ev
+        if not isinstance(t, dict) or dn not in _V3_SHOT_TYPES:
+            continue
+        if _v3_is_shootout(ev) or "OwnGoal" in _v3_qual_set(ev):
+            continue
+        out[id(ev)] = _XG_SCORER_V3.xg_from_shot_event(ev, byid, prev_pass, league=_XG_LEAGUE)
+    return out
 
 
 def _ws_to_sb_x(ws_x: float) -> float:
@@ -59,6 +86,9 @@ def _ws_to_sb_x(ws_x: float) -> float:
 def _estimate_xg(x_sb: float, y_sb: float, is_penalty: bool, is_big_chance: bool,
                  body_part: str, situation: str = "Open Play",
                  assisted: bool = False) -> float:
+    """LEGACY scalar xG (v2). build_shot_df scores shots through the v3 event path
+    (_XG_SCORER_V3.iter_match_xg) so the PNG matches the site; this remains only for
+    any caller that has bare coordinates and no match context."""
     return _XG_SCORER.estimate_xg(x_sb, y_sb, is_penalty, is_big_chance,
                                   body_part, situation, assisted=assisted,
                                   league=_XG_LEAGUE)
@@ -133,6 +163,9 @@ _SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
 
 def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
     tid = _team_id_for_name(match_data, team_name)
+    # Score every shot in the match once (v3 xG reads each shot's assisting pass) and
+    # look up per shot by object identity — the SAME path the dashboard uses, PNG==site.
+    xg_by_event = _match_xg_by_objid(match_data)
     rows = []
     for ev in match_data.get("events", []):
         if ev.get("teamId") != tid:
@@ -171,8 +204,7 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
             "is_goal":      type_name == "Goal",
             "is_on_target": type_name in ("SavedShot", "Goal"),
             "xG":           (xg_stored if xg_stored is not None
-                             else _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
-                                               assisted=ev.get("relatedPlayerId") is not None)),
+                             else xg_by_event.get(id(ev), 0.0)),
             "body_part":    body,
             "situation":    situation,
             "zone":         zone,
