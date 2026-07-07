@@ -846,6 +846,11 @@ tr.z-rel  { background: rgba(255,107,129,0.06); }
 .pl-name-b { color: var(--accent-2); }
 .pl-heat-grid { display: grid; grid-template-columns: 1fr; gap: 26px; }
 .pl-map-title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
-.pl-map-sum { font-size: 13.5px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.pl-map-sums { display: grid; gap: 16px; margin-top: 4px; }
+.pl-map-sum { font-size: 13.5px; font-variant-numeric: tabular-nums; }
 .pl-map-cols { display: grid; gap: 16px; margin-top: 8px; }
-@media (max-width: 820px) { .pl-grid { grid-template-columns: 1fr; } .pl-heat-grid { grid-template-columns: 1fr; } }
+@media (max-width: 820px) {
+  .pl-grid { grid-template-columns: 1fr; }
+  .pl-heat-grid { grid-template-columns: 1fr; }
+  .pl-map-sums { grid-template-columns: 1fr !important; gap: 2px; }
+}
