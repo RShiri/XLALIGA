@@ -814,38 +814,72 @@
     var note = document.getElementById("nwNote");
     var NS = "http://www.w3.org/2000/svg";
 
-    // Standard pass network: the starting XI, using passes up to the first
-    // substitution (the window in which all 11 were on the pitch together).
-    function cutoffFor(side) {
-      var subs = D.lineups[side].subs;
-      return (subs && subs.length && subs[0].on != null) ? subs[0].on : (D.maxMin || 90);
-    }
-
+    // Standard pass network: we choose the longest interval during the match in which
+    // the same 11 players were on the pitch together. This prevents early substitutions
+    // (e.g. injuries in the first 5 minutes) from making the network empty and useless.
     function compute() {
+      var maxMin = D.maxMin || 90;
+      var side = state.side;
+      var players = D.lineups[side].starters.concat(D.lineups[side].subs);
+
+      // Collect all transition minutes (subs, etc.)
+      var transitionMins = [0, maxMin];
+      players.forEach(function (p) {
+        if (p.on != null) transitionMins.push(p.on);
+        if (p.off != null) transitionMins.push(p.off);
+      });
+      transitionMins = Array.from(new Set(transitionMins)).sort(function (a, b) { return a - b; });
+
+      // Find the longest interval between substitutions
+      var start = 0;
+      var end = maxMin;
+      var maxDuration = 0;
+      for (var i = 0; i < transitionMins.length - 1; i++) {
+        var s = transitionMins[i];
+        var e = transitionMins[i + 1];
+        var duration = e - s;
+        if (duration > maxDuration) {
+          maxDuration = duration;
+          start = s;
+          end = e;
+        }
+      }
+
+      // Find which players were active at the midpoint of this longest interval
+      var mid = (start + end) / 2;
+      var active = {};
+      players.forEach(function (p) {
+        var playerOn = p.on != null ? p.on : 0;
+        var playerOff = p.off != null ? p.off : maxMin;
+        if (playerOn <= mid && playerOff >= mid) {
+          active[p.name] = true;
+        }
+      });
+
       var nodes = {}; // name -> {sx,sy,n, passes}
       var links = {}; // "a|b" -> count
-      var starter = {};
-      D.lineups[state.side].starters.forEach(function (p) { starter[p.name] = true; });
-      var cutoff = cutoffFor(state.side);
       function node(name) {
         return nodes[name] || (nodes[name] = { name: name, x: 0, y: 0, n: 0, passes: 0 });
       }
+
       D.passes.forEach(function (p) {
-        if (p.team !== state.side || !p.ok || p.min > cutoff) return;
-        if (!starter[p.player]) return;            // passer must be a starter
+        if (p.team !== side || !p.ok || p.min < start || p.min > end) return;
+        if (!active[p.player]) return;            // passer must be active in this interval
         var passer = node(p.player);
         passer.x += p.x; passer.y += p.y; passer.n++; passer.passes++;
-        if (p.recv && starter[p.recv]) {           // receiver must be a starter too
+        if (p.recv && active[p.recv]) {           // receiver must be active too
           var r = node(p.recv);
           r.x += p.ex; r.y += p.ey; r.n++; r.passes++;
           var key = [p.player, p.recv].sort().join("|");
           links[key] = (links[key] || 0) + 1;
         }
       });
+
       Object.keys(nodes).forEach(function (k) {
         var nd = nodes[k]; if (nd.n) { nd.x /= nd.n; nd.y /= nd.n; }
       });
-      return { nodes: nodes, links: links, cutoff: cutoff };
+
+      return { nodes: nodes, links: links, start: start, end: end };
     }
 
     function draw() {
@@ -906,7 +940,7 @@
       });
       var teamName = state.side === "home" ? D.home.name : D.away.name;
       note.textContent = teamName + " · " + Object.keys(net.nodes).length + " players · " +
-        nLinks + " passing links (min " + state.minLink + ") · positions up to the first sub (" + net.cutoff + "')";
+        nLinks + " passing links (min " + state.minLink + ") · positions during minutes " + net.start + "–" + net.end + "'";
       document.getElementById("nwDir").textContent =
         (state.side === "home" ? teamName + " attacking →" : "← " + teamName + " attacking");
     }
@@ -933,10 +967,13 @@
     var host = document.getElementById("mv-avgpos");
     if (!host) return;
     var maxMin = D.maxMin || 90;
-    var info = { home: {}, away: {} };           // name -> {num, on, off} per side
+    var info = { home: {}, away: {} };           // name -> {num, on, off, starter} per side
     ["home", "away"].forEach(function (sd) {
-      D.lineups[sd].starters.concat(D.lineups[sd].subs).forEach(function (p) {
-        info[sd][p.name] = { num: p.num, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin) };
+      D.lineups[sd].starters.forEach(function (p) {
+        info[sd][p.name] = { num: p.num, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin), starter: true };
+      });
+      D.lineups[sd].subs.forEach(function (p) {
+        info[sd][p.name] = { num: p.num, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin), starter: false };
       });
     });
 
@@ -983,10 +1020,61 @@
       });
       (D.dribbles || []).forEach(function (d) { if (d.team === side && inWin(d.min)) add(d.player, d.x, d.y); });
       (D.shots || []).forEach(function (s) { if (s.team === side && inWin(s.min)) add(s.player, s.x, s.y); });
+
+      // Build substitution slots to prevent displaying more than 11 players when players sub each other in the current window
+      var activeInWindow = {};
+      if (state.win !== 0) {
+        var starters = D.lineups[side].starters.map(function (p) {
+          var pi = info[side][p.name];
+          return { name: p.name, num: p.num, on: pi.on, off: pi.off };
+        });
+        var subs = D.lineups[side].subs.map(function (p) {
+          var pi = info[side][p.name];
+          return { name: p.name, num: p.num, on: pi.on, off: pi.off };
+        }).sort(function (a, b) { return a.on - b.on; });
+
+        var slots = starters.map(function (p) { return [p]; });
+        subs.forEach(function (s) {
+          var bestSlot = -1;
+          var minDiff = 999;
+          slots.forEach(function (slot, idx) {
+            var lastPlayer = slot[slot.length - 1];
+            var diff = Math.abs(lastPlayer.off - s.on);
+            if (diff < minDiff) {
+              minDiff = diff;
+              bestSlot = idx;
+            }
+          });
+          if (bestSlot !== -1) {
+            slots[bestSlot].push(s);
+          }
+        });
+
+        slots.forEach(function (slot) {
+          var bestPlayer = null;
+          var maxDur = 0;
+          slot.forEach(function (p) {
+            var dur = Math.max(0, Math.min(hi, p.off) - Math.max(lo, p.on));
+            if (dur > maxDur) {
+              maxDur = dur;
+              bestPlayer = p;
+            }
+          });
+          if (bestPlayer) {
+            activeInWindow[bestPlayer.name] = true;
+          }
+        });
+      }
+
       var out = [];
       Object.keys(acc).forEach(function (name) {
         var a = acc[name], pi = info[side][name];
         if (!a.n || !pi || !(pi.on < hi && pi.off > lo)) return;   // must be on the pitch in window
+        if (state.win === 0) {
+          if (!pi.starter) return; // in avg position full display only starting 11
+        } else {
+          if (!activeInWindow[name]) return; // display only the player with more time in current window
+        }
         out.push({ name: name, x: a.x / a.n, y: a.y / a.n, n: a.n, num: pi.num });
       });
       return { players: out, lo: lo, hi: hi };
