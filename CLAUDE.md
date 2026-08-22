@@ -76,8 +76,9 @@ projection replace the WC group tables / knockout bracket.
 
 ## How to run / update
 ```bash
-# view locally (from this folder)
-py -m http.server 8778     # → http://localhost:8778/laliga_dashboard/index.html
+# view locally (from this folder) — also serves the Scraper button's control API
+py server.py               # → http://localhost:8778/laliga_dashboard/index.html
+py server.py --no-control  # static files only (plain viewer, no API)
 
 # refresh 2025/26 results/standings (fast, token-free)
 py laliga/build_schedule.py --season 2025-26
@@ -100,6 +101,25 @@ py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_players.
 range-enumerable, so it pages the **weekly** fixtures calendar back (`#dayChangeBtn-prev`),
 scrapes each `/Matches/<id>/Live` `matchCentreData`, and maps it to the schedule by team names.
 Resumable (skips matches already saved with events).
+
+## Scraper button (no waiting for scheduled tasks)
+`py server.py` serves the dashboard **and** a loopback control API (`/api/*`). While it runs, a
+**⚡ Scraper** button appears in the dashboard header — on the local copy and on the live site
+(the API sends the CORS + Private-Network headers Chrome needs for an https page calling
+loopback). It runs the same commands the CLI does, streams their output into the panel, and
+writes the outcome to `PROGRESS.md`:
+refresh fixtures · scrape everything not yet scraped (optionally one matchday, or capped) ·
+scrape specific WhoScored ids · scrape one FotMob id · rebuild the dashboard · commit + push.
+The browser never sends a command — it picks an action name and `server.py` builds the argv
+(`server.ACTIONS`). Front-end: `laliga_dashboard/control.js` (injects nothing when no server
+answers, so the public site is untouched). Optional shared secret: `LALIGA_CONTROL_TOKEN`.
+
+## PROGRESS.md — the running journal
+`PROGRESS.md` at the repo root logs **every scrape** (auto row from `run_match.py`,
+`scrape_whoscored.py`, `backfill.py` and the Scraper button), **platform/site changes**, and
+**what worked / what didn't** so the same mistakes aren't repeated. Append with
+`py laliga/progress_log.py {scrape|platform|lesson|show}` or from the Scraper panel's note box.
+XEPL keeps the same journal — a lesson in one repo usually applies to the other.
 
 ## Deploy / push
 - `.env` is git-ignored — copy `.env.template` → `.env` and set `GIT_TOKEN` (GitHub PAT with

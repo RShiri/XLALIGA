@@ -48,6 +48,7 @@ from laliga.scraper     import (fetch_and_save, fotmob_fetch_wc_matches,
 from laliga.renderer    import render_wc_dashboard, output_filename
 from laliga.git_ops     import push_png_to_xworldcuptwit, push_match_update
 from laliga._runlock    import scrape_lock
+from laliga.progress_log import log_scrape
 
 log = logging.getLogger("laliga.run_match")
 logging.basicConfig(
@@ -352,6 +353,7 @@ def main() -> None:
             sys.exit(1)
         home_name, away_name = parts
 
+    started = time.time()
     ok = run_match(
         fotmob_id=args.fotmob_id,
         from_file=args.from_file,
@@ -361,6 +363,15 @@ def main() -> None:
         fotmob_only=args.fotmob_only,
         do_push=not args.no_push,
         do_whatsapp=not args.no_post,
+    )
+    # One row per invocation — this is the path the scheduled tasks take, so a match that
+    # silently failed to scrape at kickoff+3h still leaves a trace in PROGRESS.md.
+    log_scrape(
+        season=args.season,
+        target=(args.match or (f"FotMob id {args.fotmob_id}" if args.fotmob_id else str(args.from_file))),
+        saved=1 if ok else 0, failed=0 if ok else 1,
+        duration_s=time.time() - started, trigger="run_match.py",
+        note="" if ok else "see the run log for the failing step", ok=ok,
     )
     sys.exit(0 if ok else 1)
 

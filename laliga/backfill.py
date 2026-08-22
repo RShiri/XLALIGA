@@ -33,6 +33,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from laliga.run_match import run_match
+from laliga.progress_log import log_scrape
 
 SCHED_DIR = _REPO_ROOT / "laliga" / "schedules"
 MATCH_DIR = _REPO_ROOT / "laliga" / "matches"
@@ -79,6 +80,7 @@ def main() -> None:
 
     print(f"Backfill {args.season}: {len(todo)} match(es) to scrape "
           f"(of {sum(1 for m in matches if m.get('finished'))} finished).")
+    started = time.time()
     ok = fail = 0
     for i, m in enumerate(todo, 1):
         label = f"{m['home']} vs {m['away']} (MD{m.get('matchday')}, id={m['fotmob_id']})"
@@ -96,6 +98,12 @@ def main() -> None:
             time.sleep(args.delay)
 
     print(f"\nBackfill done: {ok} ok, {fail} failed.")
+    target = f"{len(todo)} match(es)"
+    if args.matchday:
+        target = f"matchday {args.matchday} · {target}"
+    log_scrape(season=args.season, target=target, saved=ok, failed=fail,
+               duration_s=time.time() - started, trigger="backfill.py",
+               note=("--redo" if args.redo else "") + (" --fotmob-only" if args.fotmob_only else ""))
     if args.push and ok:
         # One deploy for the whole batch. push_match_update clones + commits the refreshed
         # laliga_dashboard/{data.js,players.js,matches_detail,database} + any new PNGs.
