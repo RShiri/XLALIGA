@@ -14,6 +14,7 @@
 
   var PORT = 8778;
   var TOKEN_KEY = "ll_control_token";
+  var PUSH_KEY = "ll_control_push";        // remembered "publish when done" preference
   var api = null;          // resolved base URL, e.g. "http://127.0.0.1:8778"
   var health = null;
   var offset = 0;
@@ -105,8 +106,9 @@
       '  <div class="ctl-row" id="ctlLimitRow"><label>Limit / matchday</label>' +
       '    <span class="ctl-two"><input id="ctlLimit" type="number" min="1" placeholder="all" />' +
       '    <input id="ctlMatchday" type="number" min="1" max="38" placeholder="any MD" /></span></div>' +
-      '  <label class="ctl-check"><input id="ctlPush" type="checkbox" /> push to GitHub when it finishes</label>' +
+      '  <label class="ctl-check"><input id="ctlPush" type="checkbox" /> commit &amp; push to GitHub when it finishes</label>' +
       '  <div class="ctl-actions"><button class="ctl-run" id="ctlRun">Run</button>' +
+      '    <button class="ctl-push" id="ctlPushNow" title="Commit and push whatever is already built">Commit &amp; push</button>' +
       '    <button class="ctl-stop" id="ctlStop" disabled>Stop</button>' +
       '    <button class="ctl-ghost" id="ctlProgress">Progress log</button></div>' +
       '  <div class="ctl-status" id="ctlStatus">Idle.</div>' +
@@ -128,6 +130,7 @@
       idsLbl: panel.querySelector("#ctlIdsLbl"), limitRow: panel.querySelector("#ctlLimitRow"),
       limit: panel.querySelector("#ctlLimit"), matchday: panel.querySelector("#ctlMatchday"),
       push: panel.querySelector("#ctlPush"), run: panel.querySelector("#ctlRun"),
+      pushNow: panel.querySelector("#ctlPushNow"),
       stop: panel.querySelector("#ctlStop"), status: panel.querySelector("#ctlStatus"),
       log: panel.querySelector("#ctlLog"), root: panel.querySelector("#ctlRoot"),
       progress: panel.querySelector("#ctlProgress"), noteKind: panel.querySelector("#ctlNoteKind"),
@@ -136,7 +139,15 @@
 
     panel.querySelector(".ctl-x").addEventListener("click", toggle);
     els.action.addEventListener("change", syncFields);
-    els.run.addEventListener("click", run);
+    els.run.addEventListener("click", function () { run(); });
+    els.pushNow.addEventListener("click", function () { run("deploy"); });
+    // Publish-when-done is on by default; the choice sticks between visits.
+    var remembered = null;
+    try { remembered = localStorage.getItem(PUSH_KEY); } catch (e) { /* private mode */ }
+    els.push.checked = remembered === null ? true : remembered === "1";
+    els.push.addEventListener("change", function () {
+      try { localStorage.setItem(PUSH_KEY, els.push.checked ? "1" : "0"); } catch (e) { /* ignore */ }
+    });
     els.stop.addEventListener("click", stop);
     els.progress.addEventListener("click", showProgress);
     els.noteSave.addEventListener("click", saveNote);
@@ -146,6 +157,7 @@
 
   function syncFields() {
     var a = els.action.value;
+    els.push.parentNode.style.display = a === "deploy" ? "none" : "";
     var wantsIds = a === "scrape_ids" || a === "scrape_match";
     els.idsRow.style.display = wantsIds ? "" : "none";
     els.limitRow.style.display = a === "scrape_new" ? "" : "none";
@@ -182,14 +194,17 @@
 
   function setRunning(on) {
     els.run.disabled = on;
+    els.pushNow.disabled = on;
     els.stop.disabled = !on;
     els.btn.classList.toggle("busy", on);
   }
 
   // ── running a job ──────────────────────────────────────────────────
-  function run() {
+  function run(actionOverride) {
+    // Called straight from a click handler too, so ignore the event object.
+    var action = typeof actionOverride === "string" ? actionOverride : els.action.value;
     var body = {
-      action: els.action.value,
+      action: action,
       season: els.season.value,
       ids: els.ids.value.trim(),
       push: els.push.checked
@@ -201,8 +216,6 @@
       var t = prompt("Control token (LALIGA_CONTROL_TOKEN on the server):", "");
       if (t) { try { localStorage.setItem(TOKEN_KEY, t.trim()); } catch (e) { /* private mode */ } }
     }
-    if (body.push && !confirm("This will commit and push to GitHub when the run finishes.\nContinue?")) return;
-
     els.log.textContent = "";
     offset = 0;
     setRunning(true);

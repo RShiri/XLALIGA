@@ -110,6 +110,10 @@ loopback). It runs the same commands the CLI does, streams their output into the
 writes the outcome to `PROGRESS.md`:
 refresh fixtures · scrape everything not yet scraped (optionally one matchday, or capped) ·
 scrape specific WhoScored ids · scrape one FotMob id · rebuild the dashboard · commit + push.
+**One click is enough:** the scrape action refreshes the fixture list first (skipped without
+failing if FotMob is unreachable) and publishes when it's done — "commit & push to GitHub when it
+finishes" is ticked by default, and there's a **Commit & push** button for publishing on its own.
+Pushing always goes through the local clone's own remote, never `git_ops`' `XWORLDCUPTWIT_REPO`.
 The browser never sends a command — it picks an action name and `server.py` builds the argv
 (`server.ACTIONS`). Front-end: `laliga_dashboard/control.js` (injects nothing when no server
 answers, so the public site is untouched). Optional shared secret: `LALIGA_CONTROL_TOKEN`.

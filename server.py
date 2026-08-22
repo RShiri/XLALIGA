@@ -65,10 +65,12 @@ mimetypes.add_type('image/svg+xml', '.svg')
 class Job:
     """One pipeline run: a sequence of subprocesses, streamed line by line to the browser."""
 
-    def __init__(self, label: str, steps: list[list[str]], season: str, target: str):
+    def __init__(self, label: str, steps: list[list[str]], season: str, target: str,
+                 optional: "set[int] | tuple" = ()):
         self.id = time.strftime("%Y%m%d-%H%M%S")
         self.label = label
         self.steps = steps
+        self.optional = set(optional)      # steps allowed to fail without stopping the job
         self.season = season
         self.target = target
         self.lines: deque[str] = deque(maxlen=4000)
@@ -120,7 +122,7 @@ class Job:
         env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
         rc = 0
         try:
-            for step in self.steps:
+            for index, step in enumerate(self.steps):
                 if self.stopped:
                     break
                 self.emit(f"$ {' '.join(shlex.quote(p) for p in step)}")
@@ -135,6 +137,12 @@ class Job:
                 if rc != 0 and step[:2] == ["git", "commit"] and self._nothing_to_commit():
                     # "nothing to commit" isn't a failure — the site is simply up to date.
                     self.emit("[nothing to commit — already up to date]")
+                    rc = 0
+                    continue
+                if rc != 0 and index in self.optional:
+                    # e.g. the fixture refresh when FotMob is unreachable — the scrape can
+                    # still run against the schedule already on disk.
+                    self.emit(f"[optional step exited {rc} — continuing anyway]")
                     rc = 0
                     continue
                 if rc != 0:
@@ -253,6 +261,7 @@ def build_job(body: dict) -> Job:
         raise ValueError(f"no schedule for {season} — run 'Refresh fixtures' first")
 
     push = bool(body.get("push"))
+    optional: set[int] = set()
     limit = body.get("limit")
     matchday = body.get("matchday")
     steps: list[list[str]] = []
@@ -263,6 +272,10 @@ def build_job(body: dict) -> Job:
                  [PY, "laliga_dashboard/build_data.py"]]
 
     elif action == "scrape_new":
+        # One click = refresh the fixture list, then scrape whatever is still missing. The
+        # refresh is optional: if FotMob is down, scrape against the schedule we already have.
+        steps = [[PY, "laliga/build_schedule.py", "--season", season]]
+        optional = {0}
         cmd = [PY, "laliga/backfill.py", "--season", season]
         if limit:
             cmd += ["--limit", str(int(limit))]
@@ -270,9 +283,7 @@ def build_job(body: dict) -> Job:
         if matchday:
             cmd += ["--matchday", str(int(matchday))]
             target = f"matchday {int(matchday)}"
-        if push:
-            cmd += ["--push"]
-        steps = [cmd]
+        steps.append(cmd)
 
     elif action == "scrape_ids":
         ids = str(body.get("ids", "")).strip()
@@ -286,10 +297,10 @@ def build_job(body: dict) -> Job:
         raw = str(body.get("ids", "")).strip()
         if not raw.isdigit():
             raise ValueError("give a single numeric FotMob match id")
-        cmd = [PY, "-m", "laliga.run_match", "--fotmob-id", raw, "--season", season, "--no-post"]
-        if not push:
-            cmd += ["--no-push"]
-        steps = [cmd]
+        # Always --no-push here: the shared git step below does the publishing, so a
+        # missing XWORLDCUPTWIT_REPO in .env can't send this match to the WC repo.
+        steps = [[PY, "-m", "laliga.run_match", "--fotmob-id", raw,
+                  "--season", season, "--no-post", "--no-push"]]
         target = f"FotMob id {raw}"
 
     elif action == "rebuild":
@@ -301,12 +312,14 @@ def build_job(body: dict) -> Job:
                  ["git", "commit", "-m", msg],
                  ["git", "push"]]
 
-    if push and action in ("scrape_ids", "rebuild"):
+    # Push through the local clone's own remote for every action — one route, and it can't
+    # land in the wrong repository the way git_ops' XWORLDCUPTWIT_REPO default can.
+    if push and action != "deploy":
         steps = steps + [["git", "add", "-A"],
                          ["git", "commit", "-m", f"[LaLiga] {target} ({season})"],
                          ["git", "push"]]
 
-    return Job(ACTIONS[action], steps, season, target)
+    return Job(ACTIONS[action], steps, season, target, optional=optional)
 
 
 # ─────────────────────────── state ───────────────────────────
@@ -335,6 +348,11 @@ def season_state() -> list[dict]:
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     control = True
+
+    def __init__(self, *args, **kwargs):
+        # Serve from the repo root whatever directory the server was launched from.
+        kwargs.setdefault("directory", str(ROOT))
+        super().__init__(*args, **kwargs)
 
     # -- helpers ------------------------------------------------------
     def _origin_ok(self) -> str:
