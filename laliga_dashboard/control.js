@@ -20,6 +20,7 @@
   var offset = 0;
   var poll = null;
   var els = {};
+  var state = [];          // per-season counts from /api/state, for the one-click path
 
   // ── plumbing ───────────────────────────────────────────────────────
   function bases() {
@@ -99,6 +100,12 @@
       '<div class="ctl-head"><b>Scraper</b><span class="ctl-sub" id="ctlRoot"></span>' +
       '<button class="ctl-x" title="Close">✕</button></div>' +
       '<div class="ctl-body">' +
+      '  <button class="ctl-primary" id="ctlOneClick">⚡ Update everything</button>' +
+      '  <div class="ctl-primary-sub" id="ctlOneClickSub">refresh fixtures → scrape what\'s missing → publish</div>' +
+      '  <div class="ctl-actions"><button class="ctl-stop" id="ctlStop" disabled>Stop</button>' +
+      '    <button class="ctl-ghost" id="ctlProgress">Progress log</button>' +
+      '    <button class="ctl-ghost" id="ctlAdvToggle">Advanced ▾</button></div>' +
+      '  <div class="ctl-adv" id="ctlAdv">' +
       '  <div class="ctl-row"><label>Season</label><select id="ctlSeason"></select></div>' +
       '  <div class="ctl-row"><label>Action</label><select id="ctlAction">' + opts + "</select></div>" +
       '  <div class="ctl-row" id="ctlIdsRow"><label id="ctlIdsLbl">Match id(s)</label>' +
@@ -107,10 +114,9 @@
       '    <span class="ctl-two"><input id="ctlLimit" type="number" min="1" placeholder="all" />' +
       '    <input id="ctlMatchday" type="number" min="1" max="38" placeholder="any MD" /></span></div>' +
       '  <label class="ctl-check"><input id="ctlPush" type="checkbox" /> commit &amp; push to GitHub when it finishes</label>' +
-      '  <div class="ctl-actions"><button class="ctl-run" id="ctlRun">Run</button>' +
+      '  <div class="ctl-actions"><button class="ctl-run" id="ctlRun">Run this action</button>' +
       '    <button class="ctl-push" id="ctlPushNow" title="Commit and push whatever is already built">Commit &amp; push</button>' +
-      '    <button class="ctl-stop" id="ctlStop" disabled>Stop</button>' +
-      '    <button class="ctl-ghost" id="ctlProgress">Progress log</button></div>' +
+      '  </div></div>' +
       '  <div class="ctl-status" id="ctlStatus">Idle.</div>' +
       '  <pre class="ctl-log" id="ctlLog"></pre>' +
       '  <div class="ctl-note"><select id="ctlNoteKind">' +
@@ -134,11 +140,18 @@
       stop: panel.querySelector("#ctlStop"), status: panel.querySelector("#ctlStatus"),
       log: panel.querySelector("#ctlLog"), root: panel.querySelector("#ctlRoot"),
       progress: panel.querySelector("#ctlProgress"), noteKind: panel.querySelector("#ctlNoteKind"),
+      oneClick: panel.querySelector("#ctlOneClick"), oneClickSub: panel.querySelector("#ctlOneClickSub"),
+      adv: panel.querySelector("#ctlAdv"), advToggle: panel.querySelector("#ctlAdvToggle"),
       noteText: panel.querySelector("#ctlNoteText"), noteSave: panel.querySelector("#ctlNoteSave")
     };
 
     panel.querySelector(".ctl-x").addEventListener("click", toggle);
     els.action.addEventListener("change", syncFields);
+    els.oneClick.addEventListener("click", oneClick);
+    els.advToggle.addEventListener("click", function () {
+      var open = els.adv.classList.toggle("open");
+      els.advToggle.textContent = open ? "Advanced ▴" : "Advanced ▾";
+    });
     els.run.addEventListener("click", function () { run(); });
     els.pushNow.addEventListener("click", function () { run("deploy"); });
     // Publish-when-done is on by default; the choice sticks between visits.
@@ -174,6 +187,7 @@
     call("/api/state").then(function (s) {
       var cur = els.season.value;
       var seasons = s.seasons || [];
+      state = seasons;
       els.season.innerHTML = seasons.map(function (x) {
         return '<option value="' + x.season + '">' + x.season.replace("-", "/") +
           " · " + x.played + " played · " + x.scraped + " scraped" +
@@ -183,6 +197,7 @@
       var pending = seasons.filter(function (x) { return x.pending > 0; });
       els.season.value = cur || (pending.length ? pending[pending.length - 1].season
         : (seasons.length ? seasons[seasons.length - 1].season : ""));
+      describeOneClick();
       if (s.job) adopt(s.job);
     }).catch(function (e) { setStatus("Control server unreachable — " + e.message, true); });
   }
@@ -193,14 +208,41 @@
   }
 
   function setRunning(on) {
+    els.oneClick.disabled = on;
     els.run.disabled = on;
     els.pushNow.disabled = on;
     els.stop.disabled = !on;
     els.btn.classList.toggle("busy", on);
   }
 
+  // ── the one button ─────────────────────────────────────────────────
+  function oneClick() {
+    // Whole update in one go: refresh the fixture list, scrape everything still
+    // missing, rebuild, commit and push. Season is chosen for you — the one with
+    // unscraped played matches, else the newest.
+    var season = pickSeason();
+    if (!season) { setStatus("No seasons found — is the schedules folder there?", true); return; }
+    els.season.value = season;
+    run("scrape_new", { season: season, push: true, ids: null, limit: null, matchday: null });
+  }
+
+  function pickSeason() {
+    var pending = state.filter(function (x) { return x.pending > 0; });
+    if (pending.length) return pending[pending.length - 1].season;
+    return state.length ? state[state.length - 1].season : els.season.value;
+  }
+
+  function describeOneClick() {
+    var season = pickSeason();
+    var row = state.filter(function (x) { return x.season === season; })[0];
+    if (!row) { els.oneClickSub.textContent = "refresh fixtures → scrape what's missing → publish"; return; }
+    els.oneClickSub.textContent = season.replace("-", "/") + " · " +
+      (row.pending ? row.pending + " match(es) to scrape" : "nothing pending — will check for new results") +
+      " → publish";
+  }
+
   // ── running a job ──────────────────────────────────────────────────
-  function run(actionOverride) {
+  function run(actionOverride, overrides) {
     // Called straight from a click handler too, so ignore the event object.
     var action = typeof actionOverride === "string" ? actionOverride : els.action.value;
     var body = {
@@ -211,6 +253,11 @@
     };
     if (els.limit.value) body.limit = parseInt(els.limit.value, 10);
     if (els.matchday.value) body.matchday = parseInt(els.matchday.value, 10);
+    if (overrides) {
+      Object.keys(overrides).forEach(function (k) {
+        if (overrides[k] === null) delete body[k]; else body[k] = overrides[k];
+      });
+    }
 
     if (health.auth && !token()) {
       var t = prompt("Control token (LALIGA_CONTROL_TOKEN on the server):", "");
