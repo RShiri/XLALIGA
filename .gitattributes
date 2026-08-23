@@ -1,0 +1,4 @@
+# PROGRESS.md is an append-at-top journal written on both sides (your PC logs scrapes,
+# other clones log platform notes). "union" merges keep every line from both sides instead
+# of raising a conflict — a merge may interleave the newest few entries, never lose one.
+PROGRESS.md merge=union
