@@ -261,6 +261,63 @@ def merge_matches(old: "list[dict]", new: "list[dict]") -> "list[dict]":
                                                  r["kickoff_utc"] or "", r["fotmob_id"]))
 
 
+def debug_day(day_str: str) -> None:
+    """Dump one day's raw feed: what shape it is, and every league in it.
+
+    Reached for when a sweep reports "answered fine but no league <id>" — that message
+    can't tell a renamed/re-numbered league from a changed document shape, and this can.
+    """
+    day = datetime.strptime(day_str, "%Y-%m-%d").date()
+    body = _fetch_day(day)
+    if not body:
+        print(f"{day}: no response at all (network, or FotMob refused).")
+        return
+    print(f"{day}: {len(body)} bytes")
+    print(f"  starts: {body[:200]!r}\n")
+
+    rows: list[tuple[str, str, int]] = []
+    try:
+        root = ET.fromstring(body)
+        print(f"  parsed as XML; root <{root.tag}>")
+        leagues = list(root.iter("league"))
+        if not leagues:
+            tags: dict[str, int] = {}
+            for el in root.iter():
+                tags[el.tag] = tags.get(el.tag, 0) + 1
+            print("  no <league> elements! element names present:")
+            for tag, n in sorted(tags.items(), key=lambda kv: -kv[1])[:15]:
+                print(f"    <{tag}> x{n}")
+        for lg in leagues:
+            rows.append((str(lg.get("id", "")), lg.get("name", ""), len(list(lg.iter("match")))))
+    except ET.ParseError:
+        try:
+            data = json.loads(body)
+        except Exception:
+            print("  parsed as NEITHER XML nor JSON — the endpoint returned something else "
+                  "(an HTML block page?). The 200 characters above are the clue.")
+            return
+        print(f"  parsed as JSON; top-level keys: {list(data)[:10]}")
+        for lg in data.get("leagues") or []:
+            rows.append((str(lg.get("primaryId") or lg.get("id") or ""),
+                         str(lg.get("name", "")), len(lg.get("matches") or [])))
+
+    if not rows:
+        print("  no leagues in this response — try a date when a match was definitely played.")
+        return
+    print(f"\n  {len(rows)} league(s) listed. Ones that look Spanish:")
+    hits = [r for r in rows if any(w in r[1].lower() for w in ("liga", "spain", "espa"))]
+    for lid, name, n in hits or []:
+        mark = "  <-- MATCHES our filter" if (lid == str(FOTMOB_LEAGUE_ID)
+                                              or name.strip().lower() in FOTMOB_LEAGUE_NAMES) else ""
+        print(f"    id={lid:<10} {name!r} · {n} match(es){mark}")
+    if not hits:
+        print("    (none) — first 25 leagues in the response:")
+        for lid, name, n in rows[:25]:
+            print(f"    id={lid:<10} {name!r} · {n} match(es)")
+    print(f"\n  We currently accept id={FOTMOB_LEAGUE_ID} or name in {sorted(FOTMOB_LEAGUE_NAMES)}.")
+    print("  Override with the LALIGA_FOTMOB_LEAGUE_ID environment variable.")
+
+
 def build_schedule(season: str, start: str | None = None, end: str | None = None,
                    verbose: bool = True, existing: "list[dict] | None" = None,
                    full: bool = False, days_ahead: int = 14) -> list[dict]:
@@ -347,7 +404,14 @@ def main() -> None:
     ap.add_argument("--days-ahead", type=int, default=14,
                     help="how far past today to look for newly-listed fixtures (default 14)")
     ap.add_argument("--out", help="output path (default schedules/SCHEDULE_<season>.json)")
+    ap.add_argument("--debug-day", metavar="YYYY-MM-DD",
+                    help="dump what the feed returns for one date, and every league in it, "
+                         "then exit (use when a sweep finds nothing)")
     args = ap.parse_args()
+
+    if args.debug_day:
+        debug_day(args.debug_day)
+        return
 
     SCHED_DIR.mkdir(parents=True, exist_ok=True)
     out = Path(args.out) if args.out else SCHED_DIR / f"SCHEDULE_{args.season}.json"
