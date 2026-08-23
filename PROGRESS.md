@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-08-23** — build_schedule is now incremental by default: it sweeps from a few days before the last finished match to a fortnight ahead and merges into the existing schedule (--full for the whole season). It also parses the feed as XML or JSON, and says why a sweep found nothing instead of silently reporting 0.
 - **2026-08-22** — Scraper panel collapsed to a single '⚡ Update everything' button — picks the season, refreshes fixtures, scrapes what's missing, rebuilds and publishes in one click; the season/action/id/limit controls moved behind an Advanced toggle.
 - **2026-08-22** — Scraper panel: added a Commit & push button, made publish-when-done the default, and folded the fixture refresh into the scrape action (optional step — a FotMob outage no longer blocks the scrape). All pushes now go through the local clone's remote instead of git_ops.
 - **2026-08-22** — Added this journal (`PROGRESS.md` + `laliga/progress_log.py`) and a
@@ -44,6 +45,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Lessons — what worked / what didn't
 
 <!-- progress:lessons -->
+- ❌ **Didn't work** — A sweep printing '0 matches so far' told us nothing: ET.fromstring failures were swallowed by 'except Exception: continue', so a FotMob format change looked identical to 'no fixtures yet'. Failure counters + a verdict line now distinguish blocked / format-changed / no-such-league / not-published.  (2026-08-23)
 - ❌ **Didn't work** _deploy_ — `git_ops.push_match_update` copies `data.js`, `players.js`,
   `matches_detail/` and `database/` but **not** `shots.js` or `player_lab/`, so auto-pushed
   matches leave the live Team Lab and Player Lab stale even though the renderer regenerates
