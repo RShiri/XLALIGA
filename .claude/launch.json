@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "laliga-dashboard",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-m", "http.server", "8778"],
+      "port": 8778
+    }
+  ]
+}
