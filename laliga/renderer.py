@@ -1327,8 +1327,16 @@ def _load_dashboard_module(name: str, filename: str):
 def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | None = None) -> None:
     """Rebuild the interactive match page + the index data.js (best-effort).
 
+    Set LALIGA_SKIP_DASHBOARD_REFRESH=1 to skip it entirely — batch runs (backfill) do this
+    and rebuild once at the end instead. Per-match it re-reads every season and regenerates
+    every derived file, which for a 14-match batch is fourteen full rebuilds competing with
+    a running Chrome.
+
     ``match_id`` forces the detail filename (the slot-coded id for knockout games) so it
     matches the PNG and the dashboard match id; when omitted it's derived from team names."""
+    if os.environ.get("LALIGA_SKIP_DASHBOARD_REFRESH") == "1":
+        log.info("Dashboard refresh skipped (batch mode; rebuilt once at the end).")
+        return
     try:
         if match_data is not None:
             details = _load_dashboard_module("wc_dashboard_details", "build_match_details.py")

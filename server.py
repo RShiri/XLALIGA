@@ -239,6 +239,7 @@ REBUILD_STEPS = [
 ]
 
 ACTIONS = {
+    "results_only": "Results & table only — no browser, ~1 minute (safe on any machine)",
     "schedule":     "Refresh fixtures & results (FotMob, no browser)",
     "scrape_new":   "Scrape every played match not scraped yet",
     "scrape_partial": "Re-scrape matches that only got FotMob data (no maps/lineups)",
@@ -268,7 +269,14 @@ def build_job(body: dict) -> Job:
     steps: list[list[str]] = []
     target = ACTIONS[action]
 
-    if action == "schedule":
+    if action == "results_only":
+        # Scores, table, fixtures and projection — one HTTP request, no Chrome, no scraping.
+        # This is the low-risk update: it can't hang, thrash the machine or take an hour.
+        steps = [[PY, "laliga/build_schedule.py", "--season", season],
+                 [PY, "laliga_dashboard/build_data.py"]]
+        target = "results & table"
+
+    elif action == "schedule":
         steps = [[PY, "laliga/build_schedule.py", "--season", season],
                  [PY, "laliga_dashboard/build_data.py"]]
 
