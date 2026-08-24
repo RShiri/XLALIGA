@@ -199,7 +199,9 @@ def _match_from_json(m: dict) -> "dict | None":
     home_name, home_id, home_score = _side(m.get("home") or {})
     away_name, away_id, away_score = _side(m.get("away") or {})
 
-    rnd = m.get("round", m.get("roundName", m.get("matchday", (m.get("tournament") or {}).get("round"))))
+    rnd = next((m.get(k) for k in ("round", "roundName", "matchday", "roundNumber",
+                                   "week", "stage", "matchRound") if m.get(k) is not None),
+               (m.get("tournament") or {}).get("round"))
     try:
         matchday = int(str(rnd).strip()) if str(rnd).strip().isdigit() else None
     except (TypeError, ValueError):
@@ -241,11 +243,73 @@ def fetch_season_matches(season: str, verbose: bool = True) -> "list[dict]":
                   f"Falling back to the day-by-day sweep.")
         return []
     best = max(lists, key=len)
-    out = [r for r in (_match_from_json(m) for m in best) if r]
+    out = _fill_missing_rounds([r for r in (_match_from_json(m) for m in best) if r], verbose)
     if verbose:
         print(f"  {len(out)} fixture(s) parsed "
               f"({sum(1 for r in out if r['finished'])} finished).")
     return out
+
+
+def dump_sample(season: str) -> None:
+    """Print one raw match object from the season payload, so its real field names are visible."""
+    url = FOTMOB_SEASON_URL.format(league=FOTMOB_LEAGUE_ID,
+                                   season=urllib.parse.quote(_season_param(season), safe=""))
+    data = _fetch_json(url)
+    if not isinstance(data, dict):
+        print("No season payload came back.")
+        return
+    print(f"top-level keys: {list(data)}")
+    m = data.get("matches")
+    if isinstance(m, dict):
+        print(f"data['matches'] keys: {list(m)}")
+    lists = _find_match_lists(data)
+    print(f"{len(lists)} match-shaped list(s); lengths: {sorted((len(l) for l in lists), reverse=True)[:6]}")
+    if not lists:
+        return
+    best = max(lists, key=len)
+    print(f"\nfirst object of the longest list ({len(best)} items):")
+    print(json.dumps(best[0], indent=2, ensure_ascii=False)[:2000])
+    keys: dict[str, int] = {}
+    for item in best[:80]:
+        for k in item:
+            keys[k] = keys.get(k, 0) + 1
+    print(f"\nkeys seen across the first 80 items: {sorted(keys)}")
+
+
+def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[dict]":
+    """Infer matchday when the payload doesn't carry one.
+
+    FotMob's season view lists fixtures in round order, and a 20-team league plays
+    teams/2 matches per round — so consecutive blocks of that size are the rounds. Only
+    applied when NO record has a round, and only kept if every inferred round contains
+    each team at most once (which is what makes a round a round).
+    """
+    if not records or any(r.get("matchday") for r in records):
+        return records
+    teams = {r["home"] for r in records} | {r["away"] for r in records}
+    per_round = max(len(teams) // 2, 1)
+    if per_round < 2 or len(records) % per_round:
+        if verbose:
+            print(f"  ! no matchday in the feed, and {len(records)} fixtures / {len(teams)} teams "
+                  f"doesn't divide into rounds — leaving matchday empty.")
+        return records
+    for i, r in enumerate(records):
+        r["matchday"] = i // per_round + 1
+    # Validate: a real round never repeats a team.
+    for start in range(0, len(records), per_round):
+        block = records[start:start + per_round]
+        seen = [t for r in block for t in (r["home"], r["away"])]
+        if len(set(seen)) != len(seen):
+            for r in records:
+                r["matchday"] = None
+            if verbose:
+                print("  ! inferred matchdays repeated a team — the feed isn't in round order, "
+                      "so matchday is left empty rather than wrong.")
+            return records
+    if verbose:
+        print(f"  matchday wasn't in the feed — inferred {len(records) // per_round} rounds of "
+              f"{per_round} from the fixture order (validated: no team twice in a round).")
+    return records
 
 
 def fetch_day_matches(day: date, verbose: bool = False) -> "list[dict]":
@@ -649,6 +713,8 @@ def main() -> None:
     ap.add_argument("--debug-day", metavar="YYYY-MM-DD",
                     help="dump what the feed returns for one date, and every league in it, "
                          "then exit (use when a sweep finds nothing)")
+    ap.add_argument("--dump-sample", action="store_true",
+                    help="print one raw match object from the season payload (field names)")
     ap.add_argument("--probe-endpoints", metavar="YYYY-MM-DD",
                     help="try every known fixture source for one date and report what each "
                          "returns (use when the current feed has stopped listing fixtures)")
@@ -659,6 +725,9 @@ def main() -> None:
         return
     if args.probe_endpoints:
         probe_endpoints(args.probe_endpoints)
+        return
+    if args.dump_sample:
+        dump_sample(args.season)
         return
 
     SCHED_DIR.mkdir(parents=True, exist_ok=True)
