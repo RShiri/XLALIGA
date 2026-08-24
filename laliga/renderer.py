@@ -1346,13 +1346,20 @@ def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | No
                     log.info("Match centre page refreshed → %s", os.path.basename(out))
     except Exception as exc:  # pragma: no cover - never block rendering
         log.warning("Could not refresh match centre page: %s", exc)
+    full_rebuild = match_data is None      # batch mode: no single match to write
     for modname, filename, label in (
+        # build_match_details regenerates every matches_detail/<id>.js from the raw scrapes.
+        # It belongs here, not only on the per-match path: a batch that skips the per-match
+        # refresh would otherwise never write a Match Centre page for anything it scraped.
+        ("wc_dashboard_details_all", "build_match_details.py", "match centre pages"),
         ("wc_dashboard_build", "build_data.py", "data.js"),
         ("wc_dashboard_players", "build_players.py", "players.js"),
         ("wc_dashboard_shots", "build_shots.py", "shots.js (Team Lab)"),
         ("wc_dashboard_database", "build_database.py", "database export"),
         ("wc_dashboard_player_lab", "build_player_lab.py", "player_lab per-team events"),
     ):
+        if modname == "wc_dashboard_details_all" and not full_rebuild:
+            continue                       # the single page was already written above
         try:
             mod = _load_dashboard_module(modname, filename)
             if mod is not None:
