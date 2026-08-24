@@ -50,6 +50,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Lessons — what worked / what didn't
 
 <!-- progress:lessons -->
+- ✅ **Worked** — Two cheap wins on scrape time and stability: remember that undetected-chromedriver is broken after the FIRST failure (it was retried at every browser launch — 3x per match, ~5s each plus a driver-patching dance), and stop launching a browser for Understat after it returns nothing twice (it has been dead since the AJAX move). Roughly halves the browser launches per match.  (2026-08-24)
 - ❌ **Didn't work** — backfill rebuilt the ENTIRE dashboard after every match (renderer's refresh hook re-reads every season and rewrites every derived file). For a 14-match batch that is 14 full rebuilds racing a live Chrome — it crashed the machine twice. Batches now set LALIGA_SKIP_DASHBOARD_REFRESH=1 and rebuild once at the end.  (2026-08-24)
 - ❌ **Didn't work** — FotMob's season payload carries NO round field — confirmed with --dump-sample: each match has only id, home, away, status, pageUrl and an empty tournament.stage. Matchday has to be reconstructed; don't go looking for the field again.  (2026-08-24)
 - ✅ **Worked** — Matchday inference now tries the payload order AND kickoff order, validating each by 'no team twice in a round'. FotMob's season view is date-ordered, not round-ordered, so the first attempt fails and the second succeeds — and if both fail it leaves matchday empty instead of publishing a wrong table.  (2026-08-24)
