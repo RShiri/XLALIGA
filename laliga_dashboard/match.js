@@ -284,7 +284,8 @@
         '<div class="sc-val ' + (aBetter ? "win" : "") + '">' + disp(a) + "</div>" +
         "</div>";
     }).join("");
-    var LABELS = { fotmob: "FotMob", whoscored: "WhoScored", sofascore: "SofaScore" };
+    var LABELS = { fotmob: "FotMob", whoscored: "WhoScored", sofascore: "SofaScore",
+                   understat: "Understat" };
     var srcs = (rec.sources || []).map(function (s) { return LABELS[s] || s; });
     var cap = srcs.length
       ? '<div class="stat-src" style="text-align:center;font-size:.78em;opacity:.6;margin-top:8px">' +
