@@ -279,10 +279,11 @@ def dump_sample(season: str) -> None:
 def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[dict]":
     """Infer matchday when the payload doesn't carry one.
 
-    FotMob's season view lists fixtures in round order, and a 20-team league plays
-    teams/2 matches per round — so consecutive blocks of that size are the rounds. Only
-    applied when NO record has a round, and only kept if every inferred round contains
-    each team at most once (which is what makes a round a round).
+    A 20-team league plays teams/2 matches per round, so consecutive blocks of that size
+    are the rounds — but only if the fixtures are in round order. Two orderings are tried:
+    the payload's own, then kickoff order (a round is normally one contiguous weekend).
+    Each is validated by the defining property of a round: no team appears twice. If
+    neither validates, matchday is left empty rather than published wrong.
     """
     if not records or any(r.get("matchday") for r in records):
         return records
@@ -293,22 +294,36 @@ def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[d
             print(f"  ! no matchday in the feed, and {len(records)} fixtures / {len(teams)} teams "
                   f"doesn't divide into rounds — leaving matchday empty.")
         return records
-    for i, r in enumerate(records):
-        r["matchday"] = i // per_round + 1
-    # Validate: a real round never repeats a team.
-    for start in range(0, len(records), per_round):
-        block = records[start:start + per_round]
-        seen = [t for r in block for t in (r["home"], r["away"])]
-        if len(set(seen)) != len(seen):
-            for r in records:
-                r["matchday"] = None
-            if verbose:
-                print("  ! inferred matchdays repeated a team — the feed isn't in round order, "
-                      "so matchday is left empty rather than wrong.")
-            return records
+
+    def valid(order: "list[dict]") -> bool:
+        for start in range(0, len(order), per_round):
+            block = order[start:start + per_round]
+            seen = [t for r in block for t in (r["home"], r["away"])]
+            if len(set(seen)) != len(seen):
+                return False
+        return True
+
+    attempts = (
+        ("the fixture order", records),
+        ("kickoff order", sorted(records, key=lambda r: (r.get("kickoff_utc") or "",
+                                                         r.get("fotmob_id") or 0))),
+    )
+    for label, order in attempts:
+        if not valid(order):
+            continue
+        for i, r in enumerate(order):
+            r["matchday"] = i // per_round + 1
+        if verbose:
+            print(f"  matchday wasn't in the feed — inferred {len(records) // per_round} rounds "
+                  f"of {per_round} from {label} (validated: no team twice in a round).")
+        return records
+
+    for r in records:
+        r["matchday"] = None
     if verbose:
-        print(f"  matchday wasn't in the feed — inferred {len(records) // per_round} rounds of "
-              f"{per_round} from the fixture order (validated: no team twice in a round).")
+        print("  ! matchday isn't in the feed and neither fixture order nor kickoff order "
+              "splits cleanly into rounds — left empty rather than wrong. "
+              "Run with --dump-sample to see the raw fields.")
     return records
 
 
