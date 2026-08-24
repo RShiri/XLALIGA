@@ -102,6 +102,7 @@
       '<div class="ctl-body">' +
       '  <button class="ctl-primary" id="ctlOneClick">⚡ Update everything</button>' +
       '  <div class="ctl-primary-sub" id="ctlOneClickSub">refresh fixtures → scrape what\'s missing → publish</div>' +
+      '  <button class="ctl-second" id="ctlQuick">Results &amp; table only · no browser, ~1 min</button>' +
       '  <div class="ctl-actions"><button class="ctl-stop" id="ctlStop" disabled>Stop</button>' +
       '    <button class="ctl-ghost" id="ctlProgress">Progress log</button>' +
       '    <button class="ctl-ghost" id="ctlAdvToggle">Advanced ▾</button></div>' +
@@ -141,6 +142,7 @@
       log: panel.querySelector("#ctlLog"), root: panel.querySelector("#ctlRoot"),
       progress: panel.querySelector("#ctlProgress"), noteKind: panel.querySelector("#ctlNoteKind"),
       oneClick: panel.querySelector("#ctlOneClick"), oneClickSub: panel.querySelector("#ctlOneClickSub"),
+      quick: panel.querySelector("#ctlQuick"),
       adv: panel.querySelector("#ctlAdv"), advToggle: panel.querySelector("#ctlAdvToggle"),
       noteText: panel.querySelector("#ctlNoteText"), noteSave: panel.querySelector("#ctlNoteSave")
     };
@@ -148,6 +150,12 @@
     panel.querySelector(".ctl-x").addEventListener("click", toggle);
     els.action.addEventListener("change", syncFields);
     els.oneClick.addEventListener("click", oneClick);
+    // The safe update: scores and table, no Chrome, can't run long.
+    els.quick.addEventListener("click", function () {
+      var season = pickSeason();
+      if (season) run("results_only", { season: season, push: true, ids: null,
+                                        limit: null, matchday: null });
+    });
     els.advToggle.addEventListener("click", function () {
       var open = els.adv.classList.toggle("open");
       els.advToggle.textContent = open ? "Advanced ▴" : "Advanced ▾";
@@ -209,6 +217,7 @@
 
   function setRunning(on) {
     els.oneClick.disabled = on;
+    els.quick.disabled = on;
     els.run.disabled = on;
     els.pushNow.disabled = on;
     els.stop.disabled = !on;

@@ -110,6 +110,9 @@ def main() -> None:
               f"(no pass/dribble maps or lineups). Re-run with --redo-partial once WhoScored "
               f"loads again to fill them in.")
     started = time.time()
+    # One rebuild at the end, not one per match: the per-match refresh re-reads every season
+    # and rewrites every derived file, which is what makes a long batch thrash the machine.
+    os.environ["LALIGA_SKIP_DASHBOARD_REFRESH"] = "1"
     ok = fail = 0
     for i, m in enumerate(todo, 1):
         label = f"{m['home']} vs {m['away']} (MD{m.get('matchday')}, id={m['fotmob_id']})"
@@ -125,6 +128,15 @@ def main() -> None:
             print(f"   ! failed: {exc}")
         if i < len(todo):
             time.sleep(args.delay)
+
+    os.environ.pop("LALIGA_SKIP_DASHBOARD_REFRESH", None)
+    if ok:
+        print("\nRebuilding the dashboard once for the whole batch …")
+        try:
+            from laliga.renderer import _refresh_web_dashboard_db
+            _refresh_web_dashboard_db()
+        except Exception as exc:
+            print(f"  ! rebuild failed ({exc}) — run the build_*.py scripts by hand.")
 
     print(f"\nBackfill done: {ok} ok, {fail} failed.")
     still_partial = sum(1 for m in matches if m.get("finished")

@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-08-24** — Added a 'Results & table only' button: build_schedule + build_data + push, no browser, about a minute. The site's standings/results/fixtures/projection never needed Chrome — only the shot maps and Match Centre do — so the safe update is now one click away from the heavy one.
 - **2026-08-24** — Matchday reconstruction is now earliest-fit packing: fixtures in date order dropped into the earliest round with a free slot and neither team in it. Beats splitting on team-recurrence (which fragmented the season into 40 rounds) and puts postponed matches back in their real round.
 - **2026-08-24** — 2026/27 promoted clubs: added colours for Deportivo A Coruña, Malaga and Racing Santander (plus the FotMob/WhoScored name variants). Crests still need 'py laliga/download_crests.py' on a machine that can reach FotMob's CDN.
 - **2026-08-24** — 26/27 readiness sweep: scraper.fotmob_fetch_wc_matches migrated off the retired live-only endpoint to /api/data/matches (legacy XML only if the new one returns nothing); defaultSeason now follows the newest PLAYED season instead of being pinned to 2025-26; backfill/scrape_whoscored --season defaults to the newest schedule on disk; git_ops finally pushes shots.js + player_lab/ and finds the raw JSON under matches/<season>/; build_schedule warns about clubs with no colour or crest.
@@ -49,6 +50,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Lessons — what worked / what didn't
 
 <!-- progress:lessons -->
+- ❌ **Didn't work** — backfill rebuilt the ENTIRE dashboard after every match (renderer's refresh hook re-reads every season and rewrites every derived file). For a 14-match batch that is 14 full rebuilds racing a live Chrome — it crashed the machine twice. Batches now set LALIGA_SKIP_DASHBOARD_REFRESH=1 and rebuild once at the end.  (2026-08-24)
 - ❌ **Didn't work** — FotMob's season payload carries NO round field — confirmed with --dump-sample: each match has only id, home, away, status, pageUrl and an empty tournament.stage. Matchday has to be reconstructed; don't go looking for the field again.  (2026-08-24)
 - ✅ **Worked** — Matchday inference now tries the payload order AND kickoff order, validating each by 'no team twice in a round'. FotMob's season view is date-ordered, not round-ordered, so the first attempt fails and the second succeeds — and if both fail it leaves matchday empty instead of publishing a wrong table.  (2026-08-24)
 - ❌ **Didn't work** — A WhoScored failure used to be invisible and permanent: the match still saved (FotMob shots only, no event stream), so _already_scraped counted it done and no later run would ever fill in the maps/lineups. backfill now classifies each match none/partial/full and --redo-partial retries only the partials.  (2026-08-24)
