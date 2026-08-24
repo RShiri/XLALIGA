@@ -318,29 +318,42 @@ def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[d
                   f"of {per_round} from {label} (validated: no team twice in a round).")
         return records
 
-    # Third attempt: walk the fixtures in date order and start a new round whenever a team
-    # would appear twice. This needs no clean block structure — it only assumes a team plays
-    # once per round, which is what a round *is*. Handles placeholder kickoff times for
-    # unannounced fixtures, and puts a postponed match in the round where it was played.
+    # Third attempt: earliest-fit packing. FotMob's season view carries no round field at
+    # all (confirmed by --dump-sample: id/home/away/status/pageUrl and an empty
+    # tournament.stage), so the rounds have to be reconstructed. Walk the fixtures in date
+    # order and drop each into the earliest round that still has a free slot and neither
+    # team in it. A simple "new round whenever a team recurs" split fragments the season
+    # (a midweek or brought-forward game splits a round in two); packing puts a postponed
+    # match back into the round it belongs to, because that round still has a slot free.
     ordered = sorted(records, key=lambda r: (r.get("date") or "9999-99-99",
                                              r.get("kickoff_utc") or "",
                                              r.get("fotmob_id") or 0))
-    round_no, in_round = 1, set()
+    rounds: "list[dict]" = []
     for r in ordered:
-        if r["home"] in in_round or r["away"] in in_round:
-            round_no += 1
-            in_round = set()
-        r["matchday"] = round_no
-        in_round.update((r["home"], r["away"]))
+        for rd in rounds:
+            if len(rd["matches"]) < per_round and r["home"] not in rd["teams"] \
+                    and r["away"] not in rd["teams"]:
+                rd["matches"].append(r)
+                rd["teams"].update((r["home"], r["away"]))
+                break
+        else:
+            rounds.append({"matches": [r], "teams": {r["home"], r["away"]}})
+
+    # Number them chronologically by when the round actually starts.
+    rounds.sort(key=lambda rd: min((m.get("date") or "9999-99-99") for m in rd["matches"]))
+    for n, rd in enumerate(rounds, 1):
+        for m in rd["matches"]:
+            m["matchday"] = n
+
     expected = len(records) // per_round
-    if round_no <= expected + 4:                 # a few reschedules are normal
+    if len(rounds) <= expected + 2:
         if verbose:
-            print(f"  matchday wasn't in the feed — grouped into {round_no} rounds by date, "
-                  f"starting a new round whenever a team recurs "
-                  f"({'exactly as expected' if round_no == expected else f'expected ~{expected}'}).")
+            note = "exactly as expected" if len(rounds) == expected else f"expected {expected}"
+            print(f"  matchday isn't in the feed — reconstructed {len(rounds)} rounds of up to "
+                  f"{per_round} by date ({note}).")
         return records
     if verbose:
-        print(f"  ! date grouping produced {round_no} rounds where ~{expected} were expected — "
+        print(f"  ! reconstruction produced {len(rounds)} rounds where {expected} were expected — "
               f"too fragmented to trust.")
 
     for r in records:
