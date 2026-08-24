@@ -34,6 +34,7 @@ import json
 import time
 import argparse
 import urllib.request
+import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -121,6 +122,146 @@ def _is_laliga(league) -> bool:
         return True
     # id can drift between seasons; fall back to the exact name (excludes "LaLiga2").
     return name in FOTMOB_LEAGUE_NAMES
+
+
+# ── Fixture sources ──────────────────────────────────────────────────────────────
+# api.fotmob.com/matches?date= became a LIVE-ONLY feed in 2026 (root <live>/<exmatches>,
+# ?date ignored). FotMob's site API answers under /api/data/ instead:
+#   season view: /api/data/leagues?id=<league>&season=2026%2F2027   — the whole season, 1 request
+#   day view   : /api/data/matches?date=YYYYMMDD                    — every league that day
+# The season view is preferred: one request, and it carries the round (matchday) number.
+FOTMOB_SEASON_URL = "https://www.fotmob.com/api/data/leagues?id={league}&season={season}"
+FOTMOB_DAY_URL = "https://www.fotmob.com/api/data/matches?date={ymd}"
+
+
+def _season_param(season: str) -> str:
+    """'2026-27' -> '2026/2027' (FotMob's season key)."""
+    start, _, end = season.partition("-")
+    return f"{start}/{start[:2]}{end}" if len(end) == 2 else f"{start}/{end}"
+
+
+def _fetch_json(url: str, retries: int = 3) -> "dict | None":
+    headers = {"User-Agent": _UA, "Accept": "application/json, text/plain, */*"}
+    token = os.environ.get("FOTMOB_XMAS_TOKEN", "").strip()
+    if token:
+        headers["x-mas"] = token
+    for attempt in range(1, retries + 1):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.loads(r.read().decode("utf-8", "replace"))
+        except Exception as exc:
+            if attempt == retries:
+                print(f"  ! {url.split('?')[-1]} failed after {retries} tries: {exc}")
+                return None
+            time.sleep(1.5 * attempt)
+    return None
+
+
+def _looks_like_match(obj) -> bool:
+    return (isinstance(obj, dict) and "home" in obj and "away" in obj
+            and isinstance(obj.get("home"), dict))
+
+
+def _find_match_lists(node, depth: int = 0) -> "list[list]":
+    """Every list of match-shaped dicts anywhere in a payload.
+
+    FotMob keeps moving where the fixture list lives (matches.allMatches, matches.data,
+    overview.leagueOverviewMatches …). Rather than hard-code one path and break on the next
+    reshuffle, find the lists by their contents.
+    """
+    found: list[list] = []
+    if depth > 6:
+        return found
+    if isinstance(node, list):
+        if node and sum(1 for x in node[:5] if _looks_like_match(x)) >= 1:
+            found.append([x for x in node if _looks_like_match(x)])
+        for item in node[:50]:
+            found.extend(_find_match_lists(item, depth + 1))
+    elif isinstance(node, dict):
+        for value in node.values():
+            found.extend(_find_match_lists(value, depth + 1))
+    return found
+
+
+def _side(obj: dict) -> "tuple[str, object, object]":
+    name = obj.get("name") or obj.get("longName") or obj.get("shortName") or ""
+    return str(name), obj.get("id"), obj.get("score")
+
+
+def _match_from_json(m: dict) -> "dict | None":
+    """One FotMob JSON match -> our schedule record, tolerant about where fields sit."""
+    try:
+        mid = int(m.get("id"))
+    except (TypeError, ValueError):
+        return None
+    st = m.get("status") if isinstance(m.get("status"), dict) else {}
+    home_name, home_id, home_score = _side(m.get("home") or {})
+    away_name, away_id, away_score = _side(m.get("away") or {})
+
+    rnd = m.get("round", m.get("roundName", m.get("matchday", (m.get("tournament") or {}).get("round"))))
+    try:
+        matchday = int(str(rnd).strip()) if str(rnd).strip().isdigit() else None
+    except (TypeError, ValueError):
+        matchday = None
+
+    score = str(st.get("scoreStr") or m.get("scoreStr") or "")
+    if "-" in score:
+        left, _, right = score.partition("-")
+        home_score, away_score = left.strip(), right.strip()
+
+    finished = bool(st.get("finished") or m.get("finished"))
+    cancelled = bool(st.get("cancelled"))
+    status = "F" if finished else ("L" if st.get("started") and not cancelled else "N")
+    kickoff = _iso_from_any(st.get("utcTime") or m.get("utcTime") or m.get("time") or "")
+    rec = _record(mid, matchday, kickoff, home_name, away_name,
+                  home_id, away_id, status, home_score, away_score)
+    return rec if rec["home"] and rec["away"] else None
+
+
+def _is_our_league(league: dict) -> bool:
+    lid = str(league.get("primaryId") or league.get("id") or "")
+    name = str(league.get("name", "")).strip().lower()
+    return lid == str(FOTMOB_LEAGUE_ID) or name in FOTMOB_LEAGUE_NAMES
+
+
+def fetch_season_matches(season: str, verbose: bool = True) -> "list[dict]":
+    """The whole season in one request, from FotMob's per-league season view."""
+    url = FOTMOB_SEASON_URL.format(league=FOTMOB_LEAGUE_ID,
+                                   season=urllib.parse.quote(_season_param(season), safe=""))
+    if verbose:
+        print(f"Fetching the {season} season in one request (league {FOTMOB_LEAGUE_ID}) …")
+    data = _fetch_json(url)
+    if not isinstance(data, dict):
+        return []
+    lists = _find_match_lists(data)
+    if not lists:
+        if verbose:
+            print(f"  no fixture list found in the season payload (keys: {list(data)[:10]}). "
+                  f"Falling back to the day-by-day sweep.")
+        return []
+    best = max(lists, key=len)
+    out = [r for r in (_match_from_json(m) for m in best) if r]
+    if verbose:
+        print(f"  {len(out)} fixture(s) parsed "
+              f"({sum(1 for r in out if r['finished'])} finished).")
+    return out
+
+
+def fetch_day_matches(day: date, verbose: bool = False) -> "list[dict]":
+    """One day, every league — used when the season view isn't available."""
+    data = _fetch_json(FOTMOB_DAY_URL.format(ymd=f"{day:%Y%m%d}"), retries=2)
+    if not isinstance(data, dict):
+        return []
+    out = []
+    for league in data.get("leagues") or []:
+        if not _is_our_league(league):
+            continue
+        for m in league.get("matches") or []:
+            rec = _match_from_json(m)
+            if rec:
+                out.append(rec)
+    return out
 
 
 def _iso_from_any(raw: str) -> str:
@@ -409,32 +550,50 @@ def build_schedule(season: str, start: str | None = None, end: str | None = None
     s, e = sweep_window(season, existing, start, end, full, days_ahead)
 
     by_id: dict[int, dict] = {}
-    days = list(_daterange(s, e))
+
+    # 1. The season view: one request for the whole season, with round numbers.
+    if not (start or end):
+        for rec in fetch_season_matches(season, verbose):
+            by_id[rec["fotmob_id"]] = rec
+
+    # 2. Only if that came back empty, fall back to sweeping the window day by day.
     fetched = unreadable = with_league = 0
     sample = ""
-    if verbose:
-        print(f"Sweeping {len(days)} days ({s} → {e}) for La Liga (league {FOTMOB_LEAGUE_ID}) …")
-
-    for i, day in enumerate(days, 1):
-        body = _fetch_day(day)
-        if verbose and (i % 25 == 0 or i == len(days)):
-            print(f"  … {i}/{len(days)} days, {len(by_id)} matches so far")
-        if not body:
-            continue
-        fetched += 1
-        recs = _from_xml(body)
-        if recs is None:
-            recs = _from_json(body)
-        if recs is None:                       # neither XML nor JSON — the feed changed
-            unreadable += 1
-            sample = sample or body[:200].replace("\n", " ")
-            continue
-        if recs:
-            with_league += 1
-        for rec in recs:
-            prev = by_id.get(rec["fotmob_id"])
-            if prev is None or (rec["finished"] and not prev["finished"]):
-                by_id[rec["fotmob_id"]] = rec
+    if not by_id:
+        days = list(_daterange(s, e))
+        if verbose:
+            print(f"Sweeping {len(days)} days ({s} → {e}) for La Liga "
+                  f"(league {FOTMOB_LEAGUE_ID}) …")
+        for i, day in enumerate(days, 1):
+            if verbose and (i % 25 == 0 or i == len(days)):
+                print(f"  … {i}/{len(days)} days, {len(by_id)} matches so far")
+            data = _fetch_json(FOTMOB_DAY_URL.format(ymd=f"{day:%Y%m%d}"), retries=2)
+            recs = None
+            if isinstance(data, dict):
+                fetched += 1
+                recs = []
+                for lg in data.get("leagues") or []:
+                    if _is_our_league(lg):
+                        recs.extend(r for r in (_match_from_json(m) for m in lg.get("matches") or []) if r)
+            else:
+                # Last resort: the legacy endpoint, in case the site API is the one that moved.
+                body = _fetch_day(day)
+                if not body:
+                    continue
+                fetched += 1
+                recs = _from_xml(body)
+                if recs is None:
+                    recs = _from_json(body)
+                if recs is None:
+                    unreadable += 1
+                    sample = sample or body[:200].replace("\n", " ")
+                    continue
+            if recs:
+                with_league += 1
+            for rec in recs:
+                prev = by_id.get(rec["fotmob_id"])
+                if prev is None or (rec["finished"] and not prev["finished"]):
+                    by_id[rec["fotmob_id"]] = rec
 
     if verbose and not by_id:
         print("\n⚠ No La Liga matches found in that window.")
@@ -443,11 +602,12 @@ def build_schedule(season: str, start: str | None = None, end: str | None = None
                   f"format has changed. First response started with:\n    {sample}")
         elif not fetched:
             print("  Every request failed — no network, or FotMob is blocking this machine.")
+            print("  Check what the sources return: --probe-endpoints YYYY-MM-DD")
         else:
             print(f"  {fetched} days answered fine but none listed league {FOTMOB_LEAGUE_ID} "
                   f"({'/'.join(sorted(FOTMOB_LEAGUE_NAMES))}). Either the fixtures aren't published "
                   f"yet, or the league id changed (set LALIGA_FOTMOB_LEAGUE_ID).")
-    elif verbose:
+    elif verbose and fetched:
         print(f"  ({with_league} of {fetched} answered days had La Liga matches)")
 
     matches = sorted(by_id.values(), key=lambda r: (r["matchday"] or 99,

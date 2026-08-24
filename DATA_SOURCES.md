@@ -5,9 +5,14 @@ value is (moving toward) the average of the sources that returned it. One source
 not the goal.
 
 ## The three sources
-- **FotMob** — league id **87** ("LaLiga"; NOT "LaLiga2" 901075). The token-free XML feed
-  (`api.fotmob.com/matches?date=`) gives fixtures/results/matchday/team-ids (the schedule
-  spine); `matchDetails` (needs `FOTMOB_XMAS_TOKEN`) adds possession/venue/xG.
+- **FotMob** — league id **87** ("LaLiga"; NOT "LaLiga2" 901075). The schedule spine comes from
+  the site API under `/api/data/` (since Aug 2026): `www.fotmob.com/api/data/leagues?id=87&
+  season=2026%2F2027` returns the whole season — fixtures, results, round numbers — in **one**
+  request, with `www.fotmob.com/api/data/matches?date=YYYYMMDD` as the per-day fallback.
+  The old token-free XML feed `api.fotmob.com/matches?date=` is now **live-only**: it answers
+  with root `<live>/<exmatches>` listing just the games in play and ignores `?date`, so it can
+  no longer build a schedule. `matchDetails` (optionally `FOTMOB_XMAS_TOKEN`) still adds
+  possession/venue/xG.
 - **WhoScored** — the **event stream** (shots, passes, dribbles, goals, saves, lineups,
   coordinates) via the `matchCentreData` blob. Selenium; the richest spatial data; drives the
   shot/pass/dribble maps and the All-Goals-Map.
