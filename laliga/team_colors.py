@@ -27,11 +27,22 @@ LALIGA_TEAM_COLORS: dict[str, dict[str, str]] = {
     "Sevilla":           {"primary": "#D81E05", "secondary": "#FFFFFF"},
     "Valencia":          {"primary": "#F18E00", "secondary": "#000000"},
     "Villarreal":        {"primary": "#FDE607", "secondary": "#005187"},
+    # promoted for 2026/27
+    "Deportivo A Coruña": {"primary": "#0067B1", "secondary": "#FFFFFF"},
+    "Malaga":            {"primary": "#00529F", "secondary": "#FFFFFF"},
+    "Racing Santander":  {"primary": "#00A650", "secondary": "#FFFFFF"},
     # common alias spellings from FotMob / WhoScored / Understat
     "Atlético Madrid":   {"primary": "#CB3524", "secondary": "#262E62"},
     "Alaves":            {"primary": "#0761AF", "secondary": "#FFFFFF"},
     "Elche CF":          {"primary": "#046A38", "secondary": "#FFFFFF"},
     "Real Betis Balompié": {"primary": "#00954C", "secondary": "#FFFFFF"},
+    "Deportivo La Coruna": {"primary": "#0067B1", "secondary": "#FFFFFF"},
+    "Deportivo de La Coruña": {"primary": "#0067B1", "secondary": "#FFFFFF"},
+    "Deportivo":         {"primary": "#0067B1", "secondary": "#FFFFFF"},
+    "Málaga":            {"primary": "#00529F", "secondary": "#FFFFFF"},
+    "Malaga CF":         {"primary": "#00529F", "secondary": "#FFFFFF"},
+    "Racing de Santander": {"primary": "#00A650", "secondary": "#FFFFFF"},
+    "Racing":            {"primary": "#00A650", "secondary": "#FFFFFF"},
 }
 
 # Drop-in alias so the ported renderer.py (which imports WC2026_TEAM_COLORS) works unchanged.
