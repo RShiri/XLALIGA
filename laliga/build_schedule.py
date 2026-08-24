@@ -261,6 +261,145 @@ def merge_matches(old: "list[dict]", new: "list[dict]") -> "list[dict]":
                                                  r["kickoff_utc"] or "", r["fotmob_id"]))
 
 
+# Candidate endpoints for "every match on date D". The old token-free XML feed
+# (api.fotmob.com/matches?date=) turned into a LIVE-ONLY feed in 2026 — it answers with
+# root <live>/<exmatches> listing just the games in play, ignoring ?date. --probe-endpoints
+# tries the known alternatives from a machine that can actually reach them.
+def _candidates(day: date) -> "list[tuple[str, str]]":
+    ymd = f"{day:%Y%m%d}"
+    iso = f"{day:%Y-%m-%d}"
+    season = f"{day.year}/{day.year + 1}" if day.month >= 7 else f"{day.year - 1}/{day.year}"
+    return [
+        ("fotmob xml (current, live-only)", f"https://api.fotmob.com/matches?date={ymd}"),
+        ("fotmob xml + all=true", f"https://api.fotmob.com/matches?date={ymd}&all=true"),
+        ("fotmob xml + timezone", f"https://api.fotmob.com/matches?date={ymd}&timezone=Europe/Madrid"),
+        ("fotmob site api", f"https://www.fotmob.com/api/matches?date={ymd}"),
+        ("fotmob site api /data", f"https://www.fotmob.com/api/data/matches?date={ymd}"),
+        ("fotmob league fixtures", f"https://www.fotmob.com/api/leagues?id={FOTMOB_LEAGUE_ID}"
+                                   f"&season={season.replace('/', '%2F')}"),
+        ("fotmob league fixtures /data", f"https://www.fotmob.com/api/data/leagues?id={FOTMOB_LEAGUE_ID}"
+                                         f"&season={season.replace('/', '%2F')}"),
+        ("espn scoreboard (token-free)",
+         f"https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard?dates={ymd}"),
+        ("espn league schedule",
+         f"https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard?dates={ymd}&limit=100"),
+        ("openfootball (static, no key)",
+         f"https://raw.githubusercontent.com/openfootball/football.json/master/2026-27/es.1.json"),
+    ]
+
+
+def _describe(body: str) -> str:
+    """One line saying what a response actually is, and whether La Liga is in it."""
+    head = body.lstrip()[:1]
+    if head == "<":
+        try:
+            root = ET.fromstring(body)
+        except ET.ParseError:
+            return f"HTML/other, {len(body)}b — starts {body.lstrip()[:60]!r}"
+        leagues = [(str(l.get("id", "")), l.get("name", ""), len(list(l.iter("match"))))
+                   for l in root.iter("league")]
+        hit = [l for l in leagues if "liga" in l[1].lower() or l[0] == str(FOTMOB_LEAGUE_ID)]
+        return (f"XML <{root.tag}>, {len(leagues)} league(s), {sum(l[2] for l in leagues)} match(es)"
+                + (f" — LA LIGA FOUND: {hit}" if hit else " — no La Liga"))
+    try:
+        data = json.loads(body)
+    except Exception:
+        return f"neither XML nor JSON, {len(body)}b — starts {body.lstrip()[:60]!r}"
+    if isinstance(data, dict) and "events" in data:                 # ESPN shape
+        evs = data.get("events") or []
+        sample = ""
+        if evs:
+            comps = (evs[0].get("competitions") or [{}])[0].get("competitors") or []
+            names = " vs ".join(str((c.get("team") or {}).get("displayName", "?")) for c in comps[:2])
+            sample = f" — e.g. {names} ({(evs[0].get('status') or {}).get('type', {}).get('detail', '')})"
+        return f"JSON (ESPN), {len(evs)} event(s){sample}"
+    if isinstance(data, dict) and "leagues" in data:
+        lg = data.get("leagues") or []
+        hit = [x.get("name") for x in lg if "liga" in str(x.get("name", "")).lower()]
+        return f"JSON, {len(lg)} league(s)" + (f" — LA LIGA FOUND: {hit}" if hit else " — no La Liga")
+    if isinstance(data, dict):
+        keys = list(data)[:8]
+        fixtures = data.get("matches") or data.get("fixtures") or []
+        return f"JSON, keys {keys}" + (f", {len(fixtures)} match(es)" if fixtures else "")
+    return f"JSON {type(data).__name__}, {len(body)}b"
+
+
+def probe_endpoints(day_str: str) -> None:
+    """Try every candidate source for one date and report what each returns."""
+    day = datetime.strptime(day_str, "%Y-%m-%d").date()
+    token = os.environ.get("FOTMOB_XMAS_TOKEN", "").strip()
+    print(f"Probing sources for {day} (x-mas token: {'set' if token else 'not set'})\n")
+    for label, url in _candidates(day):
+        headers = {"User-Agent": _UA, "Accept": "application/json, text/xml, */*"}
+        if token and "fotmob" in url:
+            headers["x-mas"] = token
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=25) as r:
+                body = r.read().decode("utf-8", "replace")
+                print(f"  [{r.status}] {label}\n        {url}\n        {_describe(body)}")
+        except Exception as exc:
+            print(f"  [ERR] {label}\n        {url}\n        {type(exc).__name__}: {str(exc)[:120]}")
+        print()
+
+
+def debug_day(day_str: str) -> None:
+    """Dump one day's raw feed: what shape it is, and every league in it.
+
+    Reached for when a sweep reports "answered fine but no league <id>" — that message
+    can't tell a renamed/re-numbered league from a changed document shape, and this can.
+    """
+    day = datetime.strptime(day_str, "%Y-%m-%d").date()
+    body = _fetch_day(day)
+    if not body:
+        print(f"{day}: no response at all (network, or FotMob refused).")
+        return
+    print(f"{day}: {len(body)} bytes")
+    print(f"  starts: {body[:200]!r}\n")
+
+    rows: list[tuple[str, str, int]] = []
+    try:
+        root = ET.fromstring(body)
+        print(f"  parsed as XML; root <{root.tag}>")
+        leagues = list(root.iter("league"))
+        if not leagues:
+            tags: dict[str, int] = {}
+            for el in root.iter():
+                tags[el.tag] = tags.get(el.tag, 0) + 1
+            print("  no <league> elements! element names present:")
+            for tag, n in sorted(tags.items(), key=lambda kv: -kv[1])[:15]:
+                print(f"    <{tag}> x{n}")
+        for lg in leagues:
+            rows.append((str(lg.get("id", "")), lg.get("name", ""), len(list(lg.iter("match")))))
+    except ET.ParseError:
+        try:
+            data = json.loads(body)
+        except Exception:
+            print("  parsed as NEITHER XML nor JSON — the endpoint returned something else "
+                  "(an HTML block page?). The 200 characters above are the clue.")
+            return
+        print(f"  parsed as JSON; top-level keys: {list(data)[:10]}")
+        for lg in data.get("leagues") or []:
+            rows.append((str(lg.get("primaryId") or lg.get("id") or ""),
+                         str(lg.get("name", "")), len(lg.get("matches") or [])))
+
+    if not rows:
+        print("  no leagues in this response — try a date when a match was definitely played.")
+        return
+    print(f"\n  {len(rows)} league(s) listed. Ones that look Spanish:")
+    hits = [r for r in rows if any(w in r[1].lower() for w in ("liga", "spain", "espa"))]
+    for lid, name, n in hits or []:
+        mark = "  <-- MATCHES our filter" if (lid == str(FOTMOB_LEAGUE_ID)
+                                              or name.strip().lower() in FOTMOB_LEAGUE_NAMES) else ""
+        print(f"    id={lid:<10} {name!r} · {n} match(es){mark}")
+    if not hits:
+        print("    (none) — first 25 leagues in the response:")
+        for lid, name, n in rows[:25]:
+            print(f"    id={lid:<10} {name!r} · {n} match(es)")
+    print(f"\n  We currently accept id={FOTMOB_LEAGUE_ID} or name in {sorted(FOTMOB_LEAGUE_NAMES)}.")
+    print("  Override with the LALIGA_FOTMOB_LEAGUE_ID environment variable.")
+
+
 def build_schedule(season: str, start: str | None = None, end: str | None = None,
                    verbose: bool = True, existing: "list[dict] | None" = None,
                    full: bool = False, days_ahead: int = 14) -> list[dict]:
@@ -347,7 +486,20 @@ def main() -> None:
     ap.add_argument("--days-ahead", type=int, default=14,
                     help="how far past today to look for newly-listed fixtures (default 14)")
     ap.add_argument("--out", help="output path (default schedules/SCHEDULE_<season>.json)")
+    ap.add_argument("--debug-day", metavar="YYYY-MM-DD",
+                    help="dump what the feed returns for one date, and every league in it, "
+                         "then exit (use when a sweep finds nothing)")
+    ap.add_argument("--probe-endpoints", metavar="YYYY-MM-DD",
+                    help="try every known fixture source for one date and report what each "
+                         "returns (use when the current feed has stopped listing fixtures)")
     args = ap.parse_args()
+
+    if args.debug_day:
+        debug_day(args.debug_day)
+        return
+    if args.probe_endpoints:
+        probe_endpoints(args.probe_endpoints)
+        return
 
     SCHED_DIR.mkdir(parents=True, exist_ok=True)
     out = Path(args.out) if args.out else SCHED_DIR / f"SCHEDULE_{args.season}.json"
