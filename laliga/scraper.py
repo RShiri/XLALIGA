@@ -193,9 +193,60 @@ def fotmob_fetch_wc_matches(dates: "list[str] | None" = None) -> list[dict]:
     matches: list[dict] = []
     seen_ids: set = set()
 
+    # FotMob moved the day feed to the site API under /api/data/ (Aug 2026). The old
+    # api.fotmob.com/matches?date= endpoint still answers, but it now returns ONLY matches
+    # in play and ignores ?date — useless for "what finished today". Try the new one first,
+    # keep the old as a fallback in case the migration reverses.
     for date_str in dates_to_check:
+        url = f"https://www.fotmob.com/api/data/matches?date={date_str}"
+        log.info("FotMob: fetching matches for %s …", date_str)
+        payload = None
+        try:
+            resp = scraper.get(url, timeout=20)
+            resp.raise_for_status()
+            payload = resp.json()
+        except Exception as exc:
+            log.warning("FotMob day feed failed (%s): %s", date_str, exc)
+        if isinstance(payload, dict):
+            for league in payload.get("leagues") or []:
+                lid = str(league.get("primaryId") or league.get("id") or "")
+                lname = str(league.get("name", "")).strip()
+                if lid != str(LALIGA_FOTMOB_ID) and lname.lower() not in LALIGA_FOTMOB_NAMES:
+                    continue
+                for m in league.get("matches") or []:
+                    mid = str(m.get("id") or "")
+                    if not mid or mid in seen_ids:
+                        continue
+                    seen_ids.add(mid)
+                    st = m.get("status") or {}
+                    utc_time = None
+                    try:
+                        utc_time = datetime.fromisoformat(
+                            str(st.get("utcTime", "")).replace("Z", "+00:00"))
+                    except Exception:
+                        pass
+                    score = str(st.get("scoreStr") or "")
+                    h_score, _, a_score = (p.strip() for p in score.partition("-")) if "-" in score \
+                        else ("0", "", "0")
+                    is_finished = bool(st.get("finished")) or (
+                        utc_time is not None
+                        and (now_utc - utc_time).total_seconds() > 115 * 60)
+                    matches.append({
+                        "id":     int(mid),
+                        "home":   {"name": (m.get("home") or {}).get("name", ""),
+                                   "id": (m.get("home") or {}).get("id")},
+                        "away":   {"name": (m.get("away") or {}).get("name", ""),
+                                   "id": (m.get("away") or {}).get("id")},
+                        "status": {"scoreStr": f"{h_score} - {a_score}",
+                                   "finished": is_finished,
+                                   "utcTime": utc_time.isoformat() if utc_time else ""},
+                        "_league": lname,
+                    })
+
+    # Only reach for the retired endpoint if the current one gave us nothing at all.
+    for date_str in ([] if matches else dates_to_check):
         url = f"https://api.fotmob.com/matches?date={date_str}"
-        log.info("FotMob XML: fetching matches for %s …", date_str)
+        log.info("FotMob (legacy XML fallback): fetching %s …", date_str)
         try:
             resp = scraper.get(url, timeout=20)
             resp.raise_for_status()
@@ -247,7 +298,7 @@ def fotmob_fetch_wc_matches(dates: "list[str] | None" = None) -> list[dict]:
                     "_league":  league_name,
                 })
 
-    log.info("FotMob XML: found %d LALIGA matches across checked dates", len(matches))
+    log.info("FotMob: found %d LALIGA match(es) across checked dates", len(matches))
     return matches
 
 

@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-08-24** — 26/27 readiness sweep: scraper.fotmob_fetch_wc_matches migrated off the retired live-only endpoint to /api/data/matches (legacy XML only if the new one returns nothing); defaultSeason now follows the newest PLAYED season instead of being pinned to 2025-26; backfill/scrape_whoscored --season defaults to the newest schedule on disk; git_ops finally pushes shots.js + player_lab/ and finds the raw JSON under matches/<season>/; build_schedule warns about clubs with no colour or crest.
 - **2026-08-24** — FotMob moved the fixture feed: api.fotmob.com/matches?date= is now LIVE-ONLY (root <live>/<exmatches>, ?date ignored) — which is why 2026-27 came back empty on every date. The spine now uses www.fotmob.com/api/data/leagues?id=87&season=2026%2F2027 (whole season in one request, with round numbers), with /api/data/matches?date= as the per-day fallback and the old XML as a last resort.
 - **2026-08-23** — build_schedule is now incremental by default: it sweeps from a few days before the last finished match to a fortnight ahead and merges into the existing schedule (--full for the whole season). It also parses the feed as XML or JSON, and says why a sweep found nothing instead of silently reporting 0.
 - **2026-08-22** — Scraper panel collapsed to a single '⚡ Update everything' button — picks the season, refreshes fixtures, scrapes what's missing, rebuilds and publishes in one click; the season/action/id/limit controls moved behind an Advanced toggle.
@@ -46,6 +47,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Lessons — what worked / what didn't
 
 <!-- progress:lessons -->
+- ❌ **Didn't work** — A WhoScored failure used to be invisible and permanent: the match still saved (FotMob shots only, no event stream), so _already_scraped counted it done and no later run would ever fill in the maps/lineups. backfill now classifies each match none/partial/full and --redo-partial retries only the partials.  (2026-08-24)
 - ✅ **Worked** — Probing candidate endpoints from the user's own machine (--probe-endpoints) found the replacement in one shot: /api/matches 404s but /api/data/matches works, and /api/data/leagues returns the entire season. When a source dies, enumerate doors rather than guessing one.  (2026-08-24)
 - ❌ **Didn't work** — A sweep printing '0 matches so far' told us nothing: ET.fromstring failures were swallowed by 'except Exception: continue', so a FotMob format change looked identical to 'no fixtures yet'. Failure counters + a verdict line now distinguish blocked / format-changed / no-such-league / not-published.  (2026-08-23)
 - ❌ **Didn't work** _deploy_ — `git_ops.push_match_update` copies `data.js`, `players.js`,

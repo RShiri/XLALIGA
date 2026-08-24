@@ -39,23 +39,44 @@ SCHED_DIR = _REPO_ROOT / "laliga" / "schedules"
 MATCH_DIR = _REPO_ROOT / "laliga" / "matches"
 
 
-def _already_scraped(season: str, fotmob_id: int) -> bool:
+def _scrape_state(season: str, fotmob_id: int) -> str:
+    """'none' | 'partial' | 'full'.
+
+    'partial' = the match was saved, but from FotMob shots alone — WhoScored (the event
+    stream behind the pass/dribble maps, lineups and coordinates) didn't come through.
+    Worth distinguishing: a partial match must not look "done" forever just because a
+    browser failed once.
+    """
     p = MATCH_DIR / season / f"{fotmob_id}.json"
     if not p.exists():
-        return False
+        return "none"
     try:
         d = json.loads(p.read_text(encoding="utf-8"))
-        return bool(d.get("events"))   # a real scrape has an event stream
     except Exception:
-        return False
+        return "none"
+    if not d.get("events"):
+        return "none"
+    return "full" if "whoscored" in (d.get("_sources") or []) else "partial"
 
+
+
+def _newest_season() -> str:
+    """Default season for the CLIs: the newest SCHEDULE_*.json on disk."""
+    try:
+        names = sorted(p.stem.replace("SCHEDULE_", "") for p in SCHED_DIR.glob("SCHEDULE_*.json"))
+        return names[-1] if names else "2025-26"
+    except Exception:
+        return "2025-26"
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Batch deep-scrape a La Liga season.")
-    ap.add_argument("--season", default="2025-26")
+    ap.add_argument("--season", default=_newest_season())
     ap.add_argument("--limit", type=int, help="Scrape at most N matches this run.")
     ap.add_argument("--matchday", type=int, help="Only this matchday.")
     ap.add_argument("--redo", action="store_true", help="Re-scrape matches already done.")
+    ap.add_argument("--redo-partial", action="store_true",
+                    help="Also re-scrape matches saved with FotMob shots only (no WhoScored "
+                         "event stream) — use once Chrome/WhoScored is working again.")
     ap.add_argument("--fotmob-only", action="store_true", help="Skip WhoScored (faster, no maps).")
     ap.add_argument("--delay", type=float, default=8.0, help="Seconds between matches.")
     ap.add_argument("--push", action="store_true", help="git push once at the end.")
@@ -66,13 +87,17 @@ def main() -> None:
         raise SystemExit(f"No schedule for {args.season}. Run: py laliga/build_schedule.py --season {args.season}")
     matches = json.loads(sched_path.read_text(encoding="utf-8")).get("matches", [])
 
-    todo = []
+    todo, partial = [], []
     for m in matches:
         if not m.get("finished"):
             continue
         if args.matchday and m.get("matchday") != args.matchday:
             continue
-        if not args.redo and _already_scraped(args.season, m["fotmob_id"]):
+        state = _scrape_state(args.season, m["fotmob_id"])
+        if state == "full" and not args.redo:
+            continue
+        if state == "partial" and not (args.redo or args.redo_partial):
+            partial.append(m)
             continue
         todo.append(m)
     if args.limit:
@@ -80,6 +105,10 @@ def main() -> None:
 
     print(f"Backfill {args.season}: {len(todo)} match(es) to scrape "
           f"(of {sum(1 for m in matches if m.get('finished'))} finished).")
+    if partial:
+        print(f"  {len(partial)} match(es) have FotMob shots but no WhoScored event stream "
+              f"(no pass/dribble maps or lineups). Re-run with --redo-partial once WhoScored "
+              f"loads again to fill them in.")
     started = time.time()
     ok = fail = 0
     for i, m in enumerate(todo, 1):
@@ -98,6 +127,11 @@ def main() -> None:
             time.sleep(args.delay)
 
     print(f"\nBackfill done: {ok} ok, {fail} failed.")
+    still_partial = sum(1 for m in matches if m.get("finished")
+                        and _scrape_state(args.season, m["fotmob_id"]) == "partial")
+    if still_partial:
+        print(f"{still_partial} match(es) still hold FotMob data only — "
+              f"'py laliga/backfill.py --season {args.season} --redo-partial' retries just those.")
     target = f"{len(todo)} match(es)"
     if args.matchday:
         target = f"matchday {args.matchday} · {target}"
