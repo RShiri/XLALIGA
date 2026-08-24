@@ -1,21 +1,21 @@
 position,team,played,won,drawn,lost,gf,ga,gd,points
-1,Barcelona,38,31,1,6,95,36,59,94
-2,Real Madrid,38,27,5,6,77,35,42,86
-3,Villarreal,38,22,6,10,72,46,26,72
-4,Atletico Madrid,38,21,6,11,62,44,18,69
-5,Real Betis,38,15,15,8,59,48,11,60
-6,Celta Vigo,38,14,12,12,53,48,5,54
-7,Getafe,38,15,6,17,32,38,-6,51
-8,Rayo Vallecano,38,12,14,12,41,44,-3,50
-9,Valencia,38,13,10,15,46,55,-9,49
-10,Real Sociedad,38,11,13,14,59,61,-2,46
-11,Espanyol,38,12,10,16,43,55,-12,46
-12,Athletic Club,38,13,6,19,43,58,-15,45
-13,Elche,38,10,13,15,49,57,-8,43
-14,Deportivo Alaves,38,11,10,17,44,56,-12,43
-15,Sevilla,38,12,7,19,46,60,-14,43
-16,Osasuna,38,11,9,18,44,50,-6,42
-17,Mallorca,38,11,9,18,47,57,-10,42
-18,Levante,38,11,9,18,47,61,-14,42
-19,Girona,38,9,14,15,39,55,-16,41
-20,Real Oviedo,38,6,11,21,26,60,-34,29
+1,Sevilla,2,2,0,0,5,2,3,6
+2,Deportivo Alaves,2,1,1,0,4,1,3,4
+3,Atletico Madrid,2,1,1,0,4,2,2,4
+4,Barcelona,1,1,0,0,5,0,5,3
+5,Espanyol,2,1,0,1,4,2,2,3
+6,Real Madrid,1,1,0,0,2,1,1,3
+7,Real Betis,1,1,0,0,1,0,1,3
+8,Getafe,2,1,0,1,1,3,-2,3
+9,Villarreal,2,0,2,0,4,4,0,2
+10,Deportivo A Coruña,1,0,1,0,1,1,0,1
+11,Celta Vigo,1,0,1,0,0,0,0,1
+12,Valencia,1,0,1,0,0,0,0,1
+13,Racing Santander,2,0,1,1,2,3,-1,1
+14,Rayo Vallecano,2,0,1,1,2,3,-1,1
+15,Elche,2,0,1,1,1,6,-5,1
+16,Osasuna,0,0,0,0,0,0,0,0
+17,Real Sociedad,1,0,0,1,0,1,-1,0
+18,Athletic Club,1,0,0,1,1,3,-2,0
+19,Malaga,1,0,0,1,0,2,-2,0
+20,Levante,1,0,0,1,0,3,-3,0
