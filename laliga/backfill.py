@@ -59,9 +59,18 @@ def _scrape_state(season: str, fotmob_id: int) -> str:
     return "full" if "whoscored" in (d.get("_sources") or []) else "partial"
 
 
+
+def _newest_season() -> str:
+    """Default season for the CLIs: the newest SCHEDULE_*.json on disk."""
+    try:
+        names = sorted(p.stem.replace("SCHEDULE_", "") for p in SCHED_DIR.glob("SCHEDULE_*.json"))
+        return names[-1] if names else "2025-26"
+    except Exception:
+        return "2025-26"
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Batch deep-scrape a La Liga season.")
-    ap.add_argument("--season", default="2025-26")
+    ap.add_argument("--season", default=_newest_season())
     ap.add_argument("--limit", type=int, help="Scrape at most N matches this run.")
     ap.add_argument("--matchday", type=int, help="Only this matchday.")
     ap.add_argument("--redo", action="store_true", help="Re-scrape matches already done.")

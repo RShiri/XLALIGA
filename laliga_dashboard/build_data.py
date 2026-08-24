@@ -235,6 +235,12 @@ def build_season(season):
     }
 
 
+def _default_season(seasons):
+    """Newest season with at least one played match; else the newest we have."""
+    played = [s for s in sorted(seasons) if (seasons[s].get("counts") or {}).get("played")]
+    return (played or sorted(seasons))[-1]
+
+
 def main():
     seasons = {}
     for season in ("2022-23", "2023-24", "2024-25", "2025-26", "2026-27"):
@@ -246,7 +252,9 @@ def main():
 
     payload = {
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "defaultSeason": "2025-26" if "2025-26" in seasons else sorted(seasons)[0],
+        # Land on the newest season that has a played match — a new season takes over
+        # the moment it kicks off, instead of the site sitting on last year forever.
+        "defaultSeason": _default_season(seasons),
         "seasons": seasons,
     }
     with open(OUT, "w", encoding="utf-8") as fh:

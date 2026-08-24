@@ -222,9 +222,18 @@ def already_done(season, fid):
         return False
 
 
+
+def _newest_season() -> str:
+    """Default season for the CLIs: the newest SCHEDULE_*.json on disk."""
+    try:
+        names = sorted(p.stem.replace("SCHEDULE_", "") for p in SCHED_DIR.glob("SCHEDULE_*.json"))
+        return names[-1] if names else "2025-26"
+    except Exception:
+        return "2025-26"
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--season", default="2025-26")
+    ap.add_argument("--season", default=_newest_season())
     ap.add_argument("--ids", help="comma-separated WhoScored ids (skip fixtures harvest)")
     ap.add_argument("--max-back", type=int, default=40, help="matchday pages to navigate back")
     ap.add_argument("--limit", type=int, help="stop after saving N matches")
