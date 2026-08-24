@@ -318,12 +318,36 @@ def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[d
                   f"of {per_round} from {label} (validated: no team twice in a round).")
         return records
 
+    # Third attempt: walk the fixtures in date order and start a new round whenever a team
+    # would appear twice. This needs no clean block structure — it only assumes a team plays
+    # once per round, which is what a round *is*. Handles placeholder kickoff times for
+    # unannounced fixtures, and puts a postponed match in the round where it was played.
+    ordered = sorted(records, key=lambda r: (r.get("date") or "9999-99-99",
+                                             r.get("kickoff_utc") or "",
+                                             r.get("fotmob_id") or 0))
+    round_no, in_round = 1, set()
+    for r in ordered:
+        if r["home"] in in_round or r["away"] in in_round:
+            round_no += 1
+            in_round = set()
+        r["matchday"] = round_no
+        in_round.update((r["home"], r["away"]))
+    expected = len(records) // per_round
+    if round_no <= expected + 4:                 # a few reschedules are normal
+        if verbose:
+            print(f"  matchday wasn't in the feed — grouped into {round_no} rounds by date, "
+                  f"starting a new round whenever a team recurs "
+                  f"({'exactly as expected' if round_no == expected else f'expected ~{expected}'}).")
+        return records
+    if verbose:
+        print(f"  ! date grouping produced {round_no} rounds where ~{expected} were expected — "
+              f"too fragmented to trust.")
+
     for r in records:
         r["matchday"] = None
     if verbose:
-        print("  ! matchday isn't in the feed and neither fixture order nor kickoff order "
-              "splits cleanly into rounds — left empty rather than wrong. "
-              "Run with --dump-sample to see the raw fields.")
+        print("  ! matchday isn't in the feed and no ordering recovers it — left empty rather "
+              "than wrong. Run with --dump-sample to see the raw fields.")
     return records
 
 
