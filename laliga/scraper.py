@@ -919,6 +919,26 @@ def _parse_fotmob_venue(fm_data: dict) -> dict:
 # WHOSCORED – Selenium (full event stream)
 # ══════════════════════════════════════════════════════════════════════════
 
+# undetected-chromedriver dies on every Chrome version bump (its bundled driver only
+# matches one major). Retrying it per browser launch costs ~5s and a "patching driver"
+# dance each time — three times per match in a batch. Remember the first failure and go
+# straight to plain Selenium for the rest of the process.
+_UC_BROKEN = False
+_UNDERSTAT_EMPTY_RUNS = 0
+
+
+def _uc_is_broken() -> bool:
+    return _UC_BROKEN
+
+
+def _mark_uc_broken(exc: Exception) -> None:
+    global _UC_BROKEN
+    if not _UC_BROKEN:
+        _UC_BROKEN = True
+        log.info("undetected-chromedriver unavailable (%s); using plain selenium "
+                 "for the rest of this run", str(exc).splitlines()[0][:120])
+
+
 def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
     """
     Open a WhoScored match URL with Selenium, extract matchCentreData JSON.
@@ -926,6 +946,8 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
     """
     driver = None
     try:
+        if _uc_is_broken():
+            raise RuntimeError("undetected-chromedriver already known broken this run")
         import undetected_chromedriver as uc
         options = uc.ChromeOptions()
         if os.environ.get("LALIGA_VISIBLE") != "1":
@@ -938,7 +960,7 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
         # undetected-chromedriver breaks on Chrome version bumps (ImportError OR
         # SessionNotCreatedException); plain Selenium + Selenium Manager is the robust
         # fallback and clears WhoScored's Cloudflare fine in practice.
-        log.info("undetected-chromedriver unavailable (%s); using plain selenium", _uc_exc)
+        _mark_uc_broken(_uc_exc)
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
         options = Options()
@@ -1070,6 +1092,8 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
 
     driver = None
     try:
+        if _uc_is_broken():
+            raise RuntimeError("undetected-chromedriver already known broken this run")
         import undetected_chromedriver as uc
         options = uc.ChromeOptions()
         if os.environ.get("LALIGA_VISIBLE") != "1":
@@ -1078,7 +1102,7 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
         options.add_argument("--disable-dev-shm-usage")
         driver = uc.Chrome(options=options)
     except Exception as _uc_exc:
-        log.info("undetected-chromedriver unavailable (%s); using plain selenium", _uc_exc)
+        _mark_uc_broken(_uc_exc)
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
         options = Options()
@@ -1450,7 +1474,8 @@ def fetch_and_save(fotmob_id: int, season: str = "2025-26", fotmob_only: bool = 
     # every match to get xG / shots / rosters; disable with UNDERSTAT_FALLBACK=0. It's a
     # Selenium fetch, so it runs inside the same run-lock the WhoScored scrape holds.
     us_data = None
-    if os.environ.get("UNDERSTAT_FALLBACK", "1") != "0":
+    global _UNDERSTAT_EMPTY_RUNS
+    if os.environ.get("UNDERSTAT_FALLBACK", "1") != "0" and _UNDERSTAT_EMPTY_RUNS < 2:
         around = ""
         if xml_match:
             around = (xml_match.get("status", {}).get("utcTime", "") or "")[:10]
@@ -1459,6 +1484,14 @@ def fetch_and_save(fotmob_id: int, season: str = "2025-26", fotmob_only: bool = 
             us_data = understat_fetch_match_details(home_name, away_name, around or None, season)
         except Exception as exc:
             log.warning("Understat fetch failed for %s vs %s: %s", home_name, away_name, exc)
+        if not us_data:
+            _UNDERSTAT_EMPTY_RUNS += 1
+            if _UNDERSTAT_EMPTY_RUNS == 2:
+                log.info("Understat returned nothing twice — skipping it for the rest of this "
+                         "run (it has been broken since the site moved to AJAX loading). "
+                         "Set UNDERSTAT_FALLBACK=1 in a fresh run to try again.")
+        else:
+            _UNDERSTAT_EMPTY_RUNS = 0
 
     ws_data = None
     if not fotmob_only:
