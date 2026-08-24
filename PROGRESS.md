@@ -46,6 +46,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Lessons — what worked / what didn't
 
 <!-- progress:lessons -->
+- ❌ **Didn't work** — A WhoScored failure used to be invisible and permanent: the match still saved (FotMob shots only, no event stream), so _already_scraped counted it done and no later run would ever fill in the maps/lineups. backfill now classifies each match none/partial/full and --redo-partial retries only the partials.  (2026-08-24)
 - ✅ **Worked** — Probing candidate endpoints from the user's own machine (--probe-endpoints) found the replacement in one shot: /api/matches 404s but /api/data/matches works, and /api/data/leagues returns the entire season. When a source dies, enumerate doors rather than guessing one.  (2026-08-24)
 - ❌ **Didn't work** — A sweep printing '0 matches so far' told us nothing: ET.fromstring failures were swallowed by 'except Exception: continue', so a FotMob format change looked identical to 'no fixtures yet'. Failure counters + a verdict line now distinguish blocked / format-changed / no-such-league / not-published.  (2026-08-23)
 - ❌ **Didn't work** _deploy_ — `git_ops.push_match_update` copies `data.js`, `players.js`,

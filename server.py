@@ -241,6 +241,7 @@ REBUILD_STEPS = [
 ACTIONS = {
     "schedule":     "Refresh fixtures & results (FotMob, no browser)",
     "scrape_new":   "Scrape every played match not scraped yet",
+    "scrape_partial": "Re-scrape matches that only got FotMob data (no maps/lineups)",
     "scrape_ids":   "Scrape specific WhoScored id(s)",
     "scrape_match": "Scrape one match by FotMob id",
     "rebuild":      "Rebuild dashboard data from what's already scraped",
@@ -284,6 +285,10 @@ def build_job(body: dict) -> Job:
             cmd += ["--matchday", str(int(matchday))]
             target = f"matchday {int(matchday)}"
         steps.append(cmd)
+
+    elif action == "scrape_partial":
+        steps = [[PY, f"laliga/backfill.py", "--season", season, "--redo-partial"]]
+        target = "matches missing their WhoScored event stream"
 
     elif action == "scrape_ids":
         ids = str(body.get("ids", "")).strip()
