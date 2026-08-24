@@ -93,6 +93,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-08-24 17:14 | 2026-27 | dashboard button | Scrape every played match not scraped yet | ✅ 12 saved | 38m 29s | — |
 | 2026-08-24 17:14 | 2026-27 | backfill.py | 12 match(es) | ✅ 12 saved | 37m 49s | — |
 | 2026-08-23 03:32 | 2026-27 | dashboard button | Scrape every played match not scraped yet | ✅ done | 2m 13s | — |
 | 2026-08-23 03:32 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
