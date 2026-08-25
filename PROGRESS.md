@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-08-25** — Matchday inference rewritten (date clusters + round-robin validation, 100% on four known seasons); batch rebuild regenerates match centre pages before shots/player lab; database export covers all seasons.
 - **2026-08-24** — Added a 'Results & table only' button: build_schedule + build_data + push, no browser, about a minute. The site's standings/results/fixtures/projection never needed Chrome — only the shot maps and Match Centre do — so the safe update is now one click away from the heavy one.
 - **2026-08-24** — Matchday reconstruction is now earliest-fit packing: fixtures in date order dropped into the earliest round with a free slot and neither team in it. Beats splitting on team-recurrence (which fragmented the season into 40 rounds) and puts postponed matches back in their real round.
 - **2026-08-24** — 2026/27 promoted clubs: added colours for Deportivo A Coruña, Malaga and Racing Santander (plus the FotMob/WhoScored name variants). Crests still need 'py laliga/download_crests.py' on a machine that can reach FotMob's CDN.
@@ -50,6 +51,9 @@ the other, so when you add an entry here, consider adding it there too.
 ## Lessons — what worked / what didn't
 
 <!-- progress:lessons -->
+- ❌ **Didn't work** — build_database exported only defaultSeason, so the day 26/27 became the default the Data tab downloads shrank from four seasons to 14 matches (sqlite 1.5 MB -> 90 KB). Every table now carries a season column and covers every season in data.js.  (2026-08-25)
+- ❌ **Didn't work** — A backfill batch left the site half-updated: the end-of-batch rebuild skipped build_match_details, and shots.js + player_lab are derived from matches_detail/ — so the Team Lab and Player Lab were rebuilt from the previous scrape's files. 12 of 14 26/27 matches had no shot map. The batch rebuild now regenerates matches_detail/ first.  (2026-08-25)
+- ❌ **Didn't work** — Matchday reconstruction by earliest-fit packing was wrong on 353 of 380 fixtures of 26/27 — it stuffs December games into MD1 because round 1 still has a free slot. Checked against the four finished seasons (1520 fixtures with known matchdays) it scored 48%. build_schedule now tries several reconstructions and only publishes one that comes out a valid round-robin split (38 full rounds, nobody playing twice in a round) — that check scores 1520/1520.  (2026-08-25)
 - ❌ **Didn't work** — backfill rebuilt the ENTIRE dashboard after every match (renderer's refresh hook re-reads every season and rewrites every derived file). For a 14-match batch that is 14 full rebuilds racing a live Chrome — it crashed the machine twice. Batches now set LALIGA_SKIP_DASHBOARD_REFRESH=1 and rebuild once at the end.  (2026-08-24)
 - ❌ **Didn't work** — FotMob's season payload carries NO round field — confirmed with --dump-sample: each match has only id, home, away, status, pageUrl and an empty tournament.stage. Matchday has to be reconstructed; don't go looking for the field again.  (2026-08-24)
 - ✅ **Worked** — Matchday inference now tries the payload order AND kickoff order, validating each by 'no team twice in a round'. FotMob's season view is date-ordered, not round-ordered, so the first attempt fails and the second succeeds — and if both fail it leaves matchday empty instead of publishing a wrong table.  (2026-08-24)

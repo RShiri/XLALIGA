@@ -276,14 +276,176 @@ def dump_sample(season: str) -> None:
     print(f"\nkeys seen across the first 80 items: {sorted(keys)}")
 
 
-def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[dict]":
-    """Infer matchday when the payload doesn't carry one.
+def _match_date(rec: dict) -> date:
+    """The fixture's calendar day (far future when it has none, so it sorts last)."""
+    try:
+        return date.fromisoformat((rec.get("date") or "")[:10])
+    except ValueError:
+        return date(9999, 1, 1)
 
-    A 20-team league plays teams/2 matches per round, so consecutive blocks of that size
-    are the rounds — but only if the fixtures are in round order. Two orderings are tried:
-    the payload's own, then kickoff order (a round is normally one contiguous weekend).
-    Each is validated by the defining property of a round: no team appears twice. If
-    neither validates, matchday is left empty rather than published wrong.
+
+def _by_date(records: "list[dict]") -> "list[dict]":
+    return sorted(records, key=lambda r: (_match_date(r), r.get("kickoff_utc") or "",
+                                          r.get("fotmob_id") or 0))
+
+
+def _new_round(matches: "list[dict]") -> dict:
+    return {"m": list(matches),
+            "t": {t for m in matches for t in (m["home"], m["away"])}}
+
+
+def _round_fits(rd: dict, m: dict, per_round: int) -> bool:
+    return len(rd["m"]) < per_round and m["home"] not in rd["t"] and m["away"] not in rd["t"]
+
+
+def _round_start(rd: dict) -> date:
+    return min(_match_date(m) for m in rd["m"])
+
+
+def _blocks(order: "list[dict]", per_round: int) -> "list[dict]":
+    """Consecutive blocks of a round's worth — right when the feed is in round order."""
+    return [_new_round(order[i:i + per_round]) for i in range(0, len(order), per_round)]
+
+
+def _date_clusters(order: "list[dict]", per_round: int, gap: int) -> "list[dict]":
+    """Group fixtures played within ``gap`` days of each other — a round is a weekend."""
+    clusters: "list[dict]" = []
+    for m in order:
+        if clusters:
+            last = clusters[-1]
+            if (_match_date(m) - last["last"]).days <= gap and _round_fits(last, m, per_round):
+                last["m"].append(m)
+                last["t"].update((m["home"], m["away"]))
+                last["last"] = _match_date(m)
+                continue
+        rd = _new_round([m])
+        rd["last"] = _match_date(m)
+        clusters.append(rd)
+    return clusters
+
+
+def _merge_clusters(clusters: "list[dict]", per_round: int, expected: int) -> "list[dict]":
+    """Reunite a round that a midweek gap split in two: join the two halves back up.
+
+    Most-constrained-first — a cluster with only one possible partner is merged before one
+    with a choice — which is what stops a Friday game being glued to the wrong weekend.
+    """
+    def joinable(a: dict, b: dict) -> bool:
+        return len(a["m"]) + len(b["m"]) <= per_round and not (a["t"] & b["t"])
+
+    while len(clusters) > expected:
+        moves = []
+        for i, a in enumerate(clusters):
+            if len(a["m"]) >= per_round:
+                continue
+            partners = [j for j, b in enumerate(clusters) if j != i and joinable(a, b)]
+            moves += [(len(partners), len(a["m"]),
+                       abs((_round_start(a) - _round_start(clusters[j])).days), i, j)
+                      for j in partners]
+        if not moves:
+            break
+        _, _, _, i, j = min(moves)
+        clusters[i]["m"] += clusters[j]["m"]
+        clusters[i]["t"] |= clusters[j]["t"]
+        clusters.pop(j)
+    return clusters
+
+
+def _seat(rounds: "list[dict]", m: dict, per_round: int, depth: int = 4,
+          seen: "set | None" = None) -> bool:
+    """Seat one displaced fixture — a game brought forward or played weeks late.
+
+    Its own date says nothing (it was played nowhere near its round), so go by the only
+    thing left: a round is missing both its teams. Where the one round with a free slot is
+    blocked by a single game, that game is moved on in turn, up to ``depth`` links.
+    """
+    seen = set() if seen is None else seen
+    if depth < 0 or id(m) in seen:
+        return False
+    seen.add(id(m))
+    options = []
+    for rd in rounds:
+        blockers = [x for x in rd["m"] if {x["home"], x["away"]} & {m["home"], m["away"]}]
+        if not blockers and len(rd["m"]) < per_round:
+            options.append((0, rd, None))
+        elif len(blockers) == 1:
+            options.append((1, rd, blockers[0]))
+    options.sort(key=lambda o: (o[0], abs((_round_start(o[1]) - _match_date(m)).days)))
+    for kind, rd, blocker in options:
+        if kind == 0:
+            rd["m"].append(m)
+            rd["t"].update((m["home"], m["away"]))
+            return True
+        rd["m"].remove(blocker)
+        rd["m"].append(m)
+        rd["t"] = {t for x in rd["m"] for t in (x["home"], x["away"])}
+        if _seat(rounds, blocker, per_round, depth - 1, seen):
+            return True
+        rd["m"].remove(m)
+        rd["m"].append(blocker)
+        rd["t"] = {t for x in rd["m"] for t in (x["home"], x["away"])}
+    return False
+
+
+def _seat_strays(clusters: "list[dict]", per_round: int, expected: int) -> "list[dict]":
+    """Keep the ``expected`` biggest clusters as the rounds; deal the rest out one game at
+    a time, forced placements first."""
+    clusters.sort(key=lambda c: (-len(c["m"]), _round_start(c)))
+    rounds, strays = clusters[:expected], [m for c in clusters[expected:] for m in c["m"]]
+    while strays:
+        best = None
+        for m in strays:
+            seats = [rd for rd in rounds if _round_fits(rd, m, per_round)]
+            if not seats:
+                continue
+            seats.sort(key=lambda rd: abs((_round_start(rd) - _match_date(m)).days))
+            key = (len(seats), abs((_round_start(seats[0]) - _match_date(m)).days))
+            if best is None or key < best[0]:
+                best = (key, m, seats[0])
+        if best is None:
+            break
+        _, m, rd = best
+        rd["m"].append(m)
+        rd["t"].update((m["home"], m["away"]))
+        strays.remove(m)
+    for m in list(strays):
+        if _seat(rounds, m, per_round):
+            strays.remove(m)
+    return rounds + [_new_round([m]) for m in strays]
+
+
+def _pack_earliest_fit(order: "list[dict]", per_round: int) -> "list[dict]":
+    """Last resort: drop each fixture into the earliest round that still has room for it."""
+    rounds: "list[dict]" = []
+    for m in order:
+        for rd in rounds:
+            if _round_fits(rd, m, per_round):
+                rd["m"].append(m)
+                rd["t"].update((m["home"], m["away"]))
+                break
+        else:
+            rounds.append(_new_round([m]))
+    return rounds
+
+
+def _is_round_robin(rounds: "list[dict]", per_round: int, expected: int) -> bool:
+    """The property that makes a reconstruction trustworthy: exactly the right number of
+    rounds, every one of them full, and nobody playing twice in the same round."""
+    if len(rounds) != expected:
+        return False
+    return all(len(rd["m"]) == per_round and len(rd["t"]) == 2 * per_round for rd in rounds)
+
+
+def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[dict]":
+    """Infer matchday when the payload doesn't carry one (FotMob's season view never does).
+
+    Several reconstructions are tried in order of how much they assume, and the first one
+    that comes out a *valid* round-robin split — ``matches / (teams / 2)`` rounds, each one
+    full, nobody playing twice in a round — wins. Anything short of that is published as no
+    matchday at all rather than as a plausible-looking wrong table: checked against the four
+    finished seasons in ``schedules/`` (1520 fixtures whose real matchday is known), the
+    accepted reconstructions are right on every single fixture, while the rejected ones are
+    off by hundreds — so the check is what makes the number worth showing.
     """
     if not records or any(r.get("matchday") for r in records):
         return records
@@ -294,73 +456,44 @@ def _fill_missing_rounds(records: "list[dict]", verbose: bool = True) -> "list[d
             print(f"  ! no matchday in the feed, and {len(records)} fixtures / {len(teams)} teams "
                   f"doesn't divide into rounds — leaving matchday empty.")
         return records
-
-    def valid(order: "list[dict]") -> bool:
-        for start in range(0, len(order), per_round):
-            block = order[start:start + per_round]
-            seen = [t for r in block for t in (r["home"], r["away"])]
-            if len(set(seen)) != len(seen):
-                return False
-        return True
-
-    attempts = (
-        ("the fixture order", records),
-        ("kickoff order", sorted(records, key=lambda r: (r.get("kickoff_utc") or "",
-                                                         r.get("fotmob_id") or 0))),
-    )
-    for label, order in attempts:
-        if not valid(order):
-            continue
-        for i, r in enumerate(order):
-            r["matchday"] = i // per_round + 1
-        if verbose:
-            print(f"  matchday wasn't in the feed — inferred {len(records) // per_round} rounds "
-                  f"of {per_round} from {label} (validated: no team twice in a round).")
-        return records
-
-    # Third attempt: earliest-fit packing. FotMob's season view carries no round field at
-    # all (confirmed by --dump-sample: id/home/away/status/pageUrl and an empty
-    # tournament.stage), so the rounds have to be reconstructed. Walk the fixtures in date
-    # order and drop each into the earliest round that still has a free slot and neither
-    # team in it. A simple "new round whenever a team recurs" split fragments the season
-    # (a midweek or brought-forward game splits a round in two); packing puts a postponed
-    # match back into the round it belongs to, because that round still has a slot free.
-    ordered = sorted(records, key=lambda r: (r.get("date") or "9999-99-99",
-                                             r.get("kickoff_utc") or "",
-                                             r.get("fotmob_id") or 0))
-    rounds: "list[dict]" = []
-    for r in ordered:
-        for rd in rounds:
-            if len(rd["matches"]) < per_round and r["home"] not in rd["teams"] \
-                    and r["away"] not in rd["teams"]:
-                rd["matches"].append(r)
-                rd["teams"].update((r["home"], r["away"]))
-                break
-        else:
-            rounds.append({"matches": [r], "teams": {r["home"], r["away"]}})
-
-    # Number them chronologically by when the round actually starts.
-    rounds.sort(key=lambda rd: min((m.get("date") or "9999-99-99") for m in rd["matches"]))
-    for n, rd in enumerate(rounds, 1):
-        for m in rd["matches"]:
-            m["matchday"] = n
-
     expected = len(records) // per_round
-    if len(rounds) <= expected + 2:
+    order = _by_date(records)
+
+    attempts = [
+        ("the fixture order", lambda: _blocks(list(records), per_round)),
+        ("kickoff order", lambda: _blocks(order, per_round)),
+    ]
+    # A round is a weekend, so cluster by date — but how big a gap still counts as the same
+    # round varies (a round split Friday-to-Monday, a midweek round three days after the
+    # last). Try the tight reading first: it's the one that can't swallow a neighbour.
+    attempts += [(f"date clusters (≤{gap}d apart)",
+                  lambda gap=gap: _seat_strays(
+                      _merge_clusters(_date_clusters(order, per_round, gap), per_round, expected),
+                      per_round, expected))
+                 for gap in (0, 1, 2, 3)]
+    attempts.append(("earliest-fit packing", lambda: _pack_earliest_fit(order, per_round)))
+
+    for label, build in attempts:
+        rounds = build()
+        if not _is_round_robin(rounds, per_round, expected):
+            continue
+        # Number them by when the round was mostly played, so a postponed game doesn't drag
+        # its whole round backwards or forwards.
+        rounds.sort(key=lambda rd: sorted(_match_date(m) for m in rd["m"])[len(rd["m"]) // 2])
+        for n, rd in enumerate(rounds, 1):
+            for m in rd["m"]:
+                m["matchday"] = n
         if verbose:
-            note = "exactly as expected" if len(rounds) == expected else f"expected {expected}"
-            print(f"  matchday isn't in the feed — reconstructed {len(rounds)} rounds of up to "
-                  f"{per_round} by date ({note}).")
+            print(f"  matchday wasn't in the feed — reconstructed {expected} rounds of "
+                  f"{per_round} from {label} (a valid round-robin split).")
         return records
-    if verbose:
-        print(f"  ! reconstruction produced {len(rounds)} rounds where {expected} were expected — "
-              f"too fragmented to trust.")
 
     for r in records:
         r["matchday"] = None
     if verbose:
-        print("  ! matchday isn't in the feed and no ordering recovers it — left empty rather "
-              "than wrong. Run with --dump-sample to see the raw fields.")
+        print("  ! matchday isn't in the feed and nothing reconstructs a valid round-robin "
+              "split — left empty rather than wrong. Run with --dump-sample to see the raw "
+              "fields.")
     return records
 
 

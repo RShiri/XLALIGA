@@ -1,0 +1,2 @@
+window.LL_PLAYERLAB = window.LL_PLAYERLAB || {};
+window.LL_PLAYERLAB["Malaga"] = {"David Larrubia":{"shots":[[9.6,76.7,50.0,0.002,0,0,13,"Atletico Madrid"],[14.1,79.9,50.0,0.002,0,1,90,"Atletico Madrid"]],"dribbles":[],"passes":[]},"Rafita":{"shots":[[8.3,51.0,50.0,0.002,0,1,33,"Atletico Madrid"]],"dribbles":[],"passes":[]},"Chupe":{"shots":[[5.0,72.0,50.0,0.002,0,1,46,"Atletico Madrid"]],"dribbles":[],"passes":[]},"Rafa Rodriguez":{"shots":[[7.0,83.7,50.0,0.002,0,0,79,"Atletico Madrid"]],"dribbles":[],"passes":[]}};

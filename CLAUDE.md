@@ -8,17 +8,23 @@ dashboard** (`laliga_dashboard/`, static site) and a per-match **PNG infographic
 - **GitHub:** https://github.com/RShiri/XLALIGA  (public; GitHub Pages serves `main` root)
 - **This folder** is a git clone linked to that repo (`origin` → XLALIGA.git). Commit + push here.
 
-## CURRENT STATE (as of 2026-07)
+## CURRENT STATE (as of 2026-08)
 - **Four full seasons live.** Each is 380/380 played, **380 with xG**, full standings + season
   projection, and a per-match Match Centre — **1520** interactive match-centre pages across the
   four. Pick any from the dashboard's season switcher:
-  - **2025/26** — complete, **600 players**. The default season.
+  - **2025/26** — complete, **600 players**.
   - **2024/25** — complete, **589 players** (added via an archived-season WhoScored scrape).
   - **2023/24** — complete, **598 players** (Real Madrid champions; added 2026-07 same way).
   - **2022/23** — complete, **583 players** (Barcelona champions; added 2026-07 same way).
-- **2026/27 = pipeline-ready, empty.** `laliga/schedules/SCHEDULE_2026-27.json` is a placeholder.
-  When FotMob publishes the fixtures, one command fills it (see below) and the dashboard's
-  season switcher shows it.
+- **2026/27 is live and is now the default season.** All 380 fixtures are in
+  `laliga/schedules/SCHEDULE_2026-27.json`, 14 played and all 14 deep-scraped (match centre,
+  shot maps, players). `defaultSeason` follows the newest season with a played match, so the
+  site lands here. Promoted this year: Deportivo A Coruña, Málaga, Racing Santander.
+- **Matchday is reconstructed, not fetched.** FotMob's season payload has no round field, so
+  `build_schedule._fill_missing_rounds` rebuilds the rounds from the fixture dates and only
+  publishes a reconstruction that is a valid round-robin split (38 full rounds, nobody twice
+  in a round). Benchmarked at 1520/1520 against the four finished seasons; anything that
+  fails the check leaves matchday empty rather than publishing a wrong table.
 - **FotMob 0-0 glitch handling.** FotMob's historical feed occasionally reports a real result
   as 0-0 (2 in 2023/24, 6 in 2024/25). `build_data.py` now prefers the scraped WhoScored
   fulltime score over the schedule score whenever a match has a rich file, so standings stay

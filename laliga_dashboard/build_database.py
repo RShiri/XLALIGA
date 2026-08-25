@@ -148,24 +148,33 @@ def _sql_type(rows, col):
     return "TEXT"
 
 
+def _tagged(season, rows):
+    """Every table spans all seasons, so every row says which one it belongs to."""
+    for row in rows:
+        yield {"season": season, **row}
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     payload = _load_data_js()
-    # data.js is season-keyed now; export the default (current) season's tables.
-    season = payload["defaultSeason"]
-    data = payload["seasons"][season]
-    data["generated"] = payload.get("generated", "")
-    # Player aggregates read the raw match JSONs, which live in matches/<season>/ subdirs
-    # — point at the default season's dir so the player exports match the other tables
-    # (a bare aggregate()/per_match_rows() globs matches/*.json and finds nothing).
-    season_match_dir = os.path.join(MATCH_DIR, season)
+    # data.js is season-keyed, and so is the export: one download holding every season the
+    # site has, not just the current one. Exporting only defaultSeason meant the archive
+    # silently shrank to a fortnight of fixtures the day a new season kicked off.
+    results, team_stats, team_stats_src, standings, player_match, players = [], [], [], [], [], []
+    for season in sorted(payload["seasons"]):
+        data = payload["seasons"][season]
+        data["generated"] = payload.get("generated", "")
+        # Player aggregates read the raw match JSONs, which live in matches/<season>/ subdirs
+        # — point at this season's dir (a bare aggregate()/per_match_rows() globs
+        # matches/*.json and finds nothing).
+        season_match_dir = os.path.join(MATCH_DIR, season)
 
-    results = list(results_rows(data))
-    team_stats = list(team_match_stat_rows(data))
-    team_stats_src = list(team_match_stat_by_source_rows(data))
-    standings = list(standings_rows(data))
-    player_match = list(build_players.per_match_rows(season_match_dir))
-    players = build_players.aggregate(season_match_dir)
+        results += list(_tagged(season, results_rows(data)))
+        team_stats += list(_tagged(season, team_match_stat_rows(data)))
+        team_stats_src += list(_tagged(season, team_match_stat_by_source_rows(data)))
+        standings += list(_tagged(season, standings_rows(data)))
+        player_match += list(_tagged(season, build_players.per_match_rows(season_match_dir)))
+        players += list(_tagged(season, build_players.aggregate(season_match_dir)))
 
     counts = {
         "results.csv": _write_csv("results.csv", results),
@@ -188,7 +197,8 @@ def main():
     raw_files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(MATCH_DIR, "**", "*.json"), recursive=True)
                        if is_match_file(f))
     manifest = {
-        "generated": data.get("generated", ""),
+        "generated": payload.get("generated", ""),
+        "seasons": sorted(payload["seasons"]),
         "tables": [
             {"file": "results.csv", "label": "Game results", "rows": counts["results.csv"]},
             {"file": "team_match_stats.csv", "label": "Team stats per game (averaged)", "rows": counts["team_match_stats.csv"]},

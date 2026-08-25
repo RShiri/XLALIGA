@@ -1346,13 +1346,18 @@ def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | No
                     log.info("Match centre page refreshed → %s", os.path.basename(out))
     except Exception as exc:  # pragma: no cover - never block rendering
         log.warning("Could not refresh match centre page: %s", exc)
-    for modname, filename, label in (
+    # No match_data means a batch just finished (backfill) rather than one match being
+    # rendered: rebuild every match centre page first, because shots.js and the Player Lab
+    # are derived from matches_detail/ and would otherwise be built from yesterday's files.
+    steps = [] if match_data is not None else [
+        ("wc_dashboard_details_all", "build_match_details.py", "matches_detail/ (match centre pages)")]
+    for modname, filename, label in steps + [
         ("wc_dashboard_build", "build_data.py", "data.js"),
         ("wc_dashboard_players", "build_players.py", "players.js"),
         ("wc_dashboard_shots", "build_shots.py", "shots.js (Team Lab)"),
         ("wc_dashboard_database", "build_database.py", "database export"),
         ("wc_dashboard_player_lab", "build_player_lab.py", "player_lab per-team events"),
-    ):
+    ]:
         try:
             mod = _load_dashboard_module(modname, filename)
             if mod is not None:
