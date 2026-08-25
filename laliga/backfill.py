@@ -147,9 +147,15 @@ def main() -> None:
     target = f"{len(todo)} match(es)"
     if args.matchday:
         target = f"matchday {args.matchday} · {target}"
+    # The partial count belongs in the journal too, not just on stdout: a row reading
+    # "12 saved ✅" hid the fact that five of them came back with FotMob data only — no
+    # pass/dribble maps, no real lineups, and no player rows in players.js.
+    note = ("--redo" if args.redo else "") + (" --fotmob-only" if args.fotmob_only else "")
+    if still_partial:
+        note = (note + " · " if note.strip() else "") + \
+               f"{still_partial} match(es) FotMob-only — re-run with --redo-partial"
     log_scrape(season=args.season, target=target, saved=ok, failed=fail,
-               duration_s=time.time() - started, trigger="backfill.py",
-               note=("--redo" if args.redo else "") + (" --fotmob-only" if args.fotmob_only else ""))
+               duration_s=time.time() - started, trigger="backfill.py", note=note)
     if args.push and ok:
         # One deploy for the whole batch. push_match_update clones + commits the refreshed
         # laliga_dashboard/{data.js,players.js,matches_detail,database} + any new PNGs.
