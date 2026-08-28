@@ -6,6 +6,8 @@ exact name, then case-insensitively, then falls back to a neutral grey.
 ``WC2026_TEAM_COLORS`` is kept as an alias so the ported ``renderer.py`` imports unchanged.
 """
 
+import unicodedata
+
 LALIGA_TEAM_COLORS: dict[str, dict[str, str]] = {
     "Athletic Club":     {"primary": "#EE2523", "secondary": "#FFFFFF"},
     "Atletico Madrid":   {"primary": "#CB3524", "secondary": "#262E62"},
@@ -49,13 +51,22 @@ LALIGA_TEAM_COLORS: dict[str, dict[str, str]] = {
 WC2026_TEAM_COLORS = LALIGA_TEAM_COLORS
 
 
+def _fold(name: str) -> str:
+    """Case- and accent-insensitive lookup key: 'Deportivo Alavés' -> 'deportivo alaves'."""
+    stripped = unicodedata.normalize("NFKD", (name or "").strip())
+    return "".join(c for c in stripped if not unicodedata.combining(c)).casefold()
+
+
 def get_team_colors(team_name: str, fallback_home: bool = True) -> dict[str, str]:
     """Return {'primary': hex, 'secondary': hex} for a team."""
     name_clean = (team_name or "").strip()
     if name_clean in LALIGA_TEAM_COLORS:
         return LALIGA_TEAM_COLORS[name_clean]
-    lower = name_clean.lower()
+    # Accent-fold before giving up: FotMob flips between "Malaga"/"Málaga" and
+    # "Deportivo Alaves"/"Deportivo Alavés" between feeds, and a miss here silently
+    # renders the club grey in the PNGs.
+    folded = _fold(name_clean)
     for k, v in LALIGA_TEAM_COLORS.items():
-        if k.lower() == lower:
+        if _fold(k) == folded:
             return v
     return {"primary": "#6b7a99" if fallback_home else "#4a5870", "secondary": "#FFFFFF"}

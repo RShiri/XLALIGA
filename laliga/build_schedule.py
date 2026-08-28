@@ -189,6 +189,17 @@ def _side(obj: dict) -> "tuple[str, object, object]":
     return str(name), obj.get("id"), obj.get("score")
 
 
+def _round_of(m: dict) -> "int | None":
+    """The round (matchday) number of a FotMob match dict, wherever the field sits."""
+    rnd = next((m.get(k) for k in ("round", "roundName", "matchday", "roundNumber",
+                                   "week", "stage", "matchRound") if m.get(k) is not None),
+               (m.get("tournament") or {}).get("round"))
+    try:
+        return int(str(rnd).strip()) if str(rnd).strip().isdigit() else None
+    except (TypeError, ValueError):
+        return None
+
+
 def _match_from_json(m: dict) -> "dict | None":
     """One FotMob JSON match -> our schedule record, tolerant about where fields sit."""
     try:
@@ -199,13 +210,7 @@ def _match_from_json(m: dict) -> "dict | None":
     home_name, home_id, home_score = _side(m.get("home") or {})
     away_name, away_id, away_score = _side(m.get("away") or {})
 
-    rnd = next((m.get(k) for k in ("round", "roundName", "matchday", "roundNumber",
-                                   "week", "stage", "matchRound") if m.get(k) is not None),
-               (m.get("tournament") or {}).get("round"))
-    try:
-        matchday = int(str(rnd).strip()) if str(rnd).strip().isdigit() else None
-    except (TypeError, ValueError):
-        matchday = None
+    matchday = _round_of(m)
 
     score = str(st.get("scoreStr") or m.get("scoreStr") or "")
     if "-" in score:
@@ -242,7 +247,12 @@ def fetch_season_matches(season: str, verbose: bool = True) -> "list[dict]":
             print(f"  no fixture list found in the season payload (keys: {list(data)[:10]}). "
                   f"Falling back to the day-by-day sweep.")
         return []
-    best = max(lists, key=len)
+    # The season payload holds several equally long fixture lists (the fixtures view plus
+    # team-centric ones). Only the fixtures view carries "round"; picking any other means
+    # the matchday has to be guessed from kickoff dates, which mis-numbers rescheduled
+    # games. Among the longest lists, prefer whichever actually reports rounds.
+    best = max(lists, key=lambda lst: (len(lst),
+                                       sum(1 for m in lst if _round_of(m) is not None)))
     out = _fill_missing_rounds([r for r in (_match_from_json(m) for m in best) if r], verbose)
     if verbose:
         print(f"  {len(out)} fixture(s) parsed "
@@ -742,8 +752,9 @@ def _check_team_assets(matches: "list[dict]") -> None:
         return
     try:
         sys.path.insert(0, str(_HERE.parent))
-        from laliga.team_colors import LALIGA_TEAM_COLORS
-        no_colour = [t for t in teams if t not in LALIGA_TEAM_COLORS]
+        from laliga.team_colors import LALIGA_TEAM_COLORS, _fold
+        known = {_fold(k) for k in LALIGA_TEAM_COLORS}
+        no_colour = [t for t in teams if _fold(t) not in known]
     except Exception as exc:
         print(f"  (couldn't read team colours: {exc})")
         no_colour = []

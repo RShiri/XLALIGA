@@ -1,6 +1,6 @@
 match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass_acc,big_chances,big_missed,saves,fouls,duels_won,xg
-5868011,2026-08-15,Deportivo Alaves,Getafe,home,3,0,52,18,11,405,81,3,2,4,16,50,1.93
-5868011,2026-08-15,Getafe,Deportivo Alaves,away,0,3,48,6,4,376,79,0,0,8,13,50,0.24
+5868011,2026-08-15,Deportivo Alavés,Getafe,home,3,0,52,18,11,405,81,3,2,4,16,50,1.93
+5868011,2026-08-15,Getafe,Deportivo Alavés,away,0,3,48,6,4,376,79,0,0,8,13,50,0.24
 5868019,2026-08-15,Sevilla,Rayo Vallecano,home,2,1,49,13,7,383,72,2,0,2,18,50,2.19
 5868019,2026-08-15,Rayo Vallecano,Sevilla,away,1,2,51,6,3,386,73,3,2,5,18,50,1.89
 5868017,2026-08-16,Racing Santander,Villarreal,home,2,2,41,17,11,405,82,2,1,7,14,48,1.87
@@ -9,16 +9,24 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868015,2026-08-16,Levante,Espanyol,away,0,3,46,4,1,433,85,0,0,7,7,56,0.19
 5868014,2026-08-17,Deportivo A Coruña,Elche,home,1,1,39,8,4,401,81,0,0,5,17,47,0.34
 5868014,2026-08-17,Elche,Deportivo A Coruña,away,1,1,61,11,9,641,88,2,2,2,12,53,1.23
-5868012,2026-08-19,Atletico Madrid,Malaga,home,2,0,53,15,10,520,88,3,3,1,17,49,0.92
-5868012,2026-08-19,Malaga,Atletico Madrid,away,0,2,47,5,3,467,85,0,0,4,11,51,0.15
+5868012,2026-08-19,Atletico Madrid,Málaga,home,2,0,53,15,10,556,88,3,3,3,17,49,0.92
+5868012,2026-08-19,Málaga,Atletico Madrid,away,0,2,47,5,3,494,85,0,0,8,11,51,0.15
+5868020,2026-08-25,Valencia,Real Betis,home,0,1,42,16,11,423,78,1,1,7,10,47,1.12
+5868020,2026-08-25,Real Betis,Valencia,away,1,0,58,15,8,577,88,2,1,10,11,53,0.71
+5868018,2026-08-26,Real Madrid,Real Sociedad,home,4,1,51,20,17,601,91,5,2,5,10,57,3.18
+5868018,2026-08-26,Real Sociedad,Real Madrid,away,1,4,49,10,6,596,90,1,1,13,8,43,0.65
+5868013,2026-08-27,Celta Vigo,Osasuna,home,1,2,52,4,3,591,87,0,0,5,7,51,0.14
+5868013,2026-08-27,Osasuna,Celta Vigo,away,2,1,48,13,8,549,88,4,2,2,16,49,2.6
+5868016,2026-08-27,Barcelona,Athletic Club,home,2,0,70,22,15,621,90,4,2,0,13,49,4.23
+5868016,2026-08-27,Athletic Club,Barcelona,away,0,2,30,5,0,252,73,0,0,8,6,51,0.25
+5868029,2026-08-20,Rayo Vallecano,Deportivo Alavés,home,1,1,48,8,4,366,79,1,1,5,14,44,0.42
+5868029,2026-08-20,Deportivo Alavés,Rayo Vallecano,away,1,1,52,15,6,392,80,4,3,3,13,56,2.0
 5868023,2026-08-21,Real Betis,Real Sociedad,home,1,0,48,18,11,512,86,1,1,6,9,56,1.24
 5868023,2026-08-21,Real Sociedad,Real Betis,away,0,1,52,9,6,555,85,2,2,10,12,44,1.36
-5868030,2026-08-22,Valencia,Celta Vigo,home,0,0,44,8,4,526,88,1,1,4,17,54,0.7
-5868030,2026-08-22,Celta Vigo,Valencia,away,0,0,56,7,4,644,90,1,1,4,17,46,0.62
-5868029,2026-08-20,Rayo Vallecano,Deportivo Alaves,home,1,1,48,8,4,323,79,1,1,2,14,44,0.42
-5868029,2026-08-20,Deportivo Alaves,Rayo Vallecano,away,1,1,52,15,6,340,80,4,3,2,13,56,2.0
 5868021,2026-08-22,Athletic Club,Sevilla,home,1,3,65,18,11,584,81,2,1,3,11,55,1.37
 5868021,2026-08-22,Sevilla,Athletic Club,away,3,1,35,7,5,308,74,2,0,10,16,45,1.26
+5868030,2026-08-22,Valencia,Celta Vigo,home,0,0,44,8,4,526,88,1,1,4,17,54,0.7
+5868030,2026-08-22,Celta Vigo,Valencia,away,0,0,56,7,4,644,90,1,1,4,17,46,0.62
 5868025,2026-08-22,Espanyol,Real Madrid,home,1,2,37,8,4,363,84,2,1,12,19,37,1.05
 5868025,2026-08-22,Real Madrid,Espanyol,away,2,1,63,21,14,595,92,3,2,3,7,63,2.71
 5868022,2026-08-23,Atletico Madrid,Villarreal,home,2,2,52,19,14,520,88,0,0,4,12,56,0.78
@@ -27,3 +35,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868026,2026-08-23,Racing Santander,Getafe,away,0,1,57,6,3,469,81,2,2,0,17,52,1.31
 5868024,2026-08-23,Elche,Barcelona,home,0,5,46,7,2,479,80,3,3,2,13,40,0.7
 5868024,2026-08-23,Barcelona,Elche,away,5,0,54,11,7,560,87,9,4,2,12,60,4.38
+5868028,2026-08-24,Osasuna,Levante,home,0,0,46,12,8,397,79,2,2,5,9,58,0.7
+5868028,2026-08-24,Levante,Osasuna,away,0,0,54,11,5,471,82,2,2,7,12,42,1.28
+5868027,2026-08-24,Málaga,Deportivo A Coruña,home,1,1,55,13,5,528,90,2,1,4,12,54,1.95
+5868027,2026-08-24,Deportivo A Coruña,Málaga,away,1,1,45,6,5,433,89,1,0,1,12,46,1.12
