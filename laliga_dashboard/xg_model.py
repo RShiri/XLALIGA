@@ -160,6 +160,18 @@ def shot_xg(ev, xg_by_event):
     body, situation, zone, big_chance, quals = extract_qualifiers(ev)
     is_penalty = situation == "Penalty"
     xg = xg_by_event.get(id(ev), 0.0)   # object identity — see match_xg_by_event
+    # FotMob-only matches (no WhoScored event stream) carry the provider's own
+    # measured xG on the synthesised shot event. Prefer it: the v3 model derives 5
+    # of its 23 features from the assisting pass, and there is no pass stream behind
+    # these shots, so the model would silently run cold — which is exactly how a
+    # FotMob-only game ended up showing ~0.95 xG next to a 4.23 xG stats row.
+    provider = ev.get("_provider_xg")
+    if provider is not None:
+        try:
+            return round(float(provider), 3), dict(body=body, situation=situation, zone=zone,
+                                                   big_chance=big_chance, penalty=is_penalty)
+        except (TypeError, ValueError):
+            pass
     return xg, dict(body=body, situation=situation, zone=zone,
                     big_chance=big_chance, penalty=is_penalty)
 

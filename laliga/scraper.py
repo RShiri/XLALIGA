@@ -791,72 +791,230 @@ def _parse_fotmob_stats(fm_data: dict) -> dict:
     return stats
 
 
+# FotMob shotmap coordinates are pitch METRES on a 105 x 68 field, with every shot
+# already in its taker's attacking frame (x grows towards the goal being attacked).
+# WhoScored — the shape the whole pipeline speaks — uses percentages of a 100 x 100
+# pitch, also per-team attacking frame. So the only conversion needed is a rescale;
+# mirroring the away side here would put its shots at the wrong end, because
+# match.js / renderer.py already mirror the away team when they draw.
+_FM_PITCH_X = 105.0
+_FM_PITCH_Y = 68.0
+
+# FotMob eventType -> WhoScored type. `isBlocked` is a separate flag and wins over
+# these (a blocked effort is a BlockedShot, not a miss).
+_FM_EVENT_TYPE = {
+    "Goal":         "Goal",
+    "AttemptSaved": "SavedShot",
+    "SavedShot":    "SavedShot",
+    "Save":         "SavedShot",
+    "Miss":         "MissedShots",
+    "Post":         "ShotOnPost",
+    "ShotOnPost":   "ShotOnPost",
+    "Blocked":      "BlockedShot",
+    "BlockedShot":  "BlockedShot",
+    "OwnGoal":      "Goal",
+}
+
+# FotMob shotType -> the WhoScored body-part qualifier xg_model.extract_qualifiers reads.
+_FM_BODY_QUAL = {
+    "leftfoot":       "LeftFoot",
+    "left":           "LeftFoot",
+    "rightfoot":      "RightFoot",
+    "right":          "RightFoot",
+    "header":         "Head",
+    "head":           "Head",
+    "otherbodypart":  "OtherBodyPart",
+}
+
+# FotMob situation -> WhoScored situation qualifier. "RegularPlay"/"IndividualPlay"
+# carry no qualifier (they are open play).
+_FM_SITUATION_QUAL = {
+    "penalty":          "Penalty",
+    "freekick":         "DirectFreekick",
+    "directfreekick":   "DirectFreekick",
+    "fastbreak":        "FastBreak",
+    "counter":          "FastBreak",
+    "fromcorner":       "FromCorner",
+    "corner":           "FromCorner",
+    "setpiece":         "SetPiece",
+    "throwinsetpiece":  "SetPiece",
+}
+
+
+def _fm_qual(name: str, value=None) -> dict:
+    q = {"type": {"displayName": name}}
+    if value is not None:
+        q["value"] = value
+    return q
+
+
+# Goal-mouth landing spot. FotMob reports where the ball crossed the goal line in
+# METRES (goalCrossedY across the pitch, 34 = the middle; goalCrossedZ = height).
+# WhoScored's GoalMouthY/Z — what match.js's "behind the net" view is drawn against —
+# are Opta's normalised units: the posts sit at 45.2 and 54.8, the crossbar at 38.
+# (Verified against the shipped WhoScored matches: every one of 3001 goals lands
+# inside 45.2-54.8 with Z < 38.) Anchor the conversion on the goal frame itself so a
+# post-hitter maps to a post rather than to a scaled-pitch approximation of one.
+_GOAL_HALF_W_M = 3.66     # 7.32 m goal
+_GOAL_HEIGHT_M = 2.44
+_WS_GOAL_HALF_W = 4.8     # 50 +- 4.8 -> 45.2 / 54.8
+_WS_CROSSBAR = 38.0
+_FM_PITCH_MID_Y = _FM_PITCH_Y / 2.0
+
+
+def _fm_goal_mouth(shot: dict):
+    """(GoalMouthY, GoalMouthZ) in WhoScored units, or (None, None)."""
+    try:
+        gy = 50.0 + (float(shot["goalCrossedY"]) - _FM_PITCH_MID_Y) / _GOAL_HALF_W_M * _WS_GOAL_HALF_W
+    except (KeyError, TypeError, ValueError):
+        gy = None
+    try:
+        gz = float(shot["goalCrossedZ"]) / _GOAL_HEIGHT_M * _WS_CROSSBAR
+    except (KeyError, TypeError, ValueError):
+        gz = None
+    if gy is not None:
+        gy = round(min(100.0, max(0.0, gy)), 1)
+    if gz is not None:
+        gz = round(max(0.0, gz), 1)
+    return gy, gz
+
+
 def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]:
     """
     Convert FotMob shotmap shots into WhoScored-compatible event dicts.
-    These are appended to the events list so the renderer can use them.
+
+    Used when WhoScored has no event stream for the game (FotMob-only match): the
+    renderer, build_match_details and the xG model all consume WhoScored-shaped
+    events, so every field they read has to be present in the same units and the
+    same frame of reference. That means:
+
+      * coordinates rescaled from FotMob's 105 x 68 metres to WhoScored's 0-100
+        percentages, kept in the taker's attacking frame (NOT mirrored for the
+        away side — the drawing code mirrors);
+      * blocked / on-target / post outcomes kept distinct;
+      * body part, situation, big chance and own goal expressed as the WhoScored
+        qualifiers xg_model.extract_qualifiers() looks for;
+      * the goal-mouth landing spot (GoalMouthY/Z) so the on-target map works;
+      * FotMob's own (Opta) xG carried on ``_provider_xg`` — it is real measured
+        xG, and the shot-context model can't be fed properly here anyway (there
+        is no pass stream behind these shots).
     """
-    shots_raw = (
-        fm_data.get("content", {})
-        .get("shotmap", {})
-        .get("shots", [])
-    ) or []
+    content = fm_data.get("content", {}) or {}
+    shots_raw = ((content.get("shotmap") or {}).get("shots") or [])
+    if not shots_raw and isinstance(content.get("shotmap"), list):
+        shots_raw = content["shotmap"]
 
     events = []
     for s in shots_raw:
+        if not isinstance(s, dict):
+            continue
         tid = s.get("teamId")
-        # FotMob x/y are 0-100 from attacking perspective; flip away team
-        x = float(s.get("x", 50))
-        y = float(s.get("y", 50))
-        if tid == away_id:
-            x = 100 - x
-            y = 100 - y
+        if tid not in (home_id, away_id):
+            continue
 
-        outcome_map = {
-            "Goal":          "Goal",
-            "SavedShot":     "SavedShot",
-            "AttemptSaved":  "SavedShot",
-            "Miss":          "MissedShots",
-            "BlockedShot":   "MissedShots",
-            "ShotOnPost":    "ShotOnPost",
-        }
-        ev_type = outcome_map.get(s.get("eventType", ""), "MissedShots")
+        # metres on a 105x68 pitch -> WhoScored percentages, attacking frame kept
+        try:
+            x = float(s.get("x", _FM_PITCH_X / 2)) / _FM_PITCH_X * 100.0
+            y = float(s.get("y", _FM_PITCH_Y / 2)) / _FM_PITCH_Y * 100.0
+        except (TypeError, ValueError):
+            continue
+        x = round(min(100.0, max(0.0, x)), 2)
+        y = round(min(100.0, max(0.0, y)), 2)
+
+        raw_type = str(s.get("eventType") or "")
+        is_own_goal = bool(s.get("isOwnGoal")) or raw_type == "OwnGoal"
+        ev_type = _FM_EVENT_TYPE.get(raw_type)
+        if s.get("isBlocked") and ev_type not in ("Goal",):
+            ev_type = "BlockedShot"
+        if ev_type is None:
+            ev_type = "SavedShot" if s.get("isOnTarget") else "MissedShots"
         is_goal = ev_type == "Goal"
 
         quals = []
-        if s.get("isOnTarget"):
-            pass
-        if s.get("isBigChance"):
-            quals.append({"type": {"displayName": "BigChance"}})
-        bp = s.get("situation", "")
-        if "Penalty" in bp:
-            quals.append({"type": {"displayName": "Penalty"}})
-        foot = s.get("shotType", "")
-        if foot:
-            quals.append({"type": {"displayName": "RightFoot" if "right" in foot.lower() else "LeftFoot"}})
+        body = _FM_BODY_QUAL.get(str(s.get("shotType") or "").replace(" ", "").lower())
+        if body:
+            quals.append(_fm_qual(body))
+        sit = _FM_SITUATION_QUAL.get(str(s.get("situation") or "").replace(" ", "").lower())
+        if sit:
+            quals.append(_fm_qual(sit))
+        if s.get("isBigChance") or s.get("bigChance"):
+            quals.append(_fm_qual("BigChance"))
+        if is_own_goal:
+            quals.append(_fm_qual("OwnGoal"))
+        gy, gz = _fm_goal_mouth(s)
+        if gy is not None:
+            quals.append(_fm_qual("GoalMouthY", gy))
+        if gz is not None:
+            quals.append(_fm_qual("GoalMouthZ", gz))
+
+        minute = s.get("min") or 0
+        try:
+            minute = int(minute)
+        except (TypeError, ValueError):
+            minute = 0
+        period = s.get("period")
+        period_name = period if isinstance(period, str) else None
+        if not period_name:
+            period_name = "FirstHalf" if minute <= 45 else "SecondHalf"
+
+        try:
+            provider_xg = float(s.get("expectedGoals"))
+        except (TypeError, ValueError):
+            provider_xg = None
 
         events.append({
-            "id":           float(s.get("id", 0)),
+            "id":           float(s.get("id") or 0),
             "eventId":      s.get("id", 0),
-            "minute":       s.get("min", 0),
+            "minute":       minute,
             "second":       0,
             "teamId":       tid,
             "x":            x,
             "y":            y,
-            "expandedMinute": s.get("min", 0),
-            "period":       {"displayName": "FirstHalf" if s.get("min", 0) <= 45 else "SecondHalf",
-                             "value": 1 if s.get("min", 0) <= 45 else 2},
+            "expandedMinute": minute,
+            "period":       {"displayName": period_name,
+                             "value": 1 if minute <= 45 else 2},
             "type":         {"displayName": ev_type, "value": 16 if is_goal else 13},
             "outcomeType":  {"displayName": "Successful" if is_goal else "Unsuccessful",
                              "value": 1 if is_goal else 0},
             "qualifiers":   quals,
             "satisfiedEventsTypes": [],
             "isTouch":      True,
+            "isOwnGoal":    is_own_goal,
             "playerId":     s.get("playerId"),
             "_source":      "fotmob",
+            "_provider_xg": provider_xg,
         })
 
     return events
+
+
+# FotMob gives a coarse role ("Keeper"/"Defender"/…) rather than WhoScored's slot
+# code. Map it to the nearest WhoScored code so the line-up cards don't list eleven
+# midfielders (the old hard-coded "MC" even labelled the goalkeeper MC).
+_FM_ROLE_POS = {
+    "keeper":      "GK",
+    "goalkeeper":  "GK",
+    "defender":    "DC",
+    "defence":     "DC",
+    "midfielder":  "MC",
+    "midfield":    "MC",
+    "attacker":    "FW",
+    "attack":      "FW",
+    "forward":     "FW",
+}
+
+
+def _fm_position(p: dict) -> str:
+    for key in ("role", "position", "positionStringShort", "positionString"):
+        v = p.get(key)
+        if isinstance(v, dict):
+            v = v.get("label") or v.get("key")
+        if not v:
+            continue
+        code = _FM_ROLE_POS.get(str(v).strip().lower())
+        if code:
+            return code
+    return "Sub" if not p.get("isFirstEleven", True) else "MC"
 
 
 def _parse_fotmob_lineup(fm_data: dict, side: str) -> list[dict]:
@@ -885,13 +1043,26 @@ def _parse_fotmob_lineup(fm_data: dict, side: str) -> list[dict]:
         for p in group:
             if not isinstance(p, dict):
                 continue
+            name = p.get("name") or p.get("fullName", "")
+            if isinstance(name, dict):                      # {"firstName":..,"lastName":..}
+                name = " ".join(x for x in (name.get("firstName"), name.get("lastName")) if x)
+            perf = p.get("performance") if isinstance(p.get("performance"), dict) else {}
+            rating = perf.get("rating", p.get("rating"))
+            stats = {}
+            try:
+                # build_match_details._player_rating reads stats.ratings and takes the
+                # last value, so a single entry is enough to surface FotMob's rating.
+                stats["ratings"] = {"90": float(rating)}
+            except (TypeError, ValueError):
+                pass
             players.append({
                 "playerId":     p.get("id"),
-                "name":         p.get("name") or p.get("fullName", ""),
+                "name":         name,
                 "shirtNo":      p.get("shirtNumber", p.get("shirt", 0)),
-                "position":     "MC",  # WhoScored overrides; FotMob gives only positionId
+                "position":     _fm_position(p),
                 "isFirstEleven": is_starter,
-                "stats":        {},
+                "isManOfTheMatch": bool(p.get("isManOfTheMatch") or perf.get("isManOfTheMatch")),
+                "stats":        stats,
             })
     return players
 

@@ -73,6 +73,16 @@ def _match_xg_by_objid(match_data: dict) -> dict:
             continue
         if _v3_is_shootout(ev) or "OwnGoal" in _v3_qual_set(ev):
             continue
+        # FotMob-only matches carry the provider's own measured xG on the synthesised
+        # shot event; prefer it (there is no pass stream to feed the v3 model here).
+        # Mirrors laliga_dashboard/xg_model.shot_xg so PNG == site.
+        provider = ev.get("_provider_xg")
+        if provider is not None:
+            try:
+                out[id(ev)] = round(float(provider), 3)
+                continue
+            except (TypeError, ValueError):
+                pass
         out[id(ev)] = _XG_SCORER_V3.xg_from_shot_event(ev, byid, prev_pass, league=_XG_LEAGUE)
     return out
 

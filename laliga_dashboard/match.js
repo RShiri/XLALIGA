@@ -143,22 +143,28 @@
       return '<section class="mv-block"><h2 class="mv-title">' + title + '</h2><div id="' + id + '"></div></section>';
     }
     var hasDribbles = !!(D.dribbles && D.dribbles.length);
+    // Some matches only have FotMob's shotmap behind them (WhoScored had no event
+    // stream when they were scraped), so there is no pass/carry data at all. Those
+    // sections used to render as blank pitches, which reads as a broken page —
+    // show one honest notice instead.
+    var hasPasses = !!(D.passes && D.passes.length);
     var hasGoals = !!(D.goals && D.goals.length);
     var hasShootout = !!(D.shootout && D.shootout.length);
     // Win probability needs the calibrated params, a played match and shot events.
     var hasWinProb = !!(window.WINPROB_PARAMS && window.WINPROB_PARAMS.teams &&
       D.home.score != null && D.away.score != null && D.shots && D.shots.length);
-    root.innerHTML = scoreboard(D) +
+    root.innerHTML = scoreboard(D, rec) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
       // Win-probability timeline sits between the stats and the shot map.
       (hasWinProb ? block("Win probability", "mv-winprob") : "") +
       block("Shot map", "mv-shots") +
       // On-target shot map sits directly under the xG shot map.
       block("On-target shots", "mv-shots-ot") +
-      block("Pass explorer", "mv-passes") +
+      (hasPasses ? block("Pass explorer", "mv-passes") : "") +
       (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
-      block("Pass network", "mv-network") +
-      block("Average position", "mv-avgpos") +
+      (hasPasses ? block("Pass network", "mv-network") : "") +
+      (hasPasses ? block("Average position", "mv-avgpos") : "") +
+      (hasPasses ? "" : noEventDataNotice()) +
       block("Line-ups", "mv-lineups") +
       // All Goals Map sits below every stats section.
       (hasGoals ? block("All goals map", "mv-goals") : "") +
@@ -171,23 +177,45 @@
     if (hasWinProb) buildWinProb(D);
     buildShots(D);
     buildOnTargetShots(D);
-    buildPasses(D);
+    if (hasPasses) buildPasses(D);
     if (hasDribbles) buildDribbles(D);
-    buildNetwork(D);
-    buildAvgPos(D);
+    if (hasPasses) buildNetwork(D);
+    if (hasPasses) buildAvgPos(D);
     buildLineups(D);
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
     if (hasShootout) buildShootout(D);
   }
 
-  function scoreboard(D) {
+  // Shown in place of the pass explorer / pass network / average position when a
+  // match was built from a shotmap alone: those views need the full event stream.
+  function noEventDataNotice() {
+    return '<section class="mv-block"><h2 class="mv-title">Pass &amp; position maps</h2>' +
+      '<div class="stat-note" style="padding:14px 2px">' +
+      "No pass-level data for this match — it was built from the shot feed alone, so the " +
+      "pass explorer, pass network and average-position maps have nothing to draw. " +
+      "The shot map, line-ups and match stats above are complete; the pass views appear " +
+      "once the match is scraped with its full event stream." +
+      "</div></section>";
+  }
+
+  function scoreboard(D, rec) {
     var xgTxt = "";
     var hs = D.shots.filter(function (s) { return s.team === "home"; });
     var as = D.shots.filter(function (s) { return s.team === "away"; });
     function sum(a) { return a.reduce(function (t, s) { return t + s.xg; }, 0); }
-    xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + sum(hs).toFixed(2) + "</b> — <b>" +
-      sum(as).toFixed(2) + '</b> <span class="est">· model-estimated from ' + D.shots.length + " shots</span></div>";
+    // Prefer the official per-match xG carried in data.js (FotMob) over summing the
+    // shot map's model estimates: when both exist the stats table shows the official
+    // figure, and a scoreboard disagreeing with the table right under it reads as a bug.
+    var official = rec && rec.xg_estimated === false && rec.xg_home != null && rec.xg_away != null;
+    if (official) {
+      xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + Number(rec.xg_home).toFixed(2) +
+        "</b> — <b>" + Number(rec.xg_away).toFixed(2) + '</b> <span class="est">· official, from ' +
+        D.shots.length + " shots</span></div>";
+    } else {
+      xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + sum(hs).toFixed(2) + "</b> — <b>" +
+        sum(as).toFixed(2) + '</b> <span class="est">· model-estimated from ' + D.shots.length + " shots</span></div>";
+    }
 
     var goals = D.goals.map(function (g) {
       var as = g.assist ? '<span class="as">(' + esc(g.assist) + ")</span>" : "";
@@ -248,7 +276,9 @@
         shots: sh.length,
         sot: sh.filter(function (s) { return s.onTarget; }).length,
         big_chances: sh.filter(function (s) { return s.big; }).length,
-        passes: ps.length,
+        // null (not 0) when the match has no pass stream, so the stats table falls
+        // through to "no data" instead of asserting both sides played 0 passes
+        passes: ps.length || null,
         pass_acc: ps.length ? Math.round((100 * okp) / ps.length) : null,
       };
     }
