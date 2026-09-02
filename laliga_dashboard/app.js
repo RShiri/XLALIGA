@@ -172,13 +172,13 @@
     var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
     niceTicks(xMax).forEach(function (t) {
       var X = sx(t);
-      svg.push('<line x1="' + X.toFixed(1) + '" y1="' + padT + '" x2="' + X.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#222b44" stroke-width="0.6"/>');
-      svg.push('<text x="' + X.toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#93a0bd" font-size="10" text-anchor="middle">' + fmtTick(t) + "</text>");
+      svg.push('<line x1="' + X.toFixed(1) + '" y1="' + padT + '" x2="' + X.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#141f36" stroke-width="0.6"/>');
+      svg.push('<text x="' + X.toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#8ea3c4" font-size="10" text-anchor="middle">' + fmtTick(t) + "</text>");
     });
     niceTicks(yMax).forEach(function (t) {
       var Y = sy(t);
-      svg.push('<line x1="' + padL + '" y1="' + Y.toFixed(1) + '" x2="' + (padL + plotW) + '" y2="' + Y.toFixed(1) + '" stroke="#222b44" stroke-width="0.6"/>');
-      svg.push('<text x="' + (padL - 8) + '" y="' + (Y + 3).toFixed(1) + '" fill="#93a0bd" font-size="10" text-anchor="end">' + fmtTick(t) + "</text>");
+      svg.push('<line x1="' + padL + '" y1="' + Y.toFixed(1) + '" x2="' + (padL + plotW) + '" y2="' + Y.toFixed(1) + '" stroke="#141f36" stroke-width="0.6"/>');
+      svg.push('<text x="' + (padL - 8) + '" y="' + (Y + 3).toFixed(1) + '" fill="#8ea3c4" font-size="10" text-anchor="end">' + fmtTick(t) + "</text>");
     });
     if (cfg.avgX != null) {
       var AX = sx(cfg.avgX);
@@ -200,12 +200,12 @@
       var y = c.v === "t" ? padT + 14 : padT + plotH - 8;
       svg.push('<text x="' + x + '" y="' + y + '" fill="' + c.color + '" font-size="11" font-weight="700" text-anchor="' + anc + '" opacity="0.85">' + c.text + "</text>");
     });
-    svg.push('<text x="' + (padL + plotW / 2) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle">' + cfg.xLabel + "</text>");
-    svg.push('<text x="15" y="' + (padT + plotH / 2) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle" transform="rotate(-90 15 ' + (padT + plotH / 2) + ')">' + cfg.yLabel + "</text>");
+    svg.push('<text x="' + (padL + plotW / 2) + '" y="' + (H - 6) + '" fill="#e9f2ff" font-size="12.5" text-anchor="middle">' + cfg.xLabel + "</text>");
+    svg.push('<text x="15" y="' + (padT + plotH / 2) + '" fill="#e9f2ff" font-size="12.5" text-anchor="middle" transform="rotate(-90 15 ' + (padT + plotH / 2) + ')">' + cfg.yLabel + "</text>");
     rows.forEach(function (r) { r.cx = sx(r.x); r.cy = sy(r.y); });
     rows.forEach(function (r) {
       svg.push('<circle cx="' + r.cx.toFixed(1) + '" cy="' + r.cy.toFixed(1) + '" r="5" fill="' + (r.col || "#4ea8ff") +
-        '" fill-opacity="0.9" stroke="#0b0f1a" stroke-width="0.9"><title>' + esc(r.team) + (cfg.tip ? " — " + cfg.tip(r) : "") + "</title></circle>");
+        '" fill-opacity="0.9" stroke="#05070d" stroke-width="0.9"><title>' + esc(r.team) + (cfg.tip ? " — " + cfg.tip(r) : "") + "</title></circle>");
     });
     declutter(rows, 8.7);
     rows.forEach(function (r) {
@@ -330,7 +330,7 @@
      D.xgRecords (one row per team-match: xgf/xga/gf/ga/opp/home) plus
      the per-match team `stats` block for the shot-quality chart.
      Derived stats recompute per season (see computeXgDerived). ======= */
-  var COL = { green: "#4fcf8a", blue: "#6fb3ff", orange: "#ffb454", red: "#ff6b81" };
+  var COL = { green: "#3dffb0", blue: "#7aa7ff", orange: "#ffb454", red: "#ff5c7a" };
   var R = [], AGG = [], xgVals = [], goalVals = [], rPearson = 0, fit = { slope: 0, intercept: 0 };
   var ledgerSort = { key: "xgd", dir: -1 };
   var dbSort = { key: "gf", dir: -1 };
@@ -399,21 +399,21 @@
     function sy(v) { return H - pad - (v / maxV) * (H - pad - 14); }
     var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
     for (var g = 0; g <= maxV; g++) {
-      svg.push('<line x1="' + sx(g) + '" y1="' + sy(0) + '" x2="' + sx(g) + '" y2="' + sy(maxV) + '" stroke="#26304d" stroke-width="' + (g === 0 ? 1.4 : 0.5) + '"/>');
-      svg.push('<line x1="' + sx(0) + '" y1="' + sy(g) + '" x2="' + sx(maxV) + '" y2="' + sy(g) + '" stroke="#26304d" stroke-width="' + (g === 0 ? 1.4 : 0.5) + '"/>');
-      svg.push('<text x="' + sx(g) + '" y="' + (sy(0) + 16) + '" fill="#93a0bd" font-size="10" text-anchor="middle">' + g + "</text>");
-      if (g > 0) svg.push('<text x="' + (sx(0) - 8) + '" y="' + (sy(g) + 3) + '" fill="#93a0bd" font-size="10" text-anchor="end">' + g + "</text>");
+      svg.push('<line x1="' + sx(g) + '" y1="' + sy(0) + '" x2="' + sx(g) + '" y2="' + sy(maxV) + '" stroke="#1a2a45" stroke-width="' + (g === 0 ? 1.4 : 0.5) + '"/>');
+      svg.push('<line x1="' + sx(0) + '" y1="' + sy(g) + '" x2="' + sx(maxV) + '" y2="' + sy(g) + '" stroke="#1a2a45" stroke-width="' + (g === 0 ? 1.4 : 0.5) + '"/>');
+      svg.push('<text x="' + sx(g) + '" y="' + (sy(0) + 16) + '" fill="#8ea3c4" font-size="10" text-anchor="middle">' + g + "</text>");
+      if (g > 0) svg.push('<text x="' + (sx(0) - 8) + '" y="' + (sy(g) + 3) + '" fill="#8ea3c4" font-size="10" text-anchor="end">' + g + "</text>");
     }
-    svg.push('<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(maxV) + '" y2="' + sy(maxV) + '" stroke="#93a0bd" stroke-width="1.2" stroke-dasharray="5 4"/>');
-    svg.push('<line x1="' + sx(0) + '" y1="' + sy(fit.intercept) + '" x2="' + sx(maxV) + '" y2="' + sy(fit.slope * maxV + fit.intercept) + '" stroke="#4fcf8a" stroke-width="2"/>');
-    svg.push('<text x="' + (W / 2) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Expected goals (xG)</text>');
-    svg.push('<text x="14" y="' + (H / 2) + '" fill="#e8edf7" font-size="12" text-anchor="middle" transform="rotate(-90 14 ' + (H / 2) + ')">Actual goals</text>');
+    svg.push('<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(maxV) + '" y2="' + sy(maxV) + '" stroke="#8ea3c4" stroke-width="1.2" stroke-dasharray="5 4"/>');
+    svg.push('<line x1="' + sx(0) + '" y1="' + sy(fit.intercept) + '" x2="' + sx(maxV) + '" y2="' + sy(fit.slope * maxV + fit.intercept) + '" stroke="#3dffb0" stroke-width="2"/>');
+    svg.push('<text x="' + (W / 2) + '" y="' + (H - 6) + '" fill="#e9f2ff" font-size="12" text-anchor="middle">Expected goals (xG)</text>');
+    svg.push('<text x="14" y="' + (H / 2) + '" fill="#e9f2ff" font-size="12" text-anchor="middle" transform="rotate(-90 14 ' + (H / 2) + ')">Actual goals</text>');
     R.forEach(function (r, i) {
       var jx = ((i * 7) % 5 - 2) * 1.2, jy = ((i * 3) % 5 - 2) * 1.2;
       var cx = sx(r.xgf) + jx, cy = sy(r.gf) + jy, over = r.gf - r.xgf;
-      var col = over > 0.4 ? "#4fcf8a" : over < -0.4 ? "#ff6b81" : "#6fb3ff";
+      var col = over > 0.4 ? "#3dffb0" : over < -0.4 ? "#ff5c7a" : "#7aa7ff";
       svg.push('<circle class="pt" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5.5" fill="' + col +
-        '" fill-opacity="0.78" stroke="#0b0f1a" stroke-width="1" data-team="' + esc(r.team) + '" data-opp="' + esc(r.opp) +
+        '" fill-opacity="0.78" stroke="#05070d" stroke-width="1" data-team="' + esc(r.team) + '" data-opp="' + esc(r.opp) +
         '" data-g="' + r.gf + '" data-xg="' + r.xgf.toFixed(2) + '"/>');
     });
     svg.push("</svg>");
@@ -449,24 +449,24 @@
     var slot = (W - padL - 12) / NB, bw = slot - 8;
     function by(n) { return H - padB - (n / maxN) * (H - padB - padT); }
     var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
-    svg.push('<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - 8) + '" y2="' + (H - padB) + '" stroke="#26304d" stroke-width="1.2"/>');
+    svg.push('<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - 8) + '" y2="' + (H - padB) + '" stroke="#1a2a45" stroke-width="1.2"/>');
     buckets.forEach(function (bk, i) {
       var x = padL + i * slot + 4;
       var lab = (i === NB - 1) ? (BW * (NB - 1)).toFixed(1) + "+" : (BW * i).toFixed(1) + "–" + (BW * (i + 1)).toFixed(1);
-      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 14) + '" fill="#93a0bd" font-size="9.5" text-anchor="middle">' + lab + "</text>");
+      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 14) + '" fill="#8ea3c4" font-size="9.5" text-anchor="middle">' + lab + "</text>");
       if (!bk.n) return;
       var ax = bk.xg / bk.n, ag = bk.g / bk.n, d = ag - ax;
-      var col = d > 0.15 ? "#4fcf8a" : d < -0.15 ? "#ff6b81" : "#6fb3ff";
+      var col = d > 0.15 ? "#3dffb0" : d < -0.15 ? "#ff5c7a" : "#7aa7ff";
       var y = by(bk.n);
       var info = lab + " xG · " + bk.n + " team-games · avg xG " + ax.toFixed(2) + " → avg goals " + ag.toFixed(2) +
                  " (" + (d >= 0 ? "+" : "") + d.toFixed(2) + ")";
       svg.push('<rect class="xd" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) +
         '" height="' + (H - padB - y).toFixed(1) + '" rx="4" fill="' + col + '" fill-opacity="0.55" stroke="' + col +
         '" stroke-width="1" data-info="' + esc(info) + '"/>');
-      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="middle">' + bk.n + "</text>");
+      svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" fill="#e9f2ff" font-size="11" font-weight="700" text-anchor="middle">' + bk.n + "</text>");
       svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 27) + '" fill="' + col + '" font-size="9.5" text-anchor="middle">' + ax.toFixed(1) + "→" + ag.toFixed(1) + "</text>");
     });
-    svg.push('<text x="' + (W / 2) + '" y="' + (H - 3) + '" fill="#93a0bd" font-size="11" text-anchor="middle">xG created in the game · below each bar: avg xG → avg goals actually scored</text>');
+    svg.push('<text x="' + (W / 2) + '" y="' + (H - 3) + '" fill="#8ea3c4" font-size="11" text-anchor="middle">xG created in the game · below each bar: avg xG → avg goals actually scored</text>');
     svg.push("</svg>");
     host.innerHTML = svg.join("");
     host.querySelectorAll("rect.xd").forEach(function (c) {
@@ -921,7 +921,7 @@
     var line = "";
     for (var k2 = 0; k2 <= GRID; k2++) line += (k2 ? " L " : "M ") + sx(xMin + (xMax - xMin) * k2 / GRID).toFixed(1) + " " + sy(dens[k2]).toFixed(1);
     svg.push('<path d="' + line + '" fill="none" stroke="#8aa0d8" stroke-width="1.4" stroke-opacity="0.85"/>');
-    svg.push('<line x1="' + padL + '" y1="' + baseY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + baseY.toFixed(1) + '" stroke="#26304d" stroke-width="1"/>');
+    svg.push('<line x1="' + padL + '" y1="' + baseY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + baseY.toFixed(1) + '" stroke="#1a2a45" stroke-width="1"/>');
     niceTicks(xMax, 6).forEach(function (t) {
       if (t < xMin - 1e-9 || t > xMax + 1e-9) return;
       svg.push('<line x1="' + sx(t).toFixed(1) + '" y1="' + baseY.toFixed(1) + '" x2="' + sx(t).toFixed(1) + '" y2="' + (baseY + 4).toFixed(1) + '" stroke="#46527a" stroke-width="1"/>');
@@ -937,9 +937,9 @@
       var dy = baseY - 4 - jit(p.pid) * Math.max(6, band - 6);
       var isSpot = spotPid && p.pid === spotPid, anom = z >= 2;
       var r = isSpot ? 5.5 : anom ? 3.4 : 2.3;
-      var fill = isSpot ? "#d9b84a" : anom ? "#ff4d93" : "#6fb3ff";
+      var fill = isSpot ? "#35e0ff" : anom ? "#ff3d8b" : "#7aa7ff";
       var op = isSpot ? 1 : anom ? 0.92 : 0.5;
-      var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
+      var stroke = (isSpot || anom) ? ' stroke="#05070d" stroke-width="0.8"' : "";
       var info = p.name + " · " + p.team + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)";
       svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
     });
@@ -963,7 +963,7 @@
       tier = (L.x - lastX < 86) ? tier + 1 : 0; lastX = L.x;
       var ly = Math.max(padT + 6, L.y - 8 - tier * 13);
       var lx = Math.max(padL + 18, Math.min(W - padR - 18, L.x));
-      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#d9b84a" : "#ff4d93") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
+      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#35e0ff" : "#ff3d8b") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '" fill="' + (L.gold ? "#ffe08a" : "#ffaecb") + '" font-size="10.5" text-anchor="middle">' + esc(L.txt) + "</text>");
     });
     svg.push("</svg>");
@@ -1034,7 +1034,7 @@
     setHTML("soStandouts", '<div class="so-bars">' + top.map(function (t) {
       var pct = Math.max(2, 100 * t.z / maxZ), hot = t.z >= 2;
       return '<div class="so-bar-row"><div class="nm">' + logoImg(t.p.team) + "<span>" + esc(t.p.name) + "</span></div>" +
-        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff4d93" : "var(--accent-2)") + '"></div></div>' +
+        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff3d8b" : "var(--accent-2)") + '"></div></div>' +
         '<div class="so-bar-val">' + soFmt(t.v, dp) + ' <span class="so-z">' + (t.z >= 0 ? "+" : "") + t.z.toFixed(1) + "σ</span></div></div>";
     }).join("") + "</div>");
   }
@@ -1091,27 +1091,27 @@
     var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
     soLTicks(dx[0], dx[1]).forEach(function (t) {
       var x = sx(t);
-      svg.push('<line x1="' + x.toFixed(1) + '" y1="' + padT + '" x2="' + x.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<line x1="' + x.toFixed(1) + '" y1="' + padT + '" x2="' + x.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#0f1729" stroke-width="1"/>');
       svg.push('<text x="' + x.toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + soFmt(t, dpx) + "</text>");
     });
     soLTicks(dy[0], dy[1]).forEach(function (t) {
       var y = sy(t);
-      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#0f1729" stroke-width="1"/>');
       svg.push('<text x="' + (padL - 7) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + soFmt(t, dpy) + "</text>");
     });
     svg.push('<line x1="' + sx(mx).toFixed(1) + '" y1="' + padT + '" x2="' + sx(mx).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
     svg.push('<line x1="' + padL + '" y1="' + sy(my).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + sy(my).toFixed(1) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
-    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle">' + esc(soStatLabel(xKey)) + " →</text>");
-    svg.push('<text x="16" y="' + (padT + plotH / 2).toFixed(1) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle" transform="rotate(-90 16 ' + (padT + plotH / 2).toFixed(1) + ')">' + esc(soStatLabel(yKey)) + " →</text>");
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 6) + '" fill="#e9f2ff" font-size="12.5" text-anchor="middle">' + esc(soStatLabel(xKey)) + " →</text>");
+    svg.push('<text x="16" y="' + (padT + plotH / 2).toFixed(1) + '" fill="#e9f2ff" font-size="12.5" text-anchor="middle" transform="rotate(-90 16 ' + (padT + plotH / 2).toFixed(1) + ')">' + esc(soStatLabel(yKey)) + " →</text>");
     var pts = [];
     rows.forEach(function (p) {
       var vx = +p[xKey] || 0, vy = +p[yKey] || 0;
       var cx = sx(vx), cy = sy(vy), r = radius(p);
       var elite = vx > mx && vy > my;
       var isSpot = spotPid && p.pid === spotPid;
-      var fill = isSpot ? "#d9b84a" : elite ? "#ff4d93" : "#6fb3ff";
+      var fill = isSpot ? "#35e0ff" : elite ? "#ff3d8b" : "#7aa7ff";
       var op = isSpot ? 1 : elite ? 0.85 : 0.5;
-      var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
+      var stroke = (isSpot || elite) ? ' stroke="#05070d" stroke-width="0.9"' : "";
       var info = p.name + " · " + p.team + " — " + soStatLabel(xKey) + " " + soFmt(vx, dpx) +
         ", " + soStatLabel(yKey) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + soStatLabel(sizeKey) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
       svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
@@ -1182,12 +1182,12 @@
     [0.25, 0.5, 0.75, 1].forEach(function (f) {
       var pts = [];
       for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
-      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#141f36" stroke-width="1"/>');
     });
     var poly = [];
     axes.forEach(function (ax, i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / N;
-      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#141f36" stroke-width="1"/>');
       var pv = +player[ax[0]] || 0;
       var below = pool.filter(function (p) { return (+p[ax[0]] || 0) < pv; }).length;
       var pct = pool.length ? below / pool.length : 0;
@@ -1195,10 +1195,10 @@
       var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
       var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 2).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
-      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + soFmt(pv, soStatDp(ax[0])) + " (" + Math.round(pct * 100) + "%)</text>");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e9f2ff" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + soFmt(pv, soStatDp(ax[0])) + " (" + Math.round(pct * 100) + "%)</text>");
     });
-    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#d9b84a" stroke-width="2"/>');
-    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#d9b84a"/>'); });
+    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#35e0ff" stroke-width="2"/>');
+    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#35e0ff"/>'); });
     svg.push("</svg>");
     return svg.join("");
   }
@@ -1403,7 +1403,7 @@
      coords attack toward x=100; the pitch is drawn goal-at-top. ---- */
   var SHOTS = [];
   var tlState = { team: "all", teamB: "none", teamC: "none", filter: "all", sit: "all", mode: "dots" };
-  var TL_COLORS = ["#6fb3ff", "#ff4d93", "#d9b84a"];
+  var TL_COLORS = ["#7aa7ff", "#ff3d8b", "#35e0ff"];
 
   function tlMatchSit(s, sit) {
     if (sit === "all") return true;
@@ -1442,7 +1442,7 @@
     var W = 600, H = 470;
     var P = tlPitch(W, H);
     var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="tl-pitch" preserveAspectRatio="xMidYMid meet" role="img">'];
-    svg.push('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#0d1322"/>');
+    svg.push('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#070c18"/>');
     svg = svg.concat(P.svg);
     if (tlState.mode === "heat") {
       var CW = 12, CH = 10, cells = [];
@@ -1465,9 +1465,9 @@
     } else {
       shots.slice().sort(function (a, b) { return (a.g ? 1 : 0) - (b.g ? 1 : 0); }).forEach(function (s) {
         var r = 2.3 + 6 * Math.sqrt(Math.max(0, s.xg));
-        var fill = s.g ? "#ff4d93" : s.ot ? "#6fb3ff" : "#7c89a8";
+        var fill = s.g ? "#ff3d8b" : s.ot ? "#7aa7ff" : "#7c89a8";
         var op = s.g ? 0.95 : s.ot ? 0.6 : 0.35;
-        var stroke = s.g ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
+        var stroke = s.g ? ' stroke="#05070d" stroke-width="0.8"' : "";
         var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : s.ot ? " (on target)" : "") + " · " + s.s + " · " + s.m + "'";
         svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
       });
@@ -1533,18 +1533,18 @@
     [0.25, 0.5, 0.75, 1].forEach(function (f) {
       var pts = [];
       for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
-      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#141f36" stroke-width="1"/>');
     });
     TL_AXES.forEach(function (ax, i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / N;
-      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#141f36" stroke-width="1"/>');
       var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
       var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + ((single ? ly - 2 : ly + 3.5)).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
       if (single) {
         var me = styleMap[present[0]], dp = ax[2];
         var disp = ax[0] === "DEF" ? me.xgaPG.toFixed(2) + " xGA" : soFmt(me[ax[0]], dp) + (ax[0] === "poss" || ax[0] === "passAcc" || ax[1].indexOf("%") >= 0 ? "%" : "");
-        svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + disp + " (" + Math.round(pctOf(me, ax) * 100) + "%)</text>");
+        svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e9f2ff" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + disp + " (" + Math.round(pctOf(me, ax) * 100) + "%)</text>");
       }
     });
     present.forEach(function (t, ti) {
@@ -1876,6 +1876,9 @@
     heavyDirty.standouts = true; heavyDirty.teamlab = true; heavyDirty.playerlab = true;
     var active = document.querySelector("nav.tabs button.active");
     if (active) renderHeavyIfNeeded(active.dataset.view);
+    var hud = document.getElementById("hudStatus");
+    if (hud) hud.innerHTML = "MD <b>" + (D.counts.current_matchday || 0) + "</b> · <b>" + (D.counts.played || 0) + "</b>/" +
+      (D.counts.total || 0) + " played · <b>" + (D.counts.with_xg || 0) + "</b> xG · upd " + esc(String(ALL.generated || "").slice(5, 16));
     var foot = document.getElementById("footNote");
     if (foot) foot.textContent = "Season " + season + " · generated " + ALL.generated + " · " +
       (D.counts.played || 0) + " matches played · " + (D.counts.with_xg || 0) + " with xG · La Liga analytics pipeline.";
@@ -1887,7 +1890,7 @@
   // read the season aggregates already in players.js; the action maps read a per-team
   // event file (player_lab/<slug>.js) fetched on demand — like match pages load their
   // matches_detail. No tackles map (league matches_detail carries no tackle events).
-  var PL_ACC = "#4fcf8a", PL_BLUE = "#6fb3ff", PL_MUTED = "#93a0bd", PL_RED = "#ff7b74";
+  var PL_ACC = "#3dffb0", PL_BLUE = "#7aa7ff", PL_MUTED = "#8ea3c4", PL_RED = "#ff5c7a";
   var PL = { main: null, cmp: null, teams: {} };   // main/cmp store "Team @@ Player"
   var PL_MAPS = [["shots", "Shots"], ["dribbles", "Take-ons"], ["passes", "Passes"], ["prog", "Progressive passes"]];
   var PL_RADAR = [
@@ -1940,13 +1943,13 @@
     for (g = 1; g <= 4; g++) {
       var ring = [];
       for (i = 0; i < N; i++) { var a = -Math.PI / 2 + i / N * 2 * Math.PI, rr = R * g / 4; ring.push((cx + rr * Math.cos(a)).toFixed(1) + "," + (cy + rr * Math.sin(a)).toFixed(1)); }
-      svg.push('<polygon points="' + ring.join(" ") + '" fill="none" stroke="#26304d" stroke-width="0.8"/>');
+      svg.push('<polygon points="' + ring.join(" ") + '" fill="none" stroke="#1a2a45" stroke-width="0.8"/>');
     }
     for (i = 0; i < N; i++) {
       var a2 = -Math.PI / 2 + i / N * 2 * Math.PI;
       var lx = cx + (R + 16) * Math.cos(a2), ly = cy + (R + 16) * Math.sin(a2);
       var anc = Math.abs(Math.cos(a2)) < 0.3 ? "middle" : (Math.cos(a2) > 0 ? "start" : "end");
-      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a2)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a2)).toFixed(1) + '" stroke="#26304d" stroke-width="0.8"/>');
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a2)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a2)).toFixed(1) + '" stroke="#1a2a45" stroke-width="0.8"/>');
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 3).toFixed(1) + '" fill="' + PL_MUTED + '" font-size="10.5" text-anchor="' + anc + '">' + PL_RADAR[i].t + "</text>");
     }
     var cols = [PL_ACC, PL_BLUE];
@@ -1959,7 +1962,7 @@
         var vx = cx + rr2 * Math.cos(a3), vy = cy + rr2 * Math.sin(a3);
         pts.push(vx.toFixed(1) + "," + vy.toFixed(1));
         var info = p.name + " — " + mt.t + ": " + Math.round(pct * 100) + " pctl (" + val.toFixed(2) + (mt.raw ? "" : "/90") + ")";
-        dots += '<circle cx="' + vx.toFixed(1) + '" cy="' + vy.toFixed(1) + '" r="3.4" fill="' + cols[pi] + '" stroke="#0b0f1a" stroke-width="1" data-info="' + esc(info) + '"/>';
+        dots += '<circle cx="' + vx.toFixed(1) + '" cy="' + vy.toFixed(1) + '" r="3.4" fill="' + cols[pi] + '" stroke="#05070d" stroke-width="1" data-info="' + esc(info) + '"/>';
       }
       svg.push('<polygon points="' + pts.join(" ") + '" fill="' + cols[pi] + '" fill-opacity="0.18" stroke="' + cols[pi] + '" stroke-width="2"/>');
       svg.push(dots);
@@ -1977,27 +1980,27 @@
   function plMapY(wx) { return Math.max(-1, Math.min(1.03, (100 - wx) / 50)) * PL_HPH; }
   function plPitchHalf(inner) {
     var midx = PL_HPW / 2, boxW = 40.3, boxD = 16.5, sixW = 18.32, sixD = 5.5, goalW = 7.32;
-    var s = '<svg viewBox="-1 -3 ' + (PL_HPW + 2) + " " + (PL_HPH + 5) + '" width="100%" style="display:block;background:#101a2e;border-radius:6px">';
-    s += '<rect x="0.3" y="0.3" width="' + (PL_HPW - 0.6) + '" height="' + (PL_HPH - 0.6) + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
-    s += '<rect x="' + (midx - boxW / 2).toFixed(1) + '" y="0.3" width="' + boxW + '" height="' + boxD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
-    s += '<rect x="' + (midx - sixW / 2).toFixed(1) + '" y="0.3" width="' + sixW + '" height="' + sixD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
-    s += '<rect x="' + (midx - goalW / 2).toFixed(1) + '" y="-1.6" width="' + goalW + '" height="1.6" fill="none" stroke="#4fcf8a" stroke-width="0.5"/>';
-    s += '<path d="M ' + (midx - 7.3) + " " + boxD + " A 9.15 9.15 0 0 0 " + (midx + 7.3) + " " + boxD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
+    var s = '<svg viewBox="-1 -3 ' + (PL_HPW + 2) + " " + (PL_HPH + 5) + '" width="100%" style="display:block;background:#08101f;border-radius:6px">';
+    s += '<rect x="0.3" y="0.3" width="' + (PL_HPW - 0.6) + '" height="' + (PL_HPH - 0.6) + '" fill="none" stroke="#1a2a45" stroke-width="0.4"/>';
+    s += '<rect x="' + (midx - boxW / 2).toFixed(1) + '" y="0.3" width="' + boxW + '" height="' + boxD + '" fill="none" stroke="#1a2a45" stroke-width="0.4"/>';
+    s += '<rect x="' + (midx - sixW / 2).toFixed(1) + '" y="0.3" width="' + sixW + '" height="' + sixD + '" fill="none" stroke="#1a2a45" stroke-width="0.4"/>';
+    s += '<rect x="' + (midx - goalW / 2).toFixed(1) + '" y="-1.6" width="' + goalW + '" height="1.6" fill="none" stroke="#3dffb0" stroke-width="0.5"/>';
+    s += '<path d="M ' + (midx - 7.3) + " " + boxD + " A 9.15 9.15 0 0 0 " + (midx + 7.3) + " " + boxD + '" fill="none" stroke="#1a2a45" stroke-width="0.4"/>';
     return s + inner + "</svg>";
   }
   function plPitchFull(inner) {
-    return '<svg viewBox="0 0 100 64" width="100%" style="display:block;background:#101a2e;border-radius:6px">' +
-      '<rect x="0.4" y="0.4" width="99.2" height="63.2" fill="none" stroke="#26304d" stroke-width="0.4"/>' +
-      '<line x1="50" y1="0" x2="50" y2="64" stroke="#26304d" stroke-width="0.4"/>' +
-      '<circle cx="50" cy="32" r="7" fill="none" stroke="#26304d" stroke-width="0.4"/>' +
-      '<rect x="83" y="18" width="17" height="28" fill="none" stroke="#26304d" stroke-width="0.4"/>' +
-      '<rect x="0" y="18" width="17" height="28" fill="none" stroke="#26304d" stroke-width="0.4"/>' + inner + "</svg>";
+    return '<svg viewBox="0 0 100 64" width="100%" style="display:block;background:#08101f;border-radius:6px">' +
+      '<rect x="0.4" y="0.4" width="99.2" height="63.2" fill="none" stroke="#1a2a45" stroke-width="0.4"/>' +
+      '<line x1="50" y1="0" x2="50" y2="64" stroke="#1a2a45" stroke-width="0.4"/>' +
+      '<circle cx="50" cy="32" r="7" fill="none" stroke="#1a2a45" stroke-width="0.4"/>' +
+      '<rect x="83" y="18" width="17" height="28" fill="none" stroke="#1a2a45" stroke-width="0.4"/>' +
+      '<rect x="0" y="18" width="17" height="28" fill="none" stroke="#1a2a45" stroke-width="0.4"/>' + inner + "</svg>";
   }
   function plGraph(host, events, kind, color) {
     if (!host) return;
     events = events || [];
     if (events.length > 400) { var st = Math.ceil(events.length / 400); events = events.filter(function (_, ix) { return ix % st === 0; }); }
-    var gid = "plg" + (_plGid++), GREEN = "#4fcf8a", RED = PL_RED, half = kind === "shots";
+    var gid = "plg" + (_plGid++), GREEN = "#3dffb0", RED = PL_RED, half = kind === "shots";
     function di(t) { return ' data-info="' + esc(t) + '"'; }
     function opp(e) { var o = e[e.length - 1]; return o ? " — vs " + o : ""; }
     function pt(wx, wy) { return half ? [plMapX(wy), plMapY(wx)] : [wx, 64 - wy * 0.64]; }

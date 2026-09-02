@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-02** — feat/dashboard-beta: new 'Telemetry' skin (cyan signal colour, grid ground, bracketed panels, Chakra Petch + IBM Plex), plus phases 3-5 of the UI audit (single-row header, KPI readouts, sticky phone standings, Match Centre section bar, Player Lab grid, collapsible explainers, empty/loading states)
 - **2026-09-02** — feat/dashboard-beta: per-season data bundles (build_split.py -> data/index.js + data/<season>.js, no document.write/Date.now), player_lab keyed by season (fixes cross-season stat bloat), Match Centre team-colour collision guard, design tokens + Bricolage Grotesque/IBM Plex, ARIA tabs + URL hash state, labels/focus/reduced-motion, red text contrast fix
 - **2026-08-24** — Added a 'Results & table only' button: build_schedule + build_data + push, no browser, about a minute. The site's standings/results/fixtures/projection never needed Chrome — only the shot maps and Match Centre do — so the safe update is now one click away from the heavy one.
 - **2026-08-24** — Matchday reconstruction is now earliest-fit packing: fixtures in date order dropped into the earliest round with a free slot and neither team in it. Beats splitting on team-recurrence (which fragmented the season into 40 rounds) and puts postponed matches back in their real round.

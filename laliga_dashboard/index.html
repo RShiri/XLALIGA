@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0b0e16" />
+<meta name="theme-color" content="#05070d" />
 <title>La Liga Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="laliga">
 <header class="site">
   <div class="header-inner">
     <div class="brand">
-      <h1 class="title">La<span>Liga</span> Dashboard</h1>
+      <h1 class="title">La<span>Liga</span></h1>
+      <div class="sub">Dashboard</div>
     </div>
     <nav class="tabs" role="tablist" aria-label="Dashboard sections">
         <button role="tab" id="tab-standings" data-view="standings" aria-controls="view-standings" aria-selected="true" class="active">Standings</button>
@@ -28,6 +29,7 @@
         <button role="tab" id="tab-projection" data-view="projection" aria-controls="view-projection" aria-selected="false" tabindex="-1">Projection</button>
     </nav>
     <div class="header-right">
+      <span class="hud-status" id="hudStatus"></span>
       <label class="season-pick">Season <select id="seasonSel"></select></label>
     </div>
   </div>

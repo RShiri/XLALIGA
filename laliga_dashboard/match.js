@@ -174,7 +174,7 @@
   }
   function inkFor(hex) { var c = hexRgb(hex); return (c && rgbLab(c)[0] > 62) ? "#0b0e16" : "#ffffff"; }
   function teamColours(D) {
-    var MIN = 28, PITCH = "#14361f", tc = IDX.teamColors || {};
+    var MIN = 28, PITCH = "#0a1526", tc = IDX.teamColors || {};
     var home = D.home.color || "#9aa5bf", away = D.away.color || "#e6e9f2";
     function ok(c) { return !!c && deltaE(c, home) >= MIN && deltaE(c, PITCH) >= 18; }
     if (!ok(away)) {
@@ -729,7 +729,7 @@
         '<g id="shotLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffd34e"></i>Goal (team colour)</span>' +
+        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffc857"></i>Goal (team colour)</span>' +
         '<span><i class="dot" style="background:var(--c-home)"></i>On target</span>' +
         '<span><i class="dot" style="background:transparent;border:1px solid var(--muted)"></i>Off target</span>' +
         '<span><i class="dot" style="background:#7a869f"></i>Blocked</span>' +
@@ -762,7 +762,7 @@
           var ring = document.createElementNS(NS, "circle");
           ring.setAttribute("cx", cx.toFixed(2)); ring.setAttribute("cy", cy.toFixed(2));
           ring.setAttribute("r", (r + 0.55).toFixed(2));
-          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffd34e");
+          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffc857");
           ring.setAttribute("stroke-width", "0.45");
           layer.appendChild(ring);
         }
@@ -821,7 +821,7 @@
       host.innerHTML = '<div class="shot-detail empty">No on-target shots with goal-placement data for this match.</div>';
       return;
     }
-    var GOAL_COL = "#37c978", SAVE_COL = "#5a9bff";
+    var GOAL_COL = "#3dffb0", SAVE_COL = "#5a9bff";
     host.innerHTML =
       '<div class="controls-bar">' +
         '<button type="button" class="chip-toggle on home" id="otHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
@@ -942,9 +942,9 @@
         '<g id="passLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:#43e8a0"></i>completed · progressive/key</span>' +
+        '<span><i class="dot" style="background:#3dffb0"></i>completed · progressive/key</span>' +
         '<span><i class="dot" style="background:#1f9d5e"></i>completed · normal</span>' +
-        '<span><i class="dot" style="background:#ff5e7a"></i>incomplete · forward/key</span>' +
+        '<span><i class="dot" style="background:#ff5c7a"></i>incomplete · forward/key</span>' +
         '<span><i class="dot" style="background:#a83646"></i>incomplete · normal</span>' +
         '<span>dashed = incomplete · dot = start</span>' +
       "</div>" +
@@ -987,8 +987,8 @@
         // two reds for incomplete (bright = forward/key attempt, dim = normal).
         var dangerous = p.prog || p.key || p.assist || p.through;
         var col = p.ok
-          ? (dangerous ? "#43e8a0" : "#1f9d5e")
-          : (dangerous ? "#ff5e7a" : "#a83646");
+          ? (dangerous ? "#3dffb0" : "#1f9d5e")
+          : (dangerous ? "#ff5c7a" : "#a83646");
         var ln = document.createElementNS(SVGNS, "line");
         var cls = "pass-line" + (p.assist ? " assist" : p.key || p.prog ? " key" : "");
         ln.setAttribute("class", cls);
@@ -1076,8 +1076,8 @@
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
         '<defs>' +
-          '<marker id="drArrG" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#43e8a0"/></marker>' +
-          '<marker id="drArrR" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ff5e7a"/></marker>' +
+          '<marker id="drArrG" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#3dffb0"/></marker>' +
+          '<marker id="drArrR" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ff5c7a"/></marker>' +
         "</defs>" +
         pitchMarkup() +
         '<text class="dir-label" x="3" y="' + (PH + 4) + '">◀ ' + esc(D.away.name) + "</text>" +
@@ -1085,8 +1085,8 @@
         '<g id="dribLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:#43e8a0"></i>successful</span>' +
-        '<span><i class="dot" style="background:transparent;border:1px solid #ff5e7a"></i>unsuccessful</span>' +
+        '<span><i class="dot" style="background:#3dffb0"></i>successful</span>' +
+        '<span><i class="dot" style="background:transparent;border:1px solid #ff5c7a"></i>unsuccessful</span>' +
         '<span>● = where the take-on happened · → carry direction (next touch)</span>' +
       "</div>" +
       '<div class="stat-note" id="drCount"></div>';
@@ -1133,7 +1133,7 @@
         if (!filt(p)) return;
         shown++; if (p.ok) ok++;
         var cx = tx(p.team, p.x), cy = ty(p.team, p.y);
-        var col = p.ok ? "#43e8a0" : "#ff5e7a";
+        var col = p.ok ? "#3dffb0" : "#ff5c7a";
         if (p._ex != null) {
           var ax = tx(p.team, p._ex), ay = ty(p.team, p._ey);
           var arr = document.createElementNS(SVGNS, "line");
@@ -1343,7 +1343,7 @@
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
         c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0b0f1a"); c.setAttribute("stroke-width", "0.3");
+        c.setAttribute("stroke", "#05070d"); c.setAttribute("stroke-width", "0.3");
         c.addEventListener("mousemove", function (e) {
           showTip(e, "<b>" + esc(nd.name) + "</b><br>" + nd.passes + " passes involved");
         });
@@ -1514,7 +1514,7 @@
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
         c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0b0f1a"); c.setAttribute("stroke-width", "0.3");
+        c.setAttribute("stroke", "#05070d"); c.setAttribute("stroke-width", "0.3");
         (function (pl) {
           c.addEventListener("mousemove", function (e) {
             var pi = info[state.side][pl.name] || {};
@@ -1775,10 +1775,10 @@
   function agmExportStyle() {
     var rc = getComputedStyle(document.documentElement);
     function v(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-    var TEXT = v("--text", "#e8edf7"), BAD = v("--bad", "#ff6b81"), WARN = v("--warn", "#ffb454"),
-        MUTED = v("--muted", "#93a0bd"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#0b0f1a");
+    var TEXT = v("--text", "#e9f2ff"), BAD = v("--bad", "#ff5c7a"), WARN = v("--warn", "#ffb454"),
+        MUTED = v("--muted", "#8ea3c4"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#05070d");
     return "<style>" +
-      ".pitch-bg{fill:#14361f}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
+      ".pitch-bg{fill:#0a1526}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
       ".dir-label{fill:rgba(255,255,255,.5);font-size:2.4px;font-weight:700;font-family:sans-serif}" +
       ".agm-pass{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
       ".agm-cross{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
@@ -1804,8 +1804,8 @@
     try {
       var rc = getComputedStyle(document.documentElement);
       function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
-          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var bg = cvar("--card", "#0f1729"), text = cvar("--text", "#e9f2ff"), muted = cvar("--muted", "#8ea3c4"),
+          bad = cvar("--bad", "#ff5c7a"), line = cvar("--line", "#1a2a45");
       var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var clone = svgEl.cloneNode(true);
       clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2094,8 +2094,8 @@
     try {
       var rc = getComputedStyle(document.documentElement);
       function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
-          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var bg = cvar("--card", "#0f1729"), text = cvar("--text", "#e9f2ff"), muted = cvar("--muted", "#8ea3c4"),
+          bad = cvar("--bad", "#ff5c7a"), line = cvar("--line", "#1a2a45");
       var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var wrap = document.createElement("div"); wrap.innerHTML = agmSeqSVG(seq, numMap, D);
       var s = wrap.firstChild; s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2250,7 +2250,7 @@
     function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
     function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
-    var OUT_COL = { goal: "#37c978", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
+    var OUT_COL = { goal: "#3dffb0", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
     var OUT_LBL = { goal: "Scored", saved: "Saved", missed: "Off target", post: "Hit post" };
     var OUT_ICON = { goal: "⚽", saved: "🧤", missed: "✗", post: "▮" };
 

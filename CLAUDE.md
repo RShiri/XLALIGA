@@ -166,8 +166,13 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - **Design tokens live at the top of `styles.css`** (colour, type scale, radii). `--accent-2`, `--good`,
   `--bad`, `--card`, `--radius` remain as aliases for older inline references; use the semantic names
   (`--brand-red`, `--positive`, `--negative`, `--info`, `--goal`) in new code. Red is `#e04a52` because
-  the old `#a91d22` failed contrast as text (2.6:1). Fonts: Bricolage Grotesque (display) + IBM Plex Sans
-  (body, tables, stat blocks, tabular figures) + IBM Plex Mono, loaded from Google Fonts.
+  the old `#a91d22` failed contrast as text (2.6:1).
+- **Current skin = "Telemetry"** (feat/dashboard-beta): void ground `#05070d` with a faint 48px grid, ONE
+  signal colour (cyan `#35e0ff`), all-sharp radii (2/3/4px), bracketed panel corners (`.card::before/::after`),
+  Chakra Petch for display/tabs/KPIs, IBM Plex Sans for body + tables (tabular figures), IBM Plex Mono for
+  readout labels; all from Google Fonts. The header readout (`#hudStatus`, filled in `renderAll`) only shows
+  at ≥1500px so the nine tabs fit. Chart colour literals in app.js/match.js mirror the tokens (cyan, pink
+  `#ff3d8b` for goals, mint `#3dffb0` positive, `#ff5c7a` negative); change both when changing the palette.
 - **Rebuilding derived data in THIS clone needs `LALIGA_MATCH_DIR`** — the raw scrapes are
   git-ignored and absent here; point it at the dev copy before running the builders:
   `$env:LALIGA_MATCH_DIR = "..\XWORLDCUPTWIT\laliga\matches"`. The old
