@@ -19,3 +19,13 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868024,2026-08-23,,Estadio Manuel Martínez Valero,Elche,Barcelona,0,5,0.7,4.38,0
 5868028,2026-08-24,,Estadio El Sadar,Osasuna,Levante,0,0,0.7,1.28,0
 5868027,2026-08-24,,Estadio La Rosaleda,Málaga,Deportivo A Coruña,1,1,1.95,1.12,0
+5868037,2026-08-28,,,Racing Santander,Elche,3,2,,,0
+5868031,2026-08-28,,,Deportivo Alavés,Villarreal,1,0,,,0
+5868035,2026-08-29,,,Levante,Real Betis,5,2,,,0
+5868039,2026-08-29,,,Real Sociedad,Espanyol,2,1,,,0
+5868040,2026-08-29,,,Sevilla,Atletico Madrid,1,3,,,0
+5868038,2026-08-30,,,Real Madrid,Málaga,4,0,,,0
+5868033,2026-08-30,,,Deportivo A Coruña,Valencia,3,1,,,0
+5868032,2026-08-30,,,Celta Vigo,Athletic Club,0,2,,,0
+5868036,2026-08-31,,,Osasuna,Getafe,1,0,,,0
+5868034,2026-08-31,,,Barcelona,Rayo Vallecano,5,2,,,0
