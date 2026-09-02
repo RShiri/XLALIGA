@@ -34,12 +34,15 @@ laliga_dashboard/              the website (static, no build step at view time)
   index.html match.html        main dashboard + per-match "Match Centre"
   app.js match.js              front-end (app.js = league views; match.js = match centre)
   styles.css match.css
-  data.js                      window.LL_DATA, season-keyed  ← generated
-  players.js                   window.LL_PLAYERS, season-keyed ← generated
-  shots.js                     window.LL_SHOTS, season-keyed (Team Lab shot maps) ← generated
+  data.js players.js shots.js  season-keyed builder outputs ← generated (NOT loaded by the site any more)
+  data/index.js                window.LL_INDEX: season list + cache version `v` + team colours ← build_split.py (SHIPPED)
+  data/<season>.js             ONE bundle per season (LL_DATA.seasons[s] + LL_PLAYERS[s] + LL_SHOTS[s]),
+                               fetched on demand by app.js / match.js ← build_split.py (SHIPPED)
+  player_lab/<season>/<team>.js per-team, per-SEASON player event maps ← build_player_lab.py (SHIPPED)
   matches_detail/<id>.js       per-match shots/passes/dribbles/goals/lineups ← generated (SHIPPED)
   database/                    CSV + sqlite exports ← generated
   build_data.py build_players.py build_match_details.py build_database.py build_shots.py  builders
+  build_split.py               splits the builder outputs into data/index.js + data/<season>.js (run LAST)
   xg_model.py                  shared shot-extraction + xG/xA (routes through xg_core/)
 xg_core/                       THE CANONICAL calibrated models: v2 xG + pass-level xA
                                artifacts + XGScorer/XAScorer + training CLIs (see its
@@ -82,11 +85,11 @@ py server.py --no-control  # static files only (plain viewer, no API)
 
 # refresh 2025/26 results/standings (fast, token-free)
 py laliga/build_schedule.py --season 2025-26
-py laliga_dashboard/build_data.py
+py laliga_dashboard/build_data.py && py laliga_dashboard/build_split.py
 
 # bring 2026/27 online once FotMob lists fixtures
 py laliga/build_schedule.py --season 2026-27
-py laliga_dashboard/build_data.py
+py laliga_dashboard/build_data.py && py laliga_dashboard/build_split.py
 powershell -File laliga/register_tasks.ps1 -Season 2026-27   # arm per-match live auto-runs
 
 # (re)scrape rich per-match data (needs Chrome; ~1h for a full season)
@@ -95,8 +98,12 @@ py laliga/scrape_whoscored.py --season 2025-26 --ids 1914240  # specific WhoScor
 # then rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
 py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_players.py \
   && py laliga_dashboard/build_database.py && py laliga_dashboard/build_shots.py \
-  && py laliga_dashboard/build_data.py
+  && py laliga_dashboard/build_data.py && py laliga_dashboard/build_player_lab.py \
+  && py laliga_dashboard/build_split.py
 ```
+**`build_split.py` must run last** (after build_data / build_players / build_shots): the site only
+loads `data/index.js` + `data/<season>.js`, so without it the dashboard silently shows the previous
+build. `build_site.py` and the Scraper button's rebuild already include it.
 **`scrape_whoscored.py` is the workhorse** for rich data: WhoScored match ids aren't
 range-enumerable, so it pages the **weekly** fixtures calendar back (`#dayChangeBtn-prev`),
 scrapes each `/Matches/<id>/Live` `matchCentreData`, and maps it to the schedule by team names.
@@ -136,6 +143,26 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - `run_match.py` auto-pushes generated files via `git_ops.py` when `GIT_TOKEN` is set.
 
 ## Gotchas (hard-won — don't re-break these)
+- **The site loads per-season bundles, not data.js.** `index.html`/`match.html` load `data/index.js`
+  statically and `app.js`/`match.js` inject `data/<season>.js?v=<hash>` on demand (`loadSeason`).
+  No `document.write`, no `Date.now()` cache-busters: `LL_INDEX.v` (a content hash written by
+  `build_split.py`) is the cache-buster for season bundles, player_lab files and matches_detail.
+  Forgetting `build_split.py` = the site silently shows the previous build.
+- **player_lab files are keyed by season** (`LL_PLAYERLAB[season][team]`, under `player_lab/<season>/`).
+  The old team-only files summed every scraped season into one player (Raphinha "327 shots" in a
+  3-match season). `build_player_lab.py` needs `data.js` for the id→season map: run it after `build_data.py`.
+- **Match Centre team colours go through a collision guard** (`match.js teamColours`): if the two
+  primaries are within ΔE 28 (Sevilla vs Atlético) the away side gets its secondary kit colour from
+  `LL_INDEX.teamColors` (built from `laliga/team_colors.py`), then a neutral fallback. Keep the
+  secondary colours in `team_colors.py` meaningful.
+- **Dashboard state lives in the URL hash** (`#<season>/<view>`, e.g. `#2025-26/xg`); tabs are real
+  ARIA tabs (`role=tab`, roving tabindex, arrow keys). A new view needs both a `<nav>` button and a
+  `<section role="tabpanel">` with matching ids.
+- **Design tokens live at the top of `styles.css`** (colour, type scale, radii). `--accent-2`, `--good`,
+  `--bad`, `--card`, `--radius` remain as aliases for older inline references; use the semantic names
+  (`--brand-red`, `--positive`, `--negative`, `--info`, `--goal`) in new code. Red is `#e04a52` because
+  the old `#a91d22` failed contrast as text (2.6:1). Fonts: Bricolage Grotesque (display) + IBM Plex Sans
+  (body, tables, stat blocks, tabular figures) + IBM Plex Mono, loaded from Google Fonts.
 - **Rebuilding derived data in THIS clone needs `LALIGA_MATCH_DIR`** — the raw scrapes are
   git-ignored and absent here; point it at the dev copy before running the builders:
   `$env:LALIGA_MATCH_DIR = "..\XWORLDCUPTWIT\laliga\matches"`. The old
