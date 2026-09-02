@@ -236,6 +236,7 @@ REBUILD_STEPS = [
     [PY, "laliga_dashboard/build_player_lab.py"],
     [PY, "laliga_dashboard/build_database.py"],
     [PY, "laliga_dashboard/build_data.py"],
+    [PY, "laliga_dashboard/build_split.py"],
 ]
 
 ACTIONS = {

@@ -6,13 +6,60 @@
    matches get deep-scraped (see laliga/backfill.py). */
 (function () {
   "use strict";
+  /* Per-season data bundles (build_split.py): data/index.js is loaded statically and lists the
+     seasons plus a cache version; data/<season>.js is fetched on demand by loadSeason(), so a
+     visit downloads one season, not all of them. */
+  var IDX = window.LL_INDEX;
+  if (!IDX || !IDX.seasons) {
+    document.body.innerHTML = "<p style='padding:40px'>data/index.js failed to load — run laliga_dashboard/build_split.py.</p>";
+    return;
+  }
+  window.LL_DATA = window.LL_DATA || { seasons: {} };
+  window.LL_PLAYERS = window.LL_PLAYERS || {};
+  window.LL_SHOTS = window.LL_SHOTS || {};
   var ALL = window.LL_DATA;
-  if (!ALL) { document.body.innerHTML = "<p style='padding:40px'>data.js failed to load.</p>"; return; }
-  var PLAYERS_ALL = window.LL_PLAYERS || {};
+  ALL.defaultSeason = IDX.defaultSeason;
+  ALL.generated = IDX.generated;
+  var PLAYERS_ALL = window.LL_PLAYERS;
 
-  var season = ALL.defaultSeason;
-  var D = ALL.seasons[season];
+  var urlState = readUrlState();
+  var season = (urlState.season && IDX.seasons[urlState.season]) ? urlState.season : IDX.defaultSeason;
+  var D = ALL.seasons[season] || { counts: {}, standings: [], matches: [] };
   var PLAYERS = PLAYERS_ALL[season] || [];
+  var seasonLoading = {};
+
+  /* URL state: #<season>/<view>, e.g. #2026-27/teamlab — refresh and share land on the same view. */
+  function readUrlState() {
+    var parts = (location.hash || "").replace(/^#/, "").split("/");
+    return { season: parts[0] || "", view: parts[1] || "" };
+  }
+  function writeUrlState(view) {
+    var cur = document.querySelector("nav.tabs button.active");
+    var v = view || (cur ? cur.dataset.view : "standings");
+    var next = "#" + season + "/" + v;
+    if (location.hash !== next) history.replaceState(null, "", next);
+  }
+  function loadSeason(key, cb) {
+    if (ALL.seasons[key]) { cb(); return; }
+    if (seasonLoading[key]) { seasonLoading[key].push(cb); return; }
+    seasonLoading[key] = [cb];
+    document.body.setAttribute("aria-busy", "true");
+    var foot = document.getElementById("footNote");
+    if (foot) foot.textContent = "Loading season " + key.replace("-", "/") + "…";
+    var sc = document.createElement("script");
+    sc.src = "data/" + encodeURIComponent(key) + ".js?v=" + encodeURIComponent(IDX.v || "");
+    sc.onload = function () {
+      document.body.removeAttribute("aria-busy");
+      var cbs = seasonLoading[key]; delete seasonLoading[key];
+      cbs.forEach(function (f) { f(); });
+    };
+    sc.onerror = function () {
+      document.body.removeAttribute("aria-busy");
+      delete seasonLoading[key];
+      if (foot) foot.textContent = "Could not load data/" + key + ".js — rebuild with laliga_dashboard/build_split.py.";
+    };
+    document.head.appendChild(sc);
+  }
   var tooltip = document.getElementById("tooltip");
 
   /* European / relegation zones (La Liga): UCL top 4, Europa 5, Conference play-off 6,
@@ -42,7 +89,7 @@
     var url = crestUrl(team), safe = esc(team);
     if (!url) return '<span class="crest ' + (cls || "") + ' noimg" title="' + safe + '"></span>';
     return '<img class="crest ' + (cls || "") + '" src="' + esc(url) +
-      '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'" title="' + safe + '">';
+      '" alt="" width="22" height="22" loading="lazy" onerror="this.style.visibility=\'hidden\'" title="' + safe + '">';
   }
   function fmtDate(d) {
     if (!d) return "";
@@ -1959,12 +2006,14 @@
     return n + " " + w[0] + " · " + ok + " " + w[1] + " · " + (n - ok) + " " + w[2] + " · " + (n ? Math.round(100 * ok / n) : 0) + "%";
   }
 
-  function plEvents(team, name) { var t = (window.LL_PLAYERLAB || {})[team] || {}; return t[name] || { shots: [], dribbles: [], passes: [] }; }
+  // Event files are keyed by SEASON then team (build_player_lab.py), so a player's maps only
+  // sum the season on screen — never every scraped season at once.
+  function plEvents(team, name) { var t = ((window.LL_PLAYERLAB || {})[season] || {})[team] || {}; return t[name] || { shots: [], dribbles: [], passes: [] }; }
   function plDataFor(ev, kind) { return kind === "prog" ? (ev.passes || []).filter(function (q) { return q[5]; }) : (ev[kind] || []); }
   function plLoadTeam(team, cb) {
-    if ((window.LL_PLAYERLAB || {})[team]) { cb(); return; }
+    if (((window.LL_PLAYERLAB || {})[season] || {})[team]) { cb(); return; }
     var sc = document.createElement("script");
-    sc.src = "player_lab/" + plSlug(team) + ".js";
+    sc.src = "player_lab/" + encodeURIComponent(season) + "/" + plSlug(team) + ".js?v=" + encodeURIComponent(IDX.v || "");
     sc.onload = cb; sc.onerror = function () { cb(); };
     document.head.appendChild(sc);
   }
@@ -2121,25 +2170,49 @@
 
   function initControls() {
     // tabs
-    var tabs = document.querySelectorAll("nav.tabs button");
-    tabs.forEach(function (b) {
-      b.addEventListener("click", function () {
-        tabs.forEach(function (x) { x.classList.remove("active"); });
-        b.classList.add("active");
-        document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
-        document.getElementById("view-" + b.dataset.view).classList.add("active");
-        renderHeavyIfNeeded(b.dataset.view);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+    var tabs = Array.prototype.slice.call(document.querySelectorAll("nav.tabs button"));
+    function selectTab(name, fromUser) {
+      var btn = null;
+      tabs.forEach(function (x) { if (x.dataset.view === name) btn = x; });
+      if (!btn) return;
+      tabs.forEach(function (x) {
+        var on = x === btn;
+        x.classList.toggle("active", on);
+        x.setAttribute("aria-selected", on ? "true" : "false");
+        x.tabIndex = on ? 0 : -1;
+      });
+      document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+      var panel = document.getElementById("view-" + name);
+      if (panel) panel.classList.add("active");
+      if (ALL.seasons[season]) renderHeavyIfNeeded(name);
+      writeUrlState(name);
+      if (fromUser) {
+        var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      }
+    }
+    tabs.forEach(function (b, i) {
+      b.addEventListener("click", function () { selectTab(b.dataset.view, true); });
+      // roving tabindex: arrow keys move between tabs, Home/End jump to the ends
+      b.addEventListener("keydown", function (e) {
+        var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : e.key === "Home" ? -i : e.key === "End" ? (tabs.length - 1 - i) : 0;
+        if (!d) return;
+        e.preventDefault();
+        var n = tabs[(i + d + tabs.length) % tabs.length];
+        n.focus();
+        selectTab(n.dataset.view, true);
       });
     });
+    var startView = (urlState.view && document.getElementById("view-" + urlState.view)) ? urlState.view : "standings";
+    selectTab(startView, false);
     // season switcher
     var sel = document.getElementById("seasonSel");
     if (sel) {
-      sel.innerHTML = Object.keys(ALL.seasons).sort().map(function (s) {
-        var label = s.replace("-", "/") + (ALL.seasons[s].status === "not_started" ? " (upcoming)" : "");
+      sel.innerHTML = Object.keys(IDX.seasons).sort().map(function (s) {
+        var label = s.replace("-", "/") + (IDX.seasons[s].status === "not_started" ? " (upcoming)" : "");
         return '<option value="' + s + '"' + (s === season ? " selected" : "") + ">" + label + "</option>";
       }).join("");
-      sel.addEventListener("change", function () { season = sel.value; renderAll(); });
+      sel.addEventListener("change", function () { season = sel.value; writeUrlState(); loadSeason(season, renderAll); });
     }
     // match filters
     mSearch = document.getElementById("mSearch");
@@ -2165,5 +2238,5 @@
   }
 
   initControls();
-  renderAll();
+  loadSeason(season, renderAll);
 })();

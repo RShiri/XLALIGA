@@ -3,29 +3,32 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0b0e16" />
 <title>La Liga — Dashboard &amp; xG Lab</title>
-<script>document.write('<link rel="stylesheet" href="styles.css?v=' + Date.now() + '">');</script>
-<noscript><link rel="stylesheet" href="styles.css" /></noscript>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body class="laliga">
 <header class="site">
   <div class="header-inner">
     <div class="brand">
-      <div class="title">La<span>Liga</span> · Dashboard</div>
+      <h1 class="title">La<span>Liga</span> · Dashboard</h1>
       <div class="sub">Standings · fixtures &amp; results · xG lab · season projection</div>
     </div>
     <div class="header-right">
       <label class="season-pick">Season <select id="seasonSel"></select></label>
-      <nav class="tabs">
-        <button data-view="standings" class="active">Standings</button>
-        <button data-view="matches">Matches</button>
-        <button data-view="players">Players</button>
-        <button data-view="standouts">Standouts</button>
-        <button data-view="teamlab">Team Lab</button>
-        <button data-view="playerlab">Player Lab</button>
-        <button data-view="xg">xG Analysis</button>
-        <button data-view="data">Data</button>
-        <button data-view="projection">Projection</button>
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button role="tab" id="tab-standings" data-view="standings" aria-controls="view-standings" aria-selected="true" class="active">Standings</button>
+        <button role="tab" id="tab-matches" data-view="matches" aria-controls="view-matches" aria-selected="false" tabindex="-1">Matches</button>
+        <button role="tab" id="tab-players" data-view="players" aria-controls="view-players" aria-selected="false" tabindex="-1">Players</button>
+        <button role="tab" id="tab-standouts" data-view="standouts" aria-controls="view-standouts" aria-selected="false" tabindex="-1">Standouts</button>
+        <button role="tab" id="tab-teamlab" data-view="teamlab" aria-controls="view-teamlab" aria-selected="false" tabindex="-1">Team Lab</button>
+        <button role="tab" id="tab-playerlab" data-view="playerlab" aria-controls="view-playerlab" aria-selected="false" tabindex="-1">Player Lab</button>
+        <button role="tab" id="tab-xg" data-view="xg" aria-controls="view-xg" aria-selected="false" tabindex="-1">xG Analysis</button>
+        <button role="tab" id="tab-data" data-view="data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button>
+        <button role="tab" id="tab-projection" data-view="projection" aria-controls="view-projection" aria-selected="false" tabindex="-1">Projection</button>
       </nav>
     </div>
   </div>
@@ -33,7 +36,7 @@
 
 <main>
   <!-- STANDINGS -->
-  <section id="view-standings" class="view active">
+  <section id="view-standings" class="view active" role="tabpanel" aria-labelledby="tab-standings">
     <div class="section-head">
       <h2>League Table</h2>
       <p>Live standings built from played matches — ranked by points, then goal difference, then goals for.
@@ -44,25 +47,31 @@
   </section>
 
   <!-- MATCHES -->
-  <section id="view-matches" class="view">
+  <section id="view-matches" class="view" role="tabpanel" aria-labelledby="tab-matches">
     <div class="section-head">
       <h2>Matches</h2>
       <p>Every fixture and result, grouped by matchday. Deep-scraped games link into the interactive Match Centre.</p>
     </div>
     <div class="controls">
-      <input id="mSearch" type="text" placeholder="Search a team…" />
-      <select id="mStatus">
-        <option value="all">All matches</option>
-        <option value="played">Played only</option>
-        <option value="upcoming">Upcoming only</option>
-      </select>
-      <select id="mMatchday"></select>
+      <label>Team
+        <input id="mSearch" type="search" placeholder="Search a team…" autocomplete="off" spellcheck="false" />
+      </label>
+      <label>Status
+        <select id="mStatus">
+          <option value="all">All matches</option>
+          <option value="played">Played only</option>
+          <option value="upcoming">Upcoming only</option>
+        </select>
+      </label>
+      <label>Matchday
+        <select id="mMatchday"></select>
+      </label>
     </div>
     <div id="matchList"></div>
   </section>
 
   <!-- PLAYERS -->
-  <section id="view-players" class="view">
+  <section id="view-players" class="view" role="tabpanel" aria-labelledby="tab-players">
     <div class="section-head">
       <h2>Player Statistics</h2>
       <p>Goals, assists, xG and ratings aggregated across every deep-scraped match. Pick a leaderboard.
@@ -70,7 +79,7 @@
          explains how it's built.</p>
     </div>
     <div class="controls">
-      <div class="seg">
+      <div class="seg" role="group" aria-label="Leaderboard">
         <button class="seg-btn active" data-preset="ga">G + A</button>
         <button class="seg-btn" data-preset="g">Goals</button>
         <button class="seg-btn" data-preset="a">Assists</button>
@@ -83,7 +92,7 @@
   </section>
 
   <!-- STANDOUTS (player distributions) -->
-  <section id="view-standouts" class="view">
+  <section id="view-standouts" class="view" role="tabpanel" aria-labelledby="tab-standouts">
     <div class="section-head">
       <h2>Standouts — Every Dot Is a Player</h2>
       <p>Pick a stat and see the <b>whole league's distribution</b> at once. The curve is how all players
@@ -97,9 +106,9 @@
          flat, hardly anyone does. Most players cluster near the average, so the curve peaks there and tails off.
          A player <b>far to the right</b> of the crowd is doing something rare — we measure exactly how rare in
          <b>σ (sigma) over average</b>: +1σ beats ~84% of players, +2σ beats ~98%, +3σ is a genuine outlier.</p>
-      <p class="explainer-note">Dots are coloured <span style="color:#ff3d8b;font-weight:700">pink</span> once a
+      <p class="explainer-note">Dots are coloured <span style="color:var(--goal);font-weight:700">pink</span> once a
          player is 2σ or more above average. Pick a player to spotlight them in <span
-         style="color:#ffd24d;font-weight:700">gold</span> and see their percentile.</p>
+         style="color:var(--accent);font-weight:700">gold</span> and see their percentile.</p>
     </div>
 
     <div class="so-controls">
@@ -124,7 +133,7 @@
         </select>
       </label>
       <label>Spotlight player
-        <input id="soPlayer" list="soPlayerList" placeholder="Type a name…" autocomplete="off">
+        <input id="soPlayer" list="soPlayerList" placeholder="Type a name…" autocomplete="off" spellcheck="false">
         <datalist id="soPlayerList"></datalist>
       </label>
     </div>
@@ -135,7 +144,7 @@
       <h3 id="soChartTitle">Distribution</h3>
       <p class="hint" id="soChartHint">Every qualifying player placed by their value for the chosen stat.</p>
       <div class="so-chart-wrap" id="soChart"></div>
-      <div class="chart-tip" id="soChartTip">Tap any dot to see the player.</div>
+      <div class="chart-tip" id="soChartTip" aria-live="polite">Tap any dot to see the player.</div>
       <div class="insight" id="soSpotlight"></div>
     </div>
 
@@ -150,9 +159,9 @@
       <h3>Two-stat scatter — find the complete players</h3>
       <p class="hint">Plot every player on <b>two stats at once</b> and let the <b>dot size</b> carry a third.
          Top-right = strong in both; a dot that's big <i>and</i> top-right is a genuinely complete player. The
-         dashed lines are the averages. <span style="color:#ff3d8b;font-weight:700">Pink</span> = above average
+         dashed lines are the averages. <span style="color:var(--goal);font-weight:700">Pink</span> = above average
          in both; the player you spotlight above shows here in <span
-         style="color:#ffd24d;font-weight:700">gold</span> too. Start from a preset:</p>
+         style="color:var(--accent);font-weight:700">gold</span> too. Start from a preset:</p>
       <div class="so-presets" id="soPresets"></div>
       <div class="so-controls">
         <label>X axis<select id="soScX"></select></label>
@@ -177,7 +186,7 @@
         </label>
       </div>
       <div class="so-chart-wrap" id="soScatter"></div>
-      <div class="chart-tip" id="soScatterTip">Tap any dot to see the player.</div>
+      <div class="chart-tip" id="soScatterTip" aria-live="polite">Tap any dot to see the player.</div>
       <div class="insight" id="soScInsight"></div>
     </div>
 
@@ -197,7 +206,7 @@
   </section>
 
   <!-- TEAM LAB (shot map + style fingerprint) -->
-  <section id="view-teamlab" class="view">
+  <section id="view-teamlab" class="view" role="tabpanel" aria-labelledby="tab-teamlab">
     <div class="section-head">
       <h2>Team Lab — Shot Maps &amp; Style</h2>
       <p>Where every chance comes from, and how each team likes to play. Pick a team to see <b>its shot map</b>
@@ -244,12 +253,12 @@
     <div class="card full-card">
       <h3 id="tlMapTitle">Shot map</h3>
       <p class="hint">Attacking <b>↑</b> (toward the top goal). In <b>Shot dots</b> mode each dot is a shot,
-         sized by xG: <span style="color:#ff3d8b;font-weight:700">goals pink</span>,
-         <span style="color:#4ea1ff;font-weight:700">on-target blue</span>, off-target grey. Switch to
+         sized by xG: <span style="color:var(--goal);font-weight:700">goals pink</span>,
+         <span style="color:var(--info);font-weight:700">on-target blue</span>, off-target grey. Switch to
          <b>xG heatmap</b> to shade the pitch by where chance-quality is concentrated. Pick a
          <b>Compare</b> team (or two) to line up shot maps side by side.</p>
       <div class="tl-maps" id="tlMaps"></div>
-      <div class="chart-tip" id="tlMapTip">Tap any shot to see its details.</div>
+      <div class="chart-tip" id="tlMapTip" aria-live="polite">Tap any shot to see its details.</div>
     </div>
 
     <div class="card full-card" id="tlStyleCard">
@@ -266,7 +275,9 @@
     <p class="hint" style="margin:0 0 12px">Every club's season aggregate — sortable. Per-game rates (Sh/g, SoT/g,
        BigCh/g) and averages (Poss%, Pass%) count only deep-scraped games; goals/points count every played match.</p>
     <div class="controls">
-      <input id="tlSearch" type="text" placeholder="Search a team…" />
+      <label>Team
+        <input id="tlSearch" type="search" placeholder="Search a team…" autocomplete="off" spellcheck="false" />
+      </label>
     </div>
     <div class="card" style="padding:0; overflow:hidden">
       <div class="table-scroll"><div id="teamTable"></div></div>
@@ -274,7 +285,7 @@
   </section>
 
   <!-- XG -->
-  <section id="view-xg" class="view">
+  <section id="view-xg" class="view" role="tabpanel" aria-labelledby="tab-xg">
     <div class="section-head">
       <h2>xG Efficiency Lab</h2>
       <p>Do teams score as much as the quality of their chances says they should? These charts compare
@@ -394,7 +405,7 @@
   </section>
 
   <!-- DATA -->
-  <section id="view-data" class="view">
+  <section id="view-data" class="view" role="tabpanel" aria-labelledby="tab-data">
     <div class="section-head">
       <h2>Full Database</h2>
       <p>The complete dataset behind this site — game results, per-game team stats and league standings, exported
@@ -420,9 +431,8 @@
     </div>
   </section>
 
-  <!-- PROJECTION -->
   <!-- PLAYER LAB (choose a team, then a player; optional compare) -->
-  <section id="view-playerlab" class="view">
+  <section id="view-playerlab" class="view" role="tabpanel" aria-labelledby="tab-playerlab">
     <div class="section-head">
       <h2>Player Lab</h2>
       <p>Click the <b>club badges</b> to filter, then pick a <b>player</b> — and optionally a second player
@@ -459,7 +469,8 @@
     </div>
   </section>
 
-  <section id="view-projection" class="view">
+  <!-- PROJECTION -->
+  <section id="view-projection" class="view" role="tabpanel" aria-labelledby="tab-projection">
     <div class="section-head">
       <h2>Season Projection</h2>
       <p>Where does the table finish? A Poisson model built from this season's goals (home/away attack &amp; defence
@@ -470,21 +481,16 @@
     <div class="card" style="padding:0;overflow:hidden;margin-top:16px"><div class="table-scroll" id="projTable"></div></div>
   </section>
 
-  <div class="footer-note" id="footNote"></div>
+  <div class="footer-note" id="footNote" aria-live="polite"></div>
 </main>
 
-<div class="tooltip" id="tooltip"></div>
+<div class="tooltip" id="tooltip" role="tooltip"></div>
 
-<script>
-  (function () {
-    var v = Date.now();
-    document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="shots.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="database/manifest.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="control.js?v=' + v + '"></scr' + 'ipt>');
-  })();
-</script>
+<!-- Static, cacheable scripts. data/index.js is tiny (season list + cache version); the season
+     bundle data/<season>.js is fetched on demand by app.js (build_split.py writes both). -->
+<script src="data/index.js"></script>
+<script src="database/manifest.js"></script>
+<script src="app.js"></script>
+<script src="control.js"></script>
 </body>
 </html>

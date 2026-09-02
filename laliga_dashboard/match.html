@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Match Dashboard — La Liga</title>
-<script>var _v=Date.now();document.write('<link rel="stylesheet" href="styles.css?v='+_v+'"><link rel="stylesheet" href="match.css?v='+_v+'">');</script>
-<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="match.css" /></noscript>
+<meta name="theme-color" content="#0b0e16" />
+<title>Match Centre — La Liga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="match.css" />
 </head>
 <body>
 <header class="site">
@@ -14,25 +18,24 @@
       <div class="title">La<span>Liga</span> · Match Centre</div>
       <div class="sub">Interactive shot &amp; pass explorer</div>
     </div>
-    <nav class="tabs">
+    <nav class="tabs" aria-label="Match Centre">
       <a class="back-link" href="index.html">← All matches</a>
     </nav>
   </div>
 </header>
 
 <main>
-  <div id="matchRoot">
+  <div id="matchRoot" aria-live="polite">
     <p class="footer-note" id="loadingMsg">Loading match…</p>
   </div>
 </main>
 
-<div class="tooltip" id="tooltip"></div>
+<div class="tooltip" id="tooltip" role="tooltip"></div>
 
-<!-- data.js gives match.js the head-to-head team stats; the match-specific
-     event file is injected by match.js based on ?id= -->
-<script>var _mv=Date.now();
-  document.write('<scr'+'ipt src="data.js?v='+_mv+'"></scr'+'ipt>');
-  document.write('<scr'+'ipt src="winprob_params.js?v='+_mv+'"></scr'+'ipt>');
-  document.write('<scr'+'ipt src="match.js?v='+_mv+'"></scr'+'ipt>');</script>
+<!-- data/index.js lists the seasons; match.js fetches the season bundle (head-to-head
+     team stats) and the match's own matches_detail/<id>.js based on ?season= and ?id= -->
+<script src="data/index.js"></script>
+<script src="winprob_params.js"></script>
+<script src="match.js"></script>
 </body>
 </html>
