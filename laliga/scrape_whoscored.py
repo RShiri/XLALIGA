@@ -62,11 +62,17 @@ def load_schedule(season):
 
 
 def _plain_driver():
+    import tempfile
     from selenium import webdriver
     o = webdriver.ChromeOptions()
     if os.environ.get("LALIGA_VISIBLE") != "1":
         o.add_argument("--headless=new")
+    # A fresh --user-data-dir per launch: reusing Chrome's default profile means a run that
+    # left orphaned chrome.exe processes behind (crash, killed task, etc.) holds the profile
+    # lock, and the NEXT launch fails immediately with "connection refused" on the debugger
+    # port — no driver ever actually starts. Isolating the profile makes each run independent.
     for a in ("--no-sandbox", "--disable-dev-shm-usage", "--window-size=1600,1000",
+              "--user-data-dir=" + tempfile.mkdtemp(prefix="laliga_chrome_"),
               "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"):
         o.add_argument(a)
