@@ -207,3 +207,30 @@
 .so-row.goal .so-oc { color: var(--positive); }
 .so-row.saved .so-oc { color: var(--negative); }
 .so-row.missed .so-oc, .so-row.post .so-oc { color: var(--warn); }
+
+/* ---------------- phase 4: Match Centre ---------------- */
+/* The header scrolls away; the section bar is what sticks. */
+body.match header.site { position: static; }
+.mv-nav { position: sticky; top: 0; z-index: 15; margin: 0 -20px 22px; padding: 0 20px; background: rgba(11, 14, 22, 0.94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.mv-nav-inner { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; max-width: 1180px; margin: 0 auto; }
+.mv-nav-inner::-webkit-scrollbar { display: none; }
+.mv-nav a { flex: 0 0 auto; padding: 12px 12px 10px; color: var(--muted); font-size: var(--fs-small); font-weight: 600; border-bottom: 2px solid transparent; white-space: nowrap; }
+.mv-nav a:hover { color: var(--text); }
+.mv-nav a.current { color: var(--text); border-bottom-color: var(--accent); }
+.mv-block { scroll-margin-top: 52px; }
+.mv-title { scroll-margin-top: 52px; }
+
+/* Stat bars use the same two team colours as the chips and the pitch marks */
+.mv-block .sc-fill.h { background: var(--c-home); }
+.mv-block .sc-fill.a { background: var(--c-away); }
+
+/* Goal timeline: home goals on the left, away on the right, in match order */
+.timeline { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.timeline .goal-ev { margin: 0; }
+.timeline .goal-ev.home { grid-column: 1; justify-self: end; }
+.timeline .goal-ev.away { grid-column: 2; justify-self: start; }
+@media (max-width: 640px) {
+  .mv-nav { margin: 0 -12px 18px; padding: 0 12px; }
+  .timeline { grid-template-columns: 1fr; }
+  .timeline .goal-ev.home, .timeline .goal-ev.away { grid-column: 1; justify-self: stretch; }
+}

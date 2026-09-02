@@ -158,6 +158,11 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - **Dashboard state lives in the URL hash** (`#<season>/<view>`, e.g. `#2025-26/xg`); tabs are real
   ARIA tabs (`role=tab`, roving tabindex, arrow keys). A new view needs both a `<nav>` button and a
   `<section role="tabpanel">` with matching ids.
+- **Minute floors scale with the season** (`app.js minsFloor`): Standouts filters default to "Auto"
+  (30% of minutes played so far, capped at 450 / 900) and the per-90 leaderboards use the same floor, so
+  a 3-matchday season is not empty. Explainers are `<details>` that remember their state in localStorage.
+- **Match Centre section bar** (`match.js buildSectionNav`) is generated from the `.mv-block` list; a new
+  block automatically gets a link. The page header is static there; the bar is what sticks.
 - **Design tokens live at the top of `styles.css`** (colour, type scale, radii). `--accent-2`, `--good`,
   `--bad`, `--card`, `--radius` remain as aliases for older inline references; use the semantic names
   (`--brand-red`, `--positive`, `--negative`, `--info`, `--goal`) in new code. Red is `#e04a52` because

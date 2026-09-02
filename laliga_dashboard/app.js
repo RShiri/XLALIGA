@@ -44,17 +44,22 @@
     if (seasonLoading[key]) { seasonLoading[key].push(cb); return; }
     seasonLoading[key] = [cb];
     document.body.setAttribute("aria-busy", "true");
+    document.body.classList.add("is-loading");
+    var st = document.getElementById("standings");
+    if (st && !st.innerHTML.trim()) st.innerHTML = skeletonRows(12);
     var foot = document.getElementById("footNote");
     if (foot) foot.textContent = "Loading season " + key.replace("-", "/") + "…";
     var sc = document.createElement("script");
     sc.src = "data/" + encodeURIComponent(key) + ".js?v=" + encodeURIComponent(IDX.v || "");
     sc.onload = function () {
       document.body.removeAttribute("aria-busy");
+      document.body.classList.remove("is-loading");
       var cbs = seasonLoading[key]; delete seasonLoading[key];
       cbs.forEach(function (f) { f(); });
     };
     sc.onerror = function () {
       document.body.removeAttribute("aria-busy");
+      document.body.classList.remove("is-loading");
       delete seasonLoading[key];
       if (foot) foot.textContent = "Could not load data/" + key + ".js — rebuild with laliga_dashboard/build_split.py.";
     };
@@ -83,6 +88,15 @@
     return String(s).replace(/[&<>"]/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
     });
+  }
+  // One empty-state shape everywhere: what is missing + what to do about it.
+  function emptyHtml(title, action) {
+    return '<div class="empty"><b>' + esc(title) + "</b>" + (action ? "<span>" + esc(action) + "</span>" : "") + "</div>";
+  }
+  function skeletonRows(n) {
+    var out = '<div class="skeleton" aria-hidden="true">';
+    for (var i = 0; i < n; i++) out += '<div class="sk-row"><i style="width:' + (55 + (i * 37) % 35) + '%"></i></div>';
+    return out + "</div>";
   }
   function crestUrl(team) { return (D.crests && D.crests[team]) || ""; }
   function logoImg(team, cls) {
@@ -141,7 +155,7 @@
   function teamScatter(hostId, rows, cfg) {
     var host = document.getElementById(hostId);
     if (!host) return;
-    if (!rows.length) { host.innerHTML = '<p class="hint">Not enough data yet — deep-scrape matches to populate xG.</p>'; return; }
+    if (!rows.length) { host.innerHTML = emptyHtml("No xG data yet", "Deep-scrape matches to populate this chart."); return; }
     var W = 960, H = cfg.h || 560, padL = 58, padR = 14, padT = 24, padB = 50;
     var plotW = W - padL - padR, plotH = H - padT - padB;
     var xMax, yMax;
@@ -209,9 +223,9 @@
     var c = D.counts || {};
     var wrap = document.getElementById("overviewStats");
     wrap.innerHTML = "";
-    [["v accent", c.played || 0, "Matches played"],
+    [["v", c.played || 0, "Matches played"],
      ["v", (c.total || 0) - (c.played || 0), "Still to come"],
-     ["v blue", c.teams || 0, "Teams"],
+     ["v", c.teams || 0, "Teams"],
      ["v", "MD " + (c.current_matchday || 0), "Current matchday"],
      ["v", c.with_xg || 0, "Matches with xG"]
     ].forEach(function (it) {
@@ -230,7 +244,7 @@
   function renderStandings() {
     var host = document.getElementById("standings");
     var rows = D.standings || [];
-    if (!rows.length) { host.innerHTML = '<p class="hint">No results yet this season.</p>'; return; }
+    if (!rows.length) { host.innerHTML = emptyHtml("No results yet this season", "Standings appear after the first matchday."); return; }
     var total = rows.length;
     var body = rows.map(function (r) {
       return '<tr class="' + zoneOf(r.rank, total) + '">' +
@@ -268,7 +282,7 @@
       '<div class="mc-score">' + scoreCell(m) + "</div>" +
       '<div class="mc-side away">' + logoImg(m.away) + '<span class="nm">' + esc(m.away) + "</span></div>";
     var xg = (m.xg_home != null && m.xg_away != null)
-      ? '<div class="mc-xg">xG ' + m.xg_home.toFixed(2) + " – " + m.xg_away.toFixed(2) + (m.xg_estimated ? " (est)" : "") + "</div>" : "";
+      ? '<div class="mc-xg">xG ' + m.xg_home.toFixed(2) + " – " + m.xg_away.toFixed(2) + (m.xg_estimated ? ' <span class="est-tag" title="Model-estimated xG">est</span>' : "") + "</div>" : "";
     var cls = "match-card" + (m.played ? " played" : " upcoming") + (link ? " has-link" : "");
     var open = link ? '<a class="match-card-link" href="' + link + '">' : "<div class='" + cls + "'>";
     var close = link ? "</a>" : "</div>";
@@ -287,7 +301,7 @@
       if (q && (m.home + " " + m.away).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
-    if (!ms.length) { list.innerHTML = '<p class="hint">No matches match your filters.</p>'; return; }
+    if (!ms.length) { list.innerHTML = emptyHtml("No matches match these filters", "Clear the search or pick another matchday."); return; }
     // group by matchday
     var byMd = {};
     ms.forEach(function (m) { (byMd[m.matchday] = byMd[m.matchday] || []).push(m); });
@@ -316,7 +330,7 @@
      D.xgRecords (one row per team-match: xgf/xga/gf/ga/opp/home) plus
      the per-match team `stats` block for the shot-quality chart.
      Derived stats recompute per season (see computeXgDerived). ======= */
-  var COL = { green: "#3ddc97", blue: "#4ea1ff", orange: "#ffb454", red: "#ff6b81" };
+  var COL = { green: "#4fcf8a", blue: "#6fb3ff", orange: "#ffb454", red: "#ff6b81" };
   var R = [], AGG = [], xgVals = [], goalVals = [], rPearson = 0, fit = { slope: 0, intercept: 0 };
   var ledgerSort = { key: "xgd", dir: -1 };
   var dbSort = { key: "gf", dir: -1 };
@@ -378,7 +392,7 @@
   /* Per team-match scatter (hand-rolled SVG): xG vs actual goals */
   function renderScatter() {
     var host = document.getElementById("scatter");
-    if (!R.length) { host.innerHTML = '<p class="hint">Not enough data yet — deep-scrape matches to populate xG.</p>'; return; }
+    if (!R.length) { host.innerHTML = emptyHtml("No xG data yet", "Deep-scrape matches to populate this chart."); return; }
     var W = 560, H = 420, pad = 46;
     var maxV = Math.max(5, Math.ceil(Math.max.apply(null, xgVals.concat(goalVals).concat([1]))));
     function sx(v) { return pad + (v / maxV) * (W - pad - 14); }
@@ -391,13 +405,13 @@
       if (g > 0) svg.push('<text x="' + (sx(0) - 8) + '" y="' + (sy(g) + 3) + '" fill="#93a0bd" font-size="10" text-anchor="end">' + g + "</text>");
     }
     svg.push('<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(maxV) + '" y2="' + sy(maxV) + '" stroke="#93a0bd" stroke-width="1.2" stroke-dasharray="5 4"/>');
-    svg.push('<line x1="' + sx(0) + '" y1="' + sy(fit.intercept) + '" x2="' + sx(maxV) + '" y2="' + sy(fit.slope * maxV + fit.intercept) + '" stroke="#3ddc97" stroke-width="2"/>');
+    svg.push('<line x1="' + sx(0) + '" y1="' + sy(fit.intercept) + '" x2="' + sx(maxV) + '" y2="' + sy(fit.slope * maxV + fit.intercept) + '" stroke="#4fcf8a" stroke-width="2"/>');
     svg.push('<text x="' + (W / 2) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Expected goals (xG)</text>');
     svg.push('<text x="14" y="' + (H / 2) + '" fill="#e8edf7" font-size="12" text-anchor="middle" transform="rotate(-90 14 ' + (H / 2) + ')">Actual goals</text>');
     R.forEach(function (r, i) {
       var jx = ((i * 7) % 5 - 2) * 1.2, jy = ((i * 3) % 5 - 2) * 1.2;
       var cx = sx(r.xgf) + jx, cy = sy(r.gf) + jy, over = r.gf - r.xgf;
-      var col = over > 0.4 ? "#3ddc97" : over < -0.4 ? "#ff6b81" : "#4ea1ff";
+      var col = over > 0.4 ? "#4fcf8a" : over < -0.4 ? "#ff6b81" : "#6fb3ff";
       svg.push('<circle class="pt" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5.5" fill="' + col +
         '" fill-opacity="0.78" stroke="#0b0f1a" stroke-width="1" data-team="' + esc(r.team) + '" data-opp="' + esc(r.opp) +
         '" data-g="' + r.gf + '" data-xg="' + r.xgf.toFixed(2) + '"/>');
@@ -422,7 +436,7 @@
   function renderXgDist() {
     var host = document.getElementById("xgDist");
     if (!host) return;
-    if (!R.length) { host.innerHTML = '<p class="hint">Not enough data yet — deep-scrape matches to populate xG.</p>'; return; }
+    if (!R.length) { host.innerHTML = emptyHtml("No xG data yet", "Deep-scrape matches to populate this chart."); return; }
     var BW = 0.5, NB = 9;                      // eight half-goal buckets + a "4+" catch-all
     var buckets = [];
     for (var b = 0; b < NB; b++) buckets.push({ n: 0, xg: 0, g: 0 });
@@ -442,7 +456,7 @@
       svg.push('<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 14) + '" fill="#93a0bd" font-size="9.5" text-anchor="middle">' + lab + "</text>");
       if (!bk.n) return;
       var ax = bk.xg / bk.n, ag = bk.g / bk.n, d = ag - ax;
-      var col = d > 0.15 ? "#3ddc97" : d < -0.15 ? "#ff6b81" : "#4ea1ff";
+      var col = d > 0.15 ? "#4fcf8a" : d < -0.15 ? "#ff6b81" : "#6fb3ff";
       var y = by(bk.n);
       var info = lab + " xG · " + bk.n + " team-games · avg xG " + ax.toFixed(2) + " → avg goals " + ag.toFixed(2) +
                  " (" + (d >= 0 ? "+" : "") + d.toFixed(2) + ")";
@@ -468,7 +482,7 @@
 
   function renderCorr() {
     var box = document.getElementById("corrBox"), ins = document.getElementById("corrInsight");
-    if (!R.length) { box.innerHTML = '<p class="hint">No xG data yet.</p>'; ins.innerHTML = ""; return; }
+    if (!R.length) { box.innerHTML = emptyHtml("No xG data yet"); ins.innerHTML = ""; return; }
     var rr = rPearson, r2 = rr * rr;
     var strength = rr > 0.75 ? "strong" : rr > 0.5 ? "moderate" : rr > 0.3 ? "modest" : "weak";
     var scalePct = Math.max(0, Math.min(100, rr * 100));
@@ -614,7 +628,7 @@
   function renderHomeAway() {
     var host = document.getElementById("homeAway");
     var h = R.filter(function (r) { return r.home; }), a = R.filter(function (r) { return !r.home; });
-    if (!h.length || !a.length) { host.innerHTML = '<p class="hint">No home/away xG data yet.</p>'; return; }
+    if (!h.length || !a.length) { host.innerHTML = emptyHtml("No home/away xG data yet"); return; }
     function avg(arr, k) { return arr.reduce(function (s, r) { return s + r[k]; }, 0) / arr.length; }
     var hx = avg(h, "xgf"), ax = avg(a, "xgf"), hg = avg(h, "gf"), ag = avg(a, "gf");
     var mx = Math.max(hx, ax) * 1.15;
@@ -641,7 +655,7 @@
       return { m: m, adv: adv, who: who };
     }).filter(function (x) { return x.adv > 0; })
       .sort(function (a, b) { return b.adv - a.adv; }).slice(0, 10);
-    if (!rows.length) { host.innerHTML = '<p class="hint">No unlucky results yet.</p>'; return; }
+    if (!rows.length) { host.innerHTML = emptyHtml("No unlucky results yet"); return; }
     host.innerHTML = '<table class="rank"><thead><tr><th class="team">Match</th><th>Result</th><th>xG</th>' +
       '<th class="team">Deserved more</th><th>xG edge</th></tr></thead><tbody>' +
       rows.map(function (x) {
@@ -656,7 +670,7 @@
   function renderFinishingBars() {
     var host = document.getElementById("finishingBars");
     var rows = AGG.slice().sort(function (a, b) { return b.attDelta - a.attDelta; });
-    if (!rows.length) { host.innerHTML = '<p class="hint">No xG data yet.</p>'; return; }
+    if (!rows.length) { host.innerHTML = emptyHtml("No xG data yet"); return; }
     var maxAbs = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.attDelta); }).concat([1]));
     host.innerHTML = rows.map(function (r) {
       var d = r.attDelta, pct = (Math.abs(d) / maxAbs) * 50;
@@ -676,7 +690,7 @@
       if (k === "team") return ledgerSort.dir * a.team.localeCompare(b.team);
       return ledgerSort.dir * (a[k] - b[k]);
     });
-    if (!rows.length) { host.innerHTML = '<p class="hint">No xG data yet.</p>'; return; }
+    if (!rows.length) { host.innerHTML = emptyHtml("No xG data yet"); return; }
     var head = cols.map(function (c) {
       var arr = ledgerSort.key === c[0] ? (ledgerSort.dir < 0 ? " ▼" : " ▲") : "";
       return '<th class="' + (c[0] === "team" ? "team" : "") + '" data-k="' + c[0] + '">' + c[1] + '<span class="arr">' + arr + "</span></th>";
@@ -705,7 +719,7 @@
   function renderAgreement() {
     var host = document.getElementById("agreement");
     var matches = D.matches.filter(function (m) { return m.played && m.xg_home != null; });
-    if (!matches.length) { host.innerHTML = '<p class="hint">No xG data yet.</p>'; return; }
+    if (!matches.length) { host.innerHTML = emptyHtml("No xG data yet"); return; }
     var agree = 0, total = matches.length, draws = 0;
     var rows = matches.map(function (m) {
       var xgWin = m.xg_home > m.xg_away ? "H" : m.xg_home < m.xg_away ? "A" : "D";
@@ -750,7 +764,7 @@
   /* ================= STANDOUTS (player leaderboards) ================= */
   function renderPlayerLeaders() {
     var wrap = document.getElementById("playerLeaders");
-    if (!PLAYERS.length) { wrap.innerHTML = '<p class="hint">Player data populates as matches are deep-scraped.</p>'; return; }
+    if (!PLAYERS.length) { wrap.innerHTML = emptyHtml("No player data yet", "Player stats appear once matches are deep-scraped."); return; }
     function top(key, label, fmt) {
       var arr = PLAYERS.filter(function (p) { return p[key] != null; }).sort(function (a, b) { return b[key] - a[key]; });
       var p = arr[0];
@@ -766,14 +780,14 @@
   function renderPlayerBoards() {
     var host = document.getElementById("playerBoards");
     if (!host) return;
-    if (!PLAYERS.length) { host.innerHTML = '<p class="hint">Player data populates as matches are deep-scraped.</p>'; return; }
+    if (!PLAYERS.length) { host.innerHTML = emptyHtml("No player data yet", "Player stats appear once matches are deep-scraped."); return; }
     function rows(list, valFn, subFn, cls) {
       var html = list.slice(0, 8).map(function (p) {
         return '<div class="fin-row"><div class="nm">' + logoImg(p.team) + "<span>" + esc(p.name) +
           '</span></div><div class="fin-stat">' + (subFn ? '<span class="sub">' + subFn(p) + "</span>" : "") +
           '<span class="lb-val ' + (cls || "") + '">' + valFn(p) + "</span></div></div>";
       }).join("");
-      return html || '<p class="hint">Not enough data yet.</p>';
+      return html || emptyHtml("Not enough data yet");
     }
     function card(title, hint, body) {
       return '<div class="card lboard"><h3>' + title + '</h3><p class="hint">' + hint + "</p>" + body + "</div>";
@@ -791,11 +805,12 @@
     var shooters = PLAYERS.filter(function (p) { return p.shots >= 5; })
       .map(function (p) { return Object.assign({}, p, { conv: Math.round(p.g / p.shots * 100) }); })
       .sort(function (a, b) { return b.conv - a.conv; });
-    var goalsPer90 = per90(function (p) { return p.mins >= 450 && p.g > 0; }, function (p) { return p.g / p.mins * 90; });
-    var dribblers = per90(function (p) { return p.mins >= 450 && p.dribbles > 0; }, function (p) { return p.dribbles / p.mins * 90; });
-    var chancesPer90 = per90(function (p) { return p.mins >= 450 && p.keyPasses > 0; }, function (p) { return p.keyPasses / p.mins * 90; });
-    var passersPer90 = per90(function (p) { return p.mins >= 450 && p.passes > 0; }, function (p) { return p.passes / p.mins * 90; });
-    var tacklersPer90 = per90(function (p) { return p.mins >= 450 && p.tackles > 0; }, function (p) { return p.tackles / p.mins * 90; });
+    var floor = minsFloor(450);
+    var goalsPer90 = per90(function (p) { return p.mins >= floor && p.g > 0; }, function (p) { return p.g / p.mins * 90; });
+    var dribblers = per90(function (p) { return p.mins >= floor && p.dribbles > 0; }, function (p) { return p.dribbles / p.mins * 90; });
+    var chancesPer90 = per90(function (p) { return p.mins >= floor && p.keyPasses > 0; }, function (p) { return p.keyPasses / p.mins * 90; });
+    var passersPer90 = per90(function (p) { return p.mins >= floor && p.passes > 0; }, function (p) { return p.passes / p.mins * 90; });
+    var tacklersPer90 = per90(function (p) { return p.mins >= floor && p.tackles > 0; }, function (p) { return p.tackles / p.mins * 90; });
     var boards = [
       card("Top scorers", "Goals scored.", rows(desc("g"), function (p) { return p.g; }, function (p) { return p.team; })),
       card("Goals per 90'", "Goals per 90 minutes, min. 450 mins.", rows(goalsPer90, function (p) { return p._r.toFixed(2); }, function (p) { return p.g + "G"; })),
@@ -830,7 +845,23 @@
     ["saves", "Saves", 0], ["touches", "Touches", 0], ["rating", "Average match rating", 2]
   ];
   var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
-  var soState = { stat: "ga", pos: "all", mins: 450, player: "" };
+  // Minute floors scale with the season: 450+ is right for a full season but filters out every
+  // player after three matchdays. "Auto" = 30% of the minutes available so far (in 45-minute
+  // steps), capped at the classic floor. Used by the Standouts filters and the per-90 boards.
+  function minsFloor(cap) {
+    var md = (D.counts && D.counts.current_matchday) || 0;
+    var auto = Math.max(45, Math.round(md * 90 * 0.3 / 45) * 45);
+    return Math.min(cap || 450, auto);
+  }
+  function applyMinsFloor(sel, cap, state) {
+    if (!sel) return;
+    var auto = minsFloor(cap);
+    var opt = sel.querySelector('option[value="auto"]');
+    if (!opt) { opt = document.createElement("option"); opt.value = "auto"; sel.insertBefore(opt, sel.firstChild); }
+    opt.textContent = "Auto (" + auto + "+)";
+    if (state.auto !== false) { sel.value = "auto"; state.mins = auto; }
+  }
+  var soState = { stat: "ga", pos: "all", mins: 450, player: "", auto: true };
 
   function soPosGroup(pos) {
     var s = (pos || "").toUpperCase();
@@ -906,7 +937,7 @@
       var dy = baseY - 4 - jit(p.pid) * Math.max(6, band - 6);
       var isSpot = spotPid && p.pid === spotPid, anom = z >= 2;
       var r = isSpot ? 5.5 : anom ? 3.4 : 2.3;
-      var fill = isSpot ? "#ffd24d" : anom ? "#ff3d8b" : "#4ea1ff";
+      var fill = isSpot ? "#d9b84a" : anom ? "#ff4d93" : "#6fb3ff";
       var op = isSpot ? 1 : anom ? 0.92 : 0.5;
       var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
       var info = p.name + " · " + p.team + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)";
@@ -932,7 +963,7 @@
       tier = (L.x - lastX < 86) ? tier + 1 : 0; lastX = L.x;
       var ly = Math.max(padT + 6, L.y - 8 - tier * 13);
       var lx = Math.max(padL + 18, Math.min(W - padR - 18, L.x));
-      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#ffd24d" : "#ff3d8b") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
+      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#d9b84a" : "#ff4d93") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '" fill="' + (L.gold ? "#ffe08a" : "#ffaecb") + '" font-size="10.5" text-anchor="middle">' + esc(L.txt) + "</text>");
     });
     svg.push("</svg>");
@@ -944,11 +975,11 @@
     var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
     var meta = soStatMeta(), statKey = meta[0], label = meta[1], dp = meta[2];
     var rows = soQualify();
-    setHTML("soChartTitle", label + " — distribution across " + rows.length + " players");
+    setHTML("soChartTitle", label + ": distribution across " + rows.length + " players");
     setHTML("soChartHint", "Each dot is one player with " + (soState.mins ? soState.mins + "+ minutes" : "any minutes") +
       (soState.pos === "all" ? "" : " · " + SO_POS_LABEL[soState.pos]) + ". Pink = 2σ or more above average.");
     if (!rows.length) {
-      setHTML("soChart", '<p class="hint">No players match these filters — try lowering the minimum minutes.</p>');
+      setHTML("soChart", emptyHtml("No players match these filters", "Lower the minimum minutes or clear the position filter."));
       ["soStats", "soStandouts", "soSpotlight"].forEach(function (id) { setHTML(id, ""); });
       return;
     }
@@ -1003,13 +1034,13 @@
     setHTML("soStandouts", '<div class="so-bars">' + top.map(function (t) {
       var pct = Math.max(2, 100 * t.z / maxZ), hot = t.z >= 2;
       return '<div class="so-bar-row"><div class="nm">' + logoImg(t.p.team) + "<span>" + esc(t.p.name) + "</span></div>" +
-        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff3d8b" : "var(--accent-2)") + '"></div></div>' +
+        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff4d93" : "var(--accent-2)") + '"></div></div>' +
         '<div class="so-bar-val">' + soFmt(t.v, dp) + ' <span class="so-z">' + (t.z >= 0 ? "+" : "") + t.z.toFixed(1) + "σ</span></div></div>";
     }).join("") + "</div>");
   }
 
   /* ---- Two-stat scatter ---- */
-  var soSc = { x: "xg", y: "g", size: "shots", pos: "all", mins: 900 };
+  var soSc = { x: "xg", y: "g", size: "shots", pos: "all", mins: 900, auto: true };
   var SO_PRESETS = [
     { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 450 },
     { label: "🎨 Creators", x: "xa", y: "a", size: "keyPasses", pos: "all", mins: 900 },
@@ -1078,7 +1109,7 @@
       var cx = sx(vx), cy = sy(vy), r = radius(p);
       var elite = vx > mx && vy > my;
       var isSpot = spotPid && p.pid === spotPid;
-      var fill = isSpot ? "#ffd24d" : elite ? "#ff3d8b" : "#4ea1ff";
+      var fill = isSpot ? "#d9b84a" : elite ? "#ff4d93" : "#6fb3ff";
       var op = isSpot ? 1 : elite ? 0.85 : 0.5;
       var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
       var info = p.name + " · " + p.team + " — " + soStatLabel(xKey) + " " + soFmt(vx, dpx) +
@@ -1103,7 +1134,7 @@
     if (!host) return;
     var rows = soQualifyFor(soSc.pos, soSc.mins);
     var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
-    if (rows.length < 3) { host.innerHTML = '<p class="hint">Not enough players match these filters.</p>'; setHTML("soScInsight", ""); return; }
+    if (rows.length < 3) { host.innerHTML = emptyHtml("Not enough players match these filters", "Lower the minimum minutes or widen the position filter."); setHTML("soScInsight", ""); return; }
     var missing = [soSc.x, soSc.y, soSc.size].filter(function (k) { return k && !(k in rows[0]); });
     if (missing.length) {
       host.innerHTML = '<p class="hint">Some selected metrics (' + missing.map(soStatLabel).join(", ") + ') aren\'t in the current data.</p>';
@@ -1166,8 +1197,8 @@
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 2).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
       svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + soFmt(pv, soStatDp(ax[0])) + " (" + Math.round(pct * 100) + "%)</text>");
     });
-    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#ffd24d" stroke-width="2"/>');
-    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#ffd24d"/>'); });
+    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#d9b84a" stroke-width="2"/>');
+    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#d9b84a"/>'); });
     svg.push("</svg>");
     return svg.join("");
   }
@@ -1232,7 +1263,11 @@
     statSel.value = soState.stat;
     statSel.addEventListener("change", function () { soState.stat = statSel.value; renderStandouts(); });
     document.getElementById("soPos").addEventListener("change", function (e) { soState.pos = e.target.value; renderStandouts(); });
-    document.getElementById("soMins").addEventListener("change", function (e) { soState.mins = +e.target.value; renderStandouts(); });
+    document.getElementById("soMins").addEventListener("change", function (e) {
+      soState.auto = e.target.value === "auto";
+      soState.mins = soState.auto ? minsFloor(450) : +e.target.value;
+      renderStandouts();
+    });
     var pin = document.getElementById("soPlayer"), deb;
     pin.addEventListener("input", function () {
       clearTimeout(deb);
@@ -1254,7 +1289,11 @@
     ySel.addEventListener("change", function () { soSc.y = ySel.value; renderScatter2(); });
     sizeSel.addEventListener("change", function () { soSc.size = sizeSel.value; renderScatter2(); });
     document.getElementById("soScPos").addEventListener("change", function (e) { soSc.pos = e.target.value; renderScatter2(); });
-    document.getElementById("soScMins").addEventListener("change", function (e) { soSc.mins = +e.target.value; renderScatter2(); });
+    document.getElementById("soScMins").addEventListener("change", function (e) {
+      soSc.auto = e.target.value === "auto";
+      soSc.mins = soSc.auto ? minsFloor(900) : +e.target.value;
+      renderScatter2();
+    });
     var pHost = document.getElementById("soPresets");
     pHost.innerHTML = SO_PRESETS.map(function (pr, i) {
       var on = pr.x === soSc.x && pr.y === soSc.y && pr.pos === soSc.pos;
@@ -1263,7 +1302,7 @@
     pHost.querySelectorAll(".so-preset").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var pr = SO_PRESETS[+btn.dataset.i];
-        soSc.x = pr.x; soSc.y = pr.y; soSc.size = pr.size; soSc.pos = pr.pos; soSc.mins = pr.mins;
+        soSc.x = pr.x; soSc.y = pr.y; soSc.size = pr.size; soSc.pos = pr.pos; soSc.mins = Math.min(pr.mins, minsFloor(900)); soSc.auto = false;
         pHost.querySelectorAll(".so-preset").forEach(function (b) { b.classList.remove("active"); });
         btn.classList.add("active");
         syncScatterControls();
@@ -1274,6 +1313,8 @@
 
   // Per-season Standouts refresh: repopulate the player datalist + redraw everything.
   function refreshStandouts() {
+    applyMinsFloor(document.getElementById("soMins"), 450, soState);
+    applyMinsFloor(document.getElementById("soScMins"), 900, soSc);
     var dl = document.getElementById("soPlayerList");
     if (dl) dl.innerHTML = PLAYERS.map(function (p) { return p.name; }).sort()
       .map(function (nm) { return '<option value="' + esc(nm) + '">'; }).join("");
@@ -1362,7 +1403,7 @@
      coords attack toward x=100; the pitch is drawn goal-at-top. ---- */
   var SHOTS = [];
   var tlState = { team: "all", teamB: "none", teamC: "none", filter: "all", sit: "all", mode: "dots" };
-  var TL_COLORS = ["#4ea1ff", "#ff3d8b", "#ffd24d"];
+  var TL_COLORS = ["#6fb3ff", "#ff4d93", "#d9b84a"];
 
   function tlMatchSit(s, sit) {
     if (sit === "all") return true;
@@ -1424,7 +1465,7 @@
     } else {
       shots.slice().sort(function (a, b) { return (a.g ? 1 : 0) - (b.g ? 1 : 0); }).forEach(function (s) {
         var r = 2.3 + 6 * Math.sqrt(Math.max(0, s.xg));
-        var fill = s.g ? "#ff3d8b" : s.ot ? "#4ea1ff" : "#7c89a8";
+        var fill = s.g ? "#ff4d93" : s.ot ? "#6fb3ff" : "#7c89a8";
         var op = s.g ? 0.95 : s.ot ? 0.6 : 0.35;
         var stroke = s.g ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
         var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : s.ot ? " (on target)" : "") + " · " + s.s + " · " + s.m + "'";
@@ -1846,7 +1887,7 @@
   // read the season aggregates already in players.js; the action maps read a per-team
   // event file (player_lab/<slug>.js) fetched on demand — like match pages load their
   // matches_detail. No tackles map (league matches_detail carries no tackle events).
-  var PL_ACC = "#3ddc97", PL_BLUE = "#4ea1ff", PL_MUTED = "#93a0bd", PL_RED = "#ff5e7a";
+  var PL_ACC = "#4fcf8a", PL_BLUE = "#6fb3ff", PL_MUTED = "#93a0bd", PL_RED = "#ff7b74";
   var PL = { main: null, cmp: null, teams: {} };   // main/cmp store "Team @@ Player"
   var PL_MAPS = [["shots", "Shots"], ["dribbles", "Take-ons"], ["passes", "Passes"], ["prog", "Progressive passes"]];
   var PL_RADAR = [
@@ -1940,7 +1981,7 @@
     s += '<rect x="0.3" y="0.3" width="' + (PL_HPW - 0.6) + '" height="' + (PL_HPH - 0.6) + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
     s += '<rect x="' + (midx - boxW / 2).toFixed(1) + '" y="0.3" width="' + boxW + '" height="' + boxD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
     s += '<rect x="' + (midx - sixW / 2).toFixed(1) + '" y="0.3" width="' + sixW + '" height="' + sixD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
-    s += '<rect x="' + (midx - goalW / 2).toFixed(1) + '" y="-1.6" width="' + goalW + '" height="1.6" fill="none" stroke="#43e8a0" stroke-width="0.5"/>';
+    s += '<rect x="' + (midx - goalW / 2).toFixed(1) + '" y="-1.6" width="' + goalW + '" height="1.6" fill="none" stroke="#4fcf8a" stroke-width="0.5"/>';
     s += '<path d="M ' + (midx - 7.3) + " " + boxD + " A 9.15 9.15 0 0 0 " + (midx + 7.3) + " " + boxD + '" fill="none" stroke="#26304d" stroke-width="0.4"/>';
     return s + inner + "</svg>";
   }
@@ -1956,7 +1997,7 @@
     if (!host) return;
     events = events || [];
     if (events.length > 400) { var st = Math.ceil(events.length / 400); events = events.filter(function (_, ix) { return ix % st === 0; }); }
-    var gid = "plg" + (_plGid++), GREEN = "#43e8a0", RED = PL_RED, half = kind === "shots";
+    var gid = "plg" + (_plGid++), GREEN = "#4fcf8a", RED = PL_RED, half = kind === "shots";
     function di(t) { return ' data-info="' + esc(t) + '"'; }
     function opp(e) { var o = e[e.length - 1]; return o ? " — vs " + o : ""; }
     function pt(wx, wy) { return half ? [plMapX(wy), plMapY(wx)] : [wx, 64 - wy * 0.64]; }
@@ -2020,6 +2061,9 @@
   function plDrawMaps(main, pc, cmpTeam) {
     var ea = plEvents(main.team, main.name), eb = pc ? plEvents(cmpTeam, pc.name) : null;
     var cols = pc ? "1fr 1fr" : "1fr", host = document.getElementById("plHeatGrid");
+    host.classList.toggle("compare", !!pc);
+    var plGrid = document.querySelector(".pl-grid");
+    if (plGrid) plGrid.classList.toggle("has-compare", !!pc);
     host.innerHTML = PL_MAPS.map(function (mt, i) {
       var sumA = '<div class="pl-map-sum" style="color:' + PL_ACC + '">' + (pc ? "<b>" + esc(main.name) + "</b> · " : "") + plMapSummary(plDataFor(ea, mt[0]), mt[0], ea.passes) + "</div>";
       var sumB = pc ? '<div class="pl-map-sum" style="color:' + PL_BLUE + '"><b>' + esc(pc.name) + "</b> · " + plMapSummary(plDataFor(eb, mt[0]), mt[0], eb.passes) + "</div>" : "";
@@ -2181,6 +2225,7 @@
         x.setAttribute("aria-selected", on ? "true" : "false");
         x.tabIndex = on ? 0 : -1;
       });
+      try { btn.scrollIntoView({ block: "nearest", inline: "center" }); } catch (e) {}
       document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
       var panel = document.getElementById("view-" + name);
       if (panel) panel.classList.add("active");
@@ -2231,6 +2276,27 @@
     // Team Lab search
     var tl = document.getElementById("tlSearch");
     if (tl) tl.addEventListener("input", renderDbTeamTable);
+    // Long chart hints collapse to one line with a "How to read" toggle. Hints that JS rewrites
+    // carry an id and are left alone.
+    document.querySelectorAll(".card > p.hint:not([id])").forEach(function (p) {
+      if (p.textContent.trim().length < 170) return;
+      p.classList.add("hint-clamp");
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "hint-more"; b.setAttribute("aria-expanded", "false"); b.textContent = "How to read";
+      b.addEventListener("click", function () {
+        var open = p.classList.toggle("open");
+        b.setAttribute("aria-expanded", open ? "true" : "false");
+        b.textContent = open ? "Show less" : "How to read";
+      });
+      p.insertAdjacentElement("afterend", b);
+    });
+    // "How to read" explainers remember whether you closed them.
+    document.querySelectorAll("details.explainer[id]").forEach(function (d) {
+      try { if (localStorage.getItem("ll-explainer-" + d.id) === "closed") d.open = false; } catch (e) {}
+      d.addEventListener("toggle", function () {
+        try { localStorage.setItem("ll-explainer-" + d.id, d.open ? "open" : "closed"); } catch (e) {}
+      });
+    });
     // Standouts + Team Lab one-time control wiring (renders happen per season in renderAll)
     wireStandouts();
     wireTeamLab();

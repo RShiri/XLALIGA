@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0b0e16" />
-<title>La Liga — Dashboard &amp; xG Lab</title>
+<title>La Liga Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
@@ -14,12 +14,9 @@
 <header class="site">
   <div class="header-inner">
     <div class="brand">
-      <h1 class="title">La<span>Liga</span> · Dashboard</h1>
-      <div class="sub">Standings · fixtures &amp; results · xG lab · season projection</div>
+      <h1 class="title">La<span>Liga</span> Dashboard</h1>
     </div>
-    <div class="header-right">
-      <label class="season-pick">Season <select id="seasonSel"></select></label>
-      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+    <nav class="tabs" role="tablist" aria-label="Dashboard sections">
         <button role="tab" id="tab-standings" data-view="standings" aria-controls="view-standings" aria-selected="true" class="active">Standings</button>
         <button role="tab" id="tab-matches" data-view="matches" aria-controls="view-matches" aria-selected="false" tabindex="-1">Matches</button>
         <button role="tab" id="tab-players" data-view="players" aria-controls="view-players" aria-selected="false" tabindex="-1">Players</button>
@@ -29,7 +26,9 @@
         <button role="tab" id="tab-xg" data-view="xg" aria-controls="view-xg" aria-selected="false" tabindex="-1">xG Analysis</button>
         <button role="tab" id="tab-data" data-view="data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button>
         <button role="tab" id="tab-projection" data-view="projection" aria-controls="view-projection" aria-selected="false" tabindex="-1">Projection</button>
-      </nav>
+    </nav>
+    <div class="header-right">
+      <label class="season-pick">Season <select id="seasonSel"></select></label>
     </div>
   </div>
 </header>
@@ -94,14 +93,14 @@
   <!-- STANDOUTS (player distributions) -->
   <section id="view-standouts" class="view" role="tabpanel" aria-labelledby="tab-standouts">
     <div class="section-head">
-      <h2>Standouts — Every Dot Is a Player</h2>
+      <h2>Standouts</h2>
       <p>Pick a stat and see the <b>whole league's distribution</b> at once. The curve is how all players
          spread out, the dashed line is the <b>average</b>, and each dot is one player. The names way out on the
          right are the <b>anomalies</b> — the ones breaking from the pack.</p>
     </div>
 
-    <div class="explainer">
-      <h3>How to read this</h3>
+    <details class="explainer" id="explainer-standouts" open>
+      <summary><h3>How to read this</h3></summary>
       <p>This is a <b>density plot</b>: where the curve is tall, lots of players sit on that value; where it's
          flat, hardly anyone does. Most players cluster near the average, so the curve peaks there and tails off.
          A player <b>far to the right</b> of the crowd is doing something rare — we measure exactly how rare in
@@ -109,7 +108,7 @@
       <p class="explainer-note">Dots are coloured <span style="color:var(--goal);font-weight:700">pink</span> once a
          player is 2σ or more above average. Pick a player to spotlight them in <span
          style="color:var(--accent);font-weight:700">gold</span> and see their percentile.</p>
-    </div>
+    </details>
 
     <div class="so-controls">
       <label>Stat
@@ -149,14 +148,14 @@
     </div>
 
     <div class="card full-card">
-      <h3>The unique ones — biggest anomalies</h3>
+      <h3>Biggest anomalies</h3>
       <p class="hint">The players furthest above the field for the chosen stat, ranked by <b>σ over average</b>.
          The longer the bar, the more they break from the pack.</p>
       <div id="soStandouts"></div>
     </div>
 
     <div class="card full-card">
-      <h3>Two-stat scatter — find the complete players</h3>
+      <h3>Two-stat scatter</h3>
       <p class="hint">Plot every player on <b>two stats at once</b> and let the <b>dot size</b> carry a third.
          Top-right = strong in both; a dot that's big <i>and</i> top-right is a genuinely complete player. The
          dashed lines are the averages. <span style="color:var(--goal);font-weight:700">Pink</span> = above average
@@ -191,7 +190,7 @@
     </div>
 
     <div class="card full-card">
-      <h3>Player radar — percentile profile</h3>
+      <h3>Player radar</h3>
       <p class="hint">How the <b>spotlight player</b> (picked at the top) ranks against peers in the same position
          (450+ minutes) across every key area. Each spoke is a <b>percentile</b> — further out = better than more
          of their peers (100% = best in that role). Outfielders and goalkeepers get the profile that fits the job.</p>
@@ -199,8 +198,8 @@
     </div>
 
     <h2 style="margin:34px 0 4px;font-size:20px">Leaderboards</h2>
-    <p class="hint" style="margin:0 0 16px">Top eight in each category. Per-90 boards use a 450-minute minimum so
-       cameo appearances don't skew them.</p>
+    <p class="hint" style="margin:0 0 16px">Top eight in each category. Per-90 boards use a minimum-minutes floor
+       that grows with the season (450 once enough football has been played) so cameo appearances don't skew them.</p>
     <div class="stats-strip" id="playerLeaders"></div>
     <div class="lboards" id="playerBoards"></div>
   </section>
@@ -208,7 +207,7 @@
   <!-- TEAM LAB (shot map + style fingerprint) -->
   <section id="view-teamlab" class="view" role="tabpanel" aria-labelledby="tab-teamlab">
     <div class="section-head">
-      <h2>Team Lab — Shot Maps &amp; Style</h2>
+      <h2>Team Lab</h2>
       <p>Where every chance comes from, and how each team likes to play. Pick a team to see <b>its shot map</b>
          and a <b>style fingerprint</b> against the rest of the league — or leave it on <i>All teams</i> for the
          whole-league picture of where goals are made. Counts here are <b>shots only</b> — own goals
@@ -291,8 +290,8 @@
       <p>Do teams score as much as the quality of their chances says they should? These charts compare
          <b>expected goals (xG)</b> with what actually happened. <span id="xgNote" class="hint"></span></p>
     </div>
-    <div class="explainer">
-      <h3>New here? What is xG?</h3>
+    <details class="explainer" id="explainer-xg" open>
+      <summary><h3>New here? What is xG?</h3></summary>
       <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. A tap-in might be
          0.7 xG; a hopeful 30-metre strike 0.03. Sum a team's shots and you get how many goals an <i>average</i>
          finisher would score from those chances — a better "who deserved it" number than the scoreline alone.</p>
@@ -306,7 +305,7 @@
          numbers compare cleanly everywhere.</p>
       <p class="explainer-note">La Liga xG is computed from the deep-scraped WhoScored shot data. Until a match is
          deep-scraped it contributes to the table but not to these charts.</p>
-    </div>
+    </details>
     <div class="stats-strip" id="xgStats"></div>
 
     <div class="grid-2">
@@ -328,7 +327,7 @@
     </div>
 
     <div class="card full-card">
-      <h3>The same story as a distribution — games by chance quality</h3>
+      <h3>Games by chance quality</h3>
       <p class="hint">Every team-match sorted into a bucket by how much xG it produced. The bar is <b>how many
          games</b> created that much chance quality; under each bar, <b>avg xG → avg goals</b> actually scored from
          those games. <b style="color:var(--good)">Green = those chances over-delivered</b>,
@@ -338,7 +337,7 @@
     </div>
 
     <div class="card full-card">
-      <h3>Finishing: goals scored minus xG</h3>
+      <h3>Finishing: goals minus xG</h3>
       <p class="hint">For each club, total goals minus total xG. <b style="color:var(--good)">Green = clinical</b>
          (scored more than their chances were worth — sharp finishing or good luck);
          <b style="color:var(--bad)">red = wasteful</b> (scored fewer — poor finishing or unlucky).
@@ -347,7 +346,7 @@
     </div>
 
     <div class="card full-card">
-      <h3>Who's good at both ends? — attack vs. defence quality</h3>
+      <h3>Attack vs defence quality</h3>
       <p class="hint">Each club is placed by how dangerous its <b>attack</b> is (further right = more/better chances
          <b>created</b> per game) and how mean its <b>defence</b> is (higher up = fewer/worse chances <b>allowed</b>
          per game). The dashed lines are the league average, splitting the pitch into four types of team — the

@@ -185,6 +185,45 @@
     return { home: home, away: away, swapped: away !== D.away.color };
   }
 
+  /* ---- sticky jump bar: one link per block, the block in view is underlined ---- */
+  function buildSectionNav(root) {
+    var blocks = Array.prototype.slice.call(root.querySelectorAll(".mv-block"));
+    if (blocks.length < 3) return;
+    var nav = el("nav", "mv-nav");
+    nav.setAttribute("aria-label", "Match sections");
+    nav.innerHTML = '<div class="mv-nav-inner">' + blocks.map(function (b) {
+      var host = b.querySelector("[id]"), t = b.querySelector(".mv-title");
+      return '<a href="#' + host.id + '">' + esc(t.textContent) + "</a>";
+    }).join("") + "</div>";
+    root.insertBefore(nav, blocks[0]);
+    var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
+    function mark(id) {
+      links.forEach(function (a) {
+        var on = a.getAttribute("href") === "#" + id;
+        a.classList.toggle("current", on);
+        if (on) { try { a.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
+      });
+    }
+    if (window.IntersectionObserver) {
+      var io = new IntersectionObserver(function (ents) {
+        ents.forEach(function (en) { if (en.isIntersecting) mark(en.target.querySelector("[id]").id); });
+      }, { rootMargin: "-30% 0px -60% 0px" });
+      blocks.forEach(function (b) { io.observe(b); });
+    }
+    nav.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest("a") : null;
+      if (!a) return;
+      var target = document.getElementById(a.getAttribute("href").slice(1));
+      if (!target) return;
+      e.preventDefault();
+      var sec = target.closest(".mv-block") || target;
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      sec.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      history.replaceState(null, "", a.getAttribute("href"));
+      mark(target.id);
+    });
+  }
+
   /* ================= BOOT ================= */
   function boot(D) {
     document.title = D.home.name + " " + D.home.score + "-" + D.away.score + " " + D.away.name + " · LALIGA";
@@ -227,6 +266,7 @@
       (hasGoals ? block("Goal replays", "mv-goals-anim") : "") +
       // Penalty shootout (goal-mouth placement) is the last block — below all graphs.
       (hasShootout ? block("Penalty shootout", "mv-shootout") : "");
+    buildSectionNav(root);
 
     if (hasStats) buildMatchStats(rec, D);
     if (hasWinProb) buildWinProb(D);
