@@ -205,6 +205,11 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
   runs (it renders from the raw JSONs, no browser, and copies every PNG into `laliga_png/`; it is
   the first step of the Scraper button's rebuild). `build_data.py` links the *published*
   `laliga_png/` copy — a PNG that only lives in the git-ignored `laliga/output/` 404s on the live site.
+- **The Match Centre also draws its own PNG in the browser** (`match_export.js`, the
+  "Download image" button): scoreboard, goals, stat bars and shot map on a canvas in the site's
+  skin, saved via `canvas.toBlob`. It needs no server, so it works on GitHub Pages for every match
+  that has a detail file. The pipeline PNG (matplotlib) stays for WhatsApp/X posts and shows as the
+  secondary "Pipeline PNG" link when it exists.
 - **Raw match JSONs are gitignored** (`laliga/matches/20*/*.json`, ~2 MB each, 769 MB/season).
   The dashboard ships the derived `matches_detail/*.js` (~74 MB) instead. If you re-scrape,
   don't commit the raw folder.

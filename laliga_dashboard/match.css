@@ -112,6 +112,9 @@ body.match nav.tabs { align-items: center; align-self: center; }
 
 .match-top .png-btn { display: inline-flex; align-items: center; gap: 6px; margin: 0; background: var(--plate-2); color: var(--accent); padding: 8px 18px; font-size: 14px; }
 .match-top .png-btn:hover { color: var(--accent-ink); background: var(--accent); transform: none; filter: none; }
+.match-top .png-btn { background: var(--accent); color: var(--accent-ink); border: 0; cursor: pointer; }
+.match-top .png-btn:disabled { opacity: 0.6; cursor: wait; }
+.match-top .png-btn-alt { background: var(--plate-2); color: var(--muted); }
 
 .stat-note { color: var(--muted-2); font-size: 12.5px; margin-top: 8px; }
 

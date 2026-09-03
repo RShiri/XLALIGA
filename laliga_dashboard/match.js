@@ -224,6 +224,35 @@
     });
   }
 
+  /* ---- in-browser PNG export ---- */
+  function wireExport(D, rec) {
+    var btn = document.getElementById("exportPng");
+    if (!btn || !window.LL_EXPORT) return;
+    btn.addEventListener("click", function () {
+      var oldText = btn.textContent;
+      btn.disabled = true; btn.textContent = "Rendering…";
+      var sum = function (side) { return D.shots.filter(function (s) { return s.team === side; }).reduce(function (t, s) { return t + (s.xg || 0); }, 0); };
+      var M = {
+        home: { name: D.home.name, color: D.home.color, score: D.home.score },
+        away: { name: D.away.name, color: D.away.color, score: D.away.score },
+        meta: metaLine(D).replace(/ \u00b7 La Liga [^\u00b7]*$/, ""),
+        season: SEASON,
+        xg: D.shots && D.shots.length ? [sum("home"), sum("away")] : null,
+        xgNote: D.shots && D.shots.length ? "model-estimated from " + D.shots.length + " shots" : "",
+        goals: D.goals || [],
+        stats: statRows(rec, D),
+        shots: D.shots || [],
+        crests: { home: LOGO + encodeURIComponent(D.home.name) + ".png", away: LOGO + encodeURIComponent(D.away.name) + ".png" },
+        source: "Data: WhoScored · xG: our own shot model"
+      };
+      var slug = function (s) { return String(s).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); };
+      var name = slug(D.home.name) + "-" + (D.home.score == null ? "" : D.home.score) + "-" + (D.away.score == null ? "" : D.away.score) + "-" + slug(D.away.name) + (D.date ? "-" + D.date : "") + ".png";
+      window.LL_EXPORT.render(M).then(function (cv) { return window.LL_EXPORT.download(cv, name); })
+        .catch(function (e) { alert("Could not render the image: " + (e && e.message ? e.message : e)); })
+        .then(function () { btn.disabled = false; btn.textContent = oldText; });
+    });
+  }
+
   /* ================= BOOT ================= */
   function boot(D) {
     document.title = D.home.name + " " + D.home.score + "-" + D.away.score + " " + D.away.name + " · LALIGA";
@@ -267,6 +296,7 @@
       // Penalty shootout (goal-mouth placement) is the last block — below all graphs.
       (hasShootout ? block("Penalty shootout", "mv-shootout") : "");
     buildSectionNav(root);
+    wireExport(D, rec);
 
     if (hasStats) buildMatchStats(rec, D);
     if (hasWinProb) buildWinProb(D);
@@ -316,10 +346,9 @@
     // is rebuilt more often, so fall back to its record when a PNG was rendered later.
     var recPng = (function () { var r = matchRecord(); return r && r.png; })();
     var png = D.png || recPng;
-    var pngBtn = png
-      ? '<a class="png-btn" href="' + esc(png) + '" target="_blank" rel="noopener" download>' +
-        '🖼️ Infographic PNG</a>'
-      : "";
+    // Drawn in the browser (match_export.js): works on the static site, any device, no server.
+    var pngBtn = (window.LL_EXPORT ? '<button type="button" class="png-btn" id="exportPng">⬇ Download image</button>' : "") +
+      (png ? '<a class="png-btn png-btn-alt" href="' + esc(png) + '" target="_blank" rel="noopener" download title="Infographic rendered by the pipeline">Pipeline PNG</a>' : "");
 
     return '<div class="match-top">' + pngBtn + "</div>" +
       '<div class="scoreboard"><h1 class="sb-main">' +
@@ -375,33 +404,36 @@
     return { home: compute("home"), away: compute("away") };
   }
 
+  // One row per STAT_DEFS entry that has a value: {label, h, a, hpct, hBetter, aBetter, isXg, pct}.
+  // Provider stats first, event-derived numbers as the fallback. Shared by the stats panel
+  // and the in-browser image export.
+  function statRows(rec, D) {
+    var s = (rec && rec.stats) || {};
+    var es = eventStats(D);
+    return STAT_DEFS.map(function (def) {
+      var key = def[0];
+      var pair = s[key] || [null, null];
+      if (pair[0] == null && pair[1] == null && es.home[key] != null) pair = [es.home[key], es.away[key]];
+      var h = pair[0], a = pair[1];
+      if (h == null && a == null) return null;
+      var hv = h == null ? 0 : h, av = a == null ? 0 : a, total = hv + av;
+      return { label: def[1], h: h, a: a, hpct: total > 0 ? (hv / total) * 100 : 50,
+               hBetter: def[3] ? hv > av : hv < av, aBetter: def[3] ? av > hv : av < hv,
+               isXg: key === "xg", pct: !!def[2] };
+    }).filter(Boolean);
+  }
+
   function buildMatchStats(rec, D) {
     var host = document.getElementById("mv-stats");
     if (!host) return;
-    var s = rec.stats || {};
-    var es = eventStats(D);
-    var rows = STAT_DEFS.map(function (def) {
-      var key = def[0];
-      var pair = s[key] || [null, null];
-      // fall back to event-derived numbers when the provider gave us nothing
-      if (pair[0] == null && pair[1] == null && es.home[key] != null) {
-        pair = [es.home[key], es.away[key]];
-      }
-      var h = pair[0], a = pair[1];
-      if (h == null && a == null) return "";
-      var hv = h == null ? 0 : h, av = a == null ? 0 : a;
-      var total = hv + av;
-      var hpct = total > 0 ? (hv / total) * 100 : 50;
-      var suffix = def[2] ? "%" : "";
-      function disp(x) { return x == null ? "–" : (def[0] === "xg" ? x.toFixed(2) : x) + suffix; }
-      var hBetter = def[3] ? hv > av : hv < av;
-      var aBetter = def[3] ? av > hv : av < hv;
+    var rows = statRows(rec, D).map(function (r) {
+      function disp(x) { return x == null ? "–" : (r.isXg ? x.toFixed(2) : x) + (r.pct ? "%" : ""); }
       return '<div class="stat-cmp">' +
-        '<div class="sc-val ' + (hBetter ? "win" : "") + '">' + disp(h) + "</div>" +
-        '<div class="sc-mid"><div class="sc-label">' + def[1] + '</div>' +
-          '<div class="sc-bar"><div class="sc-fill h" style="width:' + hpct.toFixed(1) + '%"></div>' +
-          '<div class="sc-fill a" style="width:' + (100 - hpct).toFixed(1) + '%"></div></div></div>' +
-        '<div class="sc-val ' + (aBetter ? "win" : "") + '">' + disp(a) + "</div>" +
+        '<div class="sc-val ' + (r.hBetter ? "win" : "") + '">' + disp(r.h) + "</div>" +
+        '<div class="sc-mid"><div class="sc-label">' + r.label + '</div>' +
+          '<div class="sc-bar"><div class="sc-fill h" style="width:' + r.hpct.toFixed(1) + '%"></div>' +
+          '<div class="sc-fill a" style="width:' + (100 - r.hpct).toFixed(1) + '%"></div></div></div>' +
+        '<div class="sc-val ' + (r.aBetter ? "win" : "") + '">' + disp(r.a) + "</div>" +
         "</div>";
     }).join("");
     var LABELS = { fotmob: "FotMob", whoscored: "WhoScored", sofascore: "SofaScore",
