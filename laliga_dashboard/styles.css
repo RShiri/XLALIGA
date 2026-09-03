@@ -209,13 +209,39 @@ table.rank thead th .arr { opacity: 0.6; font-size: 10px; }
 table.rank tbody td.team { text-align: left; }
 table.rank tbody td .delta.pos { color: var(--positive); font-weight: 600; }
 table.rank tbody td .delta.neg { color: var(--negative); font-weight: 600; }
-table.rank.players { min-width: 920px; }
-table.rank.players tbody tr:hover td { background: var(--plate-2); }
+table.players { min-width: 620px; }
+table.players tbody tr:hover td { background: var(--plate-2); }
+/* Team is folded into the Player cell as a muted second line (see app.js renderPlayers).
+   Deliberately not table.rank: these headers aren't click-to-sort like the xG ledger's are,
+   so they shouldn't inherit .rank's pointer cursor / hover-accent sortable styling. */
+table.players .team-cell .nm-wrap { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; gap: 1px; }
+table.players .team-cell .nm { max-width: none; }
+table.players .team-cell .sub { font-size: 11.5px; font-weight: 600; color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 table.db-team { min-width: 720px; }
 table.db-team tbody td.team { text-align: left; }
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-table.standings, table.proj { width: 100%; border-collapse: collapse; font-size: 14px; }
+/* Shown only in the width band where a table needs a sideways swipe: the standings
+   table drops most columns and fits without scrolling under 640px (see the phone media
+   query further down), so its hint stops there too; players/projection have no such
+   compact layout and need the hint at any width up to 900px. */
+.mobile-scroll-hint {
+  display: none; align-items: center; gap: 6px; color: var(--muted-2); font-size: 12.5px; font-weight: 600; margin: 0 0 10px;
+}
+.mobile-scroll-hint::before { content: "↔"; color: var(--accent); font-weight: 800; }
+@media (max-width: 900px) { .mobile-scroll-hint { display: flex; } }
+@media (max-width: 640px) { .mobile-scroll-hint.standings-hint { display: none; } }
+
+table.standings, table.proj {
+  width: 100%; border-collapse: collapse; font-size: 14px;
+  /* A table narrower than the viewport just shrinks to fit instead of triggering
+     .table-scroll's overflow — fine on a phone in portrait (the compact layout below
+     takes over under 640px), but on a phone turned sideways (~700-930px, above that
+     breakpoint) every column used to render at once, squeezed and unreadable, with
+     nothing to swipe. This floor width means it genuinely overflows below it, so the
+     existing horizontal scroll actually engages instead of everything just shrinking. */
+  min-width: 640px;
+}
 table.standings th, table.proj th { text-align: center; padding: 11px 6px; color: var(--muted-2); font-size: 12.5px; border-bottom: 1px solid var(--line-strong); position: sticky; top: 0; background: var(--plate-2); z-index: 1; }
 table.standings td, table.proj td { text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--line); }
 table.standings th.team, table.proj th.team { text-align: left; padding-left: 10px; }
@@ -628,6 +654,10 @@ body.is-loading main > *:not(.footer-note) { opacity: 0.55; pointer-events: none
   table.standings th:first-child, table.standings td.pos { position: sticky; left: 0; z-index: 2; background: var(--plate); }
   table.standings th.team, table.standings td.team { position: sticky; left: 30px; z-index: 2; background: var(--plate); box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.8); }
   table.standings th:first-child, table.standings th.team { z-index: 3; background: var(--plate-2); }
+  /* This layout already drops most columns to fit the phone, so the general 640px scroll
+     floor (added for the landscape case above) would only force needless horizontal
+     scroll here — cancel it back to the table's own natural width. */
+  table.standings { min-width: 0; }
 }
 @media (max-width: 380px) {
   .stats-strip { grid-template-columns: repeat(2, 1fr); }

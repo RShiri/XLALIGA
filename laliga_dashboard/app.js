@@ -223,10 +223,11 @@
     var c = D.counts || {};
     var wrap = document.getElementById("overviewStats");
     wrap.innerHTML = "";
+    // Teams and current-matchday were dropped: fixed/uninteresting once a season is under
+    // way, and "MD 3" reads oddly next to "350 still to come" early on. Three tiles that
+    // actually move as the season does.
     [["v", c.played || 0, "Matches played"],
      ["v", (c.total || 0) - (c.played || 0), "Still to come"],
-     ["v", c.teams || 0, "Teams"],
-     ["v", "MD " + (c.current_matchday || 0), "Current matchday"],
      ["v", c.with_xg || 0, "Matches with xG"]
     ].forEach(function (it) {
       var s = el("div", "stat");
@@ -1682,19 +1683,25 @@
   }
 
   /* ---- Projection: Poisson strengths + Monte-Carlo over remaining fixtures ---- */
+  var projectionUsedPrior = false;   // set by runProjection(); read by renderProjection() for the footer copy
   function poisson(lambda, k) {   // P(X=k) for X~Poisson(lambda)
     var f = 1;
     for (var i = 2; i <= k; i++) f *= i;
     return Math.pow(lambda, k) * Math.exp(-lambda) / f;
   }
-  function computeStrengths() {
-    var played = (D.matches || []).filter(function (m) { return m.played; });
+  // Ddata: a season's {matches, standings} (usually the season on screen, but also used
+  // standalone to read a completed season's own strengths for use as next season's prior).
+  // prior: optional {team: {atkH,defH,atkA,defA}} — multipliers (1.0 = league average) the
+  // shrinkage target is built from instead of flat 1.0. See runProjection() for where the
+  // prior itself comes from (last season's carried-over, regressed strength).
+  function computeStrengths(Ddata, prior) {
+    var played = (Ddata.matches || []).filter(function (m) { return m.played; });
     if (played.length < 20) return null;   // too little signal
     var homeG = 0, awayG = 0, n = played.length;
     played.forEach(function (m) { homeG += m.hs; awayG += m.as; });
     var lgHome = homeG / n, lgAway = awayG / n;
     var t = {};
-    (D.standings || []).forEach(function (r) {
+    (Ddata.standings || []).forEach(function (r) {
       t[r.team] = { gfH: 0, gaH: 0, nH: 0, gfA: 0, gaA: 0, nA: 0 };
     });
     played.forEach(function (m) {
@@ -1702,19 +1709,39 @@
       t[m.home].gfH += m.hs; t[m.home].gaH += m.as; t[m.home].nH++;
       t[m.away].gfA += m.as; t[m.away].gaA += m.hs; t[m.away].nA++;
     });
-    // Attack/defence strengths (home & away split), shrunk toward 1.0 for stability
-    // when a team has few games (prior weight w games of league-average).
-    var w = 4;
+    // Attack/defence strengths (home & away split), shrunk toward a prior for stability
+    // when a team has few games (prior weight w games' worth of the shrinkage target).
+    // With no prior the target is flat league average (1.0×) — fine once a season has
+    // built up its own sample, but early on it drags every team toward the middle
+    // regardless of known quality. REG regresses last season's edge 40% toward the mean
+    // (squads and form change year to year; a team rarely repeats its exact strength) —
+    // a reasonable default, not a fitted constant.
+    var w = 4, REG = 0.6;
     var str = {};
     Object.keys(t).forEach(function (tm) {
-      var x = t[tm];
-      var atkH = ((x.gfH + w * lgHome) / (x.nH + w)) / lgHome;
-      var defH = ((x.gaH + w * lgAway) / (x.nH + w)) / lgAway;
-      var atkA = ((x.gfA + w * lgAway) / (x.nA + w)) / lgAway;
-      var defA = ((x.gaA + w * lgHome) / (x.nA + w)) / lgHome;
+      var x = t[tm], p = prior && prior[tm];
+      var pAtkH = p ? 1 + REG * (p.atkH - 1) : 1, pDefH = p ? 1 + REG * (p.defH - 1) : 1;
+      var pAtkA = p ? 1 + REG * (p.atkA - 1) : 1, pDefA = p ? 1 + REG * (p.defA - 1) : 1;
+      var atkH = ((x.gfH + w * lgHome * pAtkH) / (x.nH + w)) / lgHome;
+      var defH = ((x.gaH + w * lgAway * pDefH) / (x.nH + w)) / lgAway;
+      var atkA = ((x.gfA + w * lgAway * pAtkA) / (x.nA + w)) / lgAway;
+      var defA = ((x.gaA + w * lgHome * pDefA) / (x.nA + w)) / lgHome;
       str[tm] = { atkH: atkH, defH: defH, atkA: atkA, defA: defA };
     });
     return { lgHome: lgHome, lgAway: lgAway, str: str };
+  }
+  // The season immediately before the one on screen, if its bundle happens to already be
+  // loaded (never fetched just for this — runProjection() below triggers that fetch and
+  // re-renders once it lands, so the first paint of a new season falls back to a flat
+  // prior and quietly upgrades a moment later rather than blocking on a network request).
+  function priorSeasonStrengths() {
+    var keys = Object.keys((IDX && IDX.seasons) || {}).sort();
+    var i = keys.indexOf(season);
+    var prevKey = i > 0 ? keys[i - 1] : null;
+    var prevD = prevKey && ALL.seasons[prevKey];
+    if (!prevD) return { prevKey: prevKey, str: null };
+    var S = computeStrengths(prevD, null);
+    return { prevKey: prevKey, str: S && S.str };
   }
   function matchLambdas(S, home, away) {
     var h = S.str[home], a = S.str[away];
@@ -1727,7 +1754,18 @@
     return k - 1;
   }
   function runProjection() {
-    var S = computeStrengths();
+    var prior = priorSeasonStrengths();
+    if (prior.prevKey && !prior.str && ALL.seasons[prior.prevKey] === undefined) {
+      // Last season exists but its bundle hasn't been fetched yet — load it in the
+      // background and re-render this tab once it's in, so the numbers quietly firm up
+      // instead of the page staying on a flat-average projection all season.
+      loadSeason(prior.prevKey, function () {
+        var active = document.querySelector("nav.tabs button.active");
+        if (active && active.dataset.view === "projection") renderProjection();
+      });
+    }
+    projectionUsedPrior = !!prior.str;
+    var S = computeStrengths(D, prior.str);
     if (!S) return null;
     var remaining = (D.matches || []).filter(function (m) { return !m.played; });
     var base = {};
@@ -1809,8 +1847,11 @@
     host.innerHTML =
       "<table class='proj'><thead><tr><th>#</th><th class='team'>Team</th><th>Pts now</th><th>Proj pts</th>" +
       "<th>Title</th><th>Top 4</th><th>Top 6</th><th>Relegated</th></tr></thead><tbody>" + body + "</tbody></table>" +
-      "<p class='hint'>Poisson model on this season's goals (home/away attack &amp; defence strengths, shrunk toward league average), " +
-      "Monte-Carlo over the " + (D.matches.filter(function (m) { return !m.played; }).length) + " remaining fixtures (3,000 sims).</p>";
+      "<p class='hint'>Poisson model on this season's goals (home/away attack &amp; defence strengths, " +
+      (projectionUsedPrior
+        ? "shrunk toward last season's own form early on and fading to this season's results as more are played"
+        : "shrunk toward league average") +
+      "), Monte-Carlo over the " + (D.matches.filter(function (m) { return !m.played; }).length) + " remaining fixtures (3,000 sims).</p>";
   }
 
   /* ---- Players ---- */
@@ -1828,14 +1869,23 @@
                    xg: function (p) { return p.xg || 0; }, xa: function (p) { return p.xa || 0; },
                    rating: function (p) { return p.rating || 0; } }[key] || function (p) { return 0; };
     var rows = PLAYERS.slice().sort(function (a, b) { return metric(b) - metric(a); }).slice(0, 50);
+    // Team is folded into the Player cell as a second line (the crest already carries it
+    // visually) instead of its own column — a standalone "Team" column was the widest
+    // thing in the table and the main reason it needed 920px+ to lay out cleanly on a
+    // phone even in landscape.
     var body = rows.map(function (p, i) {
       return "<tr><td class='pos'>" + (i + 1) + "</td>" +
-        "<td class='team'><div class='team-cell'>" + logoImg(p.team) + "<span class='nm'>" + esc(p.name) + "</span></div></td>" +
-        "<td>" + esc(p.team) + "</td><td>" + (p.mp || 0) + "</td><td>" + (p.g || 0) + "</td><td>" + (p.a || 0) + "</td>" +
+        "<td class='team'><div class='team-cell'>" + logoImg(p.team) +
+          "<span class='nm-wrap'><span class='nm'>" + esc(p.name) + "</span><span class='sub'>" + esc(p.team) + "</span></span></div></td>" +
+        "<td>" + (p.mp || 0) + "</td><td>" + (p.g || 0) + "</td><td>" + (p.a || 0) + "</td>" +
         "<td>" + (p.xg != null ? p.xg.toFixed(2) : "–") + "</td><td>" + (p.xa != null ? p.xa.toFixed(2) : "–") + "</td>" +
         "<td>" + (p.rating != null ? p.rating.toFixed(2) : "–") + "</td></tr>";
     }).join("");
-    host.innerHTML = "<table><thead><tr><th>#</th><th class='team'>Player</th><th>Team</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>xA</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
+    // class="rank players": table.rank.players in styles.css is what gives this table its
+    // scroll floor-width and the folded team-cell layout below — without the class those
+    // rules never matched anything and the table just shrank to fit (wrapping "Real Madrid"
+    // onto two lines) instead of genuinely scrolling.
+    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>xA</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   /* ---- Data dump ---- */
