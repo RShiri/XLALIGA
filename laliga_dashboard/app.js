@@ -421,8 +421,11 @@
     host.innerHTML = svg.join("");
     host.querySelectorAll("circle.pt").forEach(function (c) {
       c.addEventListener("mousemove", function (e) {
-        tooltip.innerHTML = '<div class="t-team">' + c.dataset.team + " vs " + c.dataset.opp + "</div>" +
-          '<div class="t-line">Goals: ' + c.dataset.g + " · xG: " + c.dataset.xg + "</div>";
+        // "TeamA vs TeamB" reads like it's describing the fixture as a whole, so a dot
+        // with 0 goals looked like a misreported 0-0 — this is one team's OWN tally
+        // (they can easily be the side that didn't score), so say so plainly.
+        tooltip.innerHTML = '<div class="t-team">' + c.dataset.team + " <span style='color:var(--muted-2);font-weight:600'>vs " + c.dataset.opp + "</span></div>" +
+          '<div class="t-line">' + c.dataset.team + " scored " + c.dataset.g + " from " + c.dataset.xg + " xG of their own chances</div>";
         tooltip.style.opacity = "1";
         tooltip.style.left = (e.clientX + 14) + "px";
         tooltip.style.top = (e.clientY + 14) + "px";
