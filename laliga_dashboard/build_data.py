@@ -119,7 +119,6 @@ def build_matches(season, schedule):
         if rich:
             ms = rich.get("match_stats") or {}
             stats = _stat_line(ms)
-            xg_home, xg_away = stats["xg"][0], stats["xg"][1]
             sources = rich.get("_sources", [])
             has_events = bool(rich.get("events"))
             # The scraped WhoScored fulltime score is authoritative: FotMob's historical
@@ -133,11 +132,21 @@ def build_matches(season, schedule):
                 hs = rich_hs
             if rich_as is not None:
                 as_ = rich_as
-            if (xg_home is None or xg_away is None) and rich.get("events"):
+            # Our own shot-based model is what every other xG on the site is built from —
+            # the Match Centre scoreboard, the shot maps and the browser PNG export all sum
+            # the SAME shot events build_match_details.py derives from this same raw match.
+            # Prefer it here too whenever those events exist, so a match never shows two
+            # different xG totals depending on which tab it's viewed from. FotMob's own
+            # match_stats.xg (present even without a matchDetails token, unlike its shot-by-
+            # shot data) is only used as a fallback, for a match that hasn't been deep-scraped
+            # and has no shot events of ours to compute from.
+            if rich.get("events"):
                 ch, ca = team_xg_from_events(rich)
                 if ch is not None:
                     xg_home, xg_away, xg_estimated = ch, ca, True
                     stats["xg"] = [xg_home, xg_away]
+            if xg_home is None or xg_away is None:
+                xg_home, xg_away = stats["xg"][0], stats["xg"][1]
 
         played = hs is not None and as_ is not None
         has_stats = stats["xg"][0] is not None or stats["shots"][0] is not None
