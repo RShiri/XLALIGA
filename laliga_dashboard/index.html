@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=883681d0c7" />
+<link rel="stylesheet" href="styles.css?v=f06aae3ca2" />
 </head>
 <body class="laliga">
 <header class="site">
@@ -77,8 +77,8 @@
     <div class="section-head">
       <h2>Player Statistics</h2>
       <p>Goals, assists, xG and ratings aggregated across every deep-scraped match. Pick a leaderboard.
-         xG and xA come from <b>our own shot model</b>, trained on 11,830 real shots — the xG Analysis tab
-         explains how it's built.</p>
+         xG and xA come from <b>our own shot model</b>, trained on 77,600+ real shots across La Liga, the
+         Premier League and the World Cup — the xG Analysis tab explains how it's built.</p>
     </div>
     <div class="controls">
       <div class="seg" role="group" aria-label="Leaderboard">
@@ -300,13 +300,17 @@
          0.7 xG; a hopeful 30-metre strike 0.03. Sum a team's shots and you get how many goals an <i>average</i>
          finisher would score from those chances — a better "who deserved it" number than the scoreline alone.</p>
       <p><b>Where does the xG itself come from? We built the model ourselves.</b> Every shot is scored by a
-         logistic-regression model trained on <b>11,830 real shots</b> — the whole 2025/26 La Liga season plus the
-         2026 World Cup — against what actually happened to them. It weighs the shot's <b>distance</b>, the
-         <b>angle the goal mouth opens up</b> from that spot, whether it was a <b>header</b>, an Opta
-         <b>big chance</b>, and the <b>situation</b> (open play, free kick, corner, set piece or fast break). A
-         per-league finishing calibration then keeps summed xG in line with goals actually scored — penalties are
-         fixed at 0.76. The same model runs across our La Liga, World Cup and FC Barcelona dashboards, so the
-         numbers compare cleanly everywhere.</p>
+         blended logistic-regression + gradient-boosted model trained on <b>77,600+ real shots</b> — four full
+         La Liga seasons, four Premier League seasons and the 2026 World Cup — against what actually happened to
+         them. Besides the shot's <b>distance</b>, the <b>angle the goal mouth opens up</b>, whether it was a
+         <b>header</b>, an Opta <b>big chance</b> and the <b>situation</b> (open play, free kick, corner, set piece
+         or fast break), it also reads the <b>assisting pass</b> — was it a cross, a through ball, a cutback, a
+         first-time touch, a one-on-one — since those change how likely the shot is to go in even at the same
+         distance and angle. A per-league finishing calibration then keeps summed xG in line with goals actually
+         scored — penalties are fixed at 0.79. The same model runs across our La Liga, World Cup and FC Barcelona
+         dashboards, so the numbers compare cleanly everywhere. On this season's matches it has tracked actual
+         goals more closely than either FotMob's or Understat's own published xG — see each match's row in the
+         Data tab for a side-by-side.</p>
       <p class="explainer-note">La Liga xG is computed from the deep-scraped WhoScored shot data. Until a match is
          deep-scraped it contributes to the table but not to these charts.</p>
     </details>
@@ -492,9 +496,9 @@
 
 <!-- Static, cacheable scripts. data/index.js is tiny (season list + cache version); the season
      bundle data/<season>.js is fetched on demand by app.js (build_split.py writes both). -->
-<script src="data/index.js?v=451a8260b7"></script>
+<script src="data/index.js?v=9d8ba0ab2e"></script>
 <script src="database/manifest.js"></script>
-<script src="app.js?v=883681d0c7"></script>
-<script src="control.js?v=883681d0c7"></script>
+<script src="app.js?v=f06aae3ca2"></script>
+<script src="control.js?v=f06aae3ca2"></script>
 </body>
 </html>

@@ -210,6 +210,8 @@ table.rank tbody td.team { text-align: left; }
 table.rank tbody td .delta.pos { color: var(--positive); font-weight: 600; }
 table.rank tbody td .delta.neg { color: var(--negative); font-weight: 600; }
 table.players { min-width: 620px; }
+table.players tbody td .delta.pos { color: var(--positive); font-weight: 600; }
+table.players tbody td .delta.neg { color: var(--negative); font-weight: 600; }
 table.players tbody tr:hover td { background: var(--plate-2); }
 /* Team is folded into the Player cell as a muted second line (see app.js renderPlayers).
    Deliberately not table.rank: these headers aren't click-to-sort like the xG ledger's are,
