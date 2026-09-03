@@ -1876,22 +1876,35 @@
     // visually) instead of its own column — a standalone "Team" column was the widest
     // thing in the table and the main reason it needed 920px+ to lay out cleanly on a
     // phone even in landscape.
+    function diffCell(v) {
+      if (v == null) return "<td>–</td>";
+      var cls = v > 0.05 ? "delta pos" : v < -0.05 ? "delta neg" : "delta";
+      return "<td><span class='" + cls + "'>" + (v > 0 ? "+" : "") + v.toFixed(2) + "</span></td>";
+    }
     var body = rows.map(function (p, i) {
       return "<tr><td class='pos'>" + (i + 1) + "</td>" +
         "<td class='team'><div class='team-cell'>" + logoImg(p.team) +
           "<span class='nm-wrap'><span class='nm'>" + esc(p.name) + "</span><span class='sub'>" + esc(p.team) + "</span></span></div></td>" +
         "<td>" + (p.mp || 0) + "</td><td>" + (p.g || 0) + "</td><td>" + (p.a || 0) + "</td>" +
         "<td>" + (p.xg != null ? p.xg.toFixed(2) : "–") + "</td><td>" + (p.xa != null ? p.xa.toFixed(2) : "–") + "</td>" +
+        diffCell(p.xg_diff) + diffCell(p.xa_diff) +
+        "<td>" + (p.pass_pct != null ? p.pass_pct + "%" : "–") + "</td>" +
         "<td>" + (p.rating != null ? p.rating.toFixed(2) : "–") + "</td></tr>";
     }).join("");
     // class="rank players": table.rank.players in styles.css is what gives this table its
     // scroll floor-width and the folded team-cell layout below — without the class those
     // rules never matched anything and the table just shrank to fit (wrapping "Real Madrid"
     // onto two lines) instead of genuinely scrolling.
-    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>xA</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
+    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>xA</th>" +
+      "<th title='Goals minus xG — positive means finishing above expected'>xG&Delta;</th>" +
+      "<th title='Assists minus xA — positive means more assists than expected'>xA&Delta;</th>" +
+      "<th>Pass%</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   /* ---- Data dump ---- */
+  function xgPair(h, a) {
+    return (h != null && a != null) ? h.toFixed(2) + "&ndash;" + a.toFixed(2) : "–";
+  }
   function renderData() {
     var host = document.getElementById("dataTable");
     var ms = (D.matches || []).filter(function (m) { return m.played; })
@@ -1899,10 +1912,16 @@
     var body = ms.map(function (m) {
       return "<tr><td>" + (m.matchday || "") + "</td><td>" + fmtDate(m.date) + "</td>" +
         "<td class='team'>" + esc(m.home) + "</td><td class='sc'>" + m.hs + "–" + m.as + "</td><td class='team'>" + esc(m.away) + "</td>" +
-        "<td>" + (m.xg_home != null ? m.xg_home.toFixed(2) : "–") + "</td><td>" + (m.xg_away != null ? m.xg_away.toFixed(2) : "–") + "</td>" +
+        "<td>" + xgPair(m.xg_home, m.xg_away) + "</td>" +
+        "<td>" + xgPair(m.xg_home_fotmob, m.xg_away_fotmob) + "</td>" +
+        "<td>" + xgPair(m.xg_home_understat, m.xg_away_understat) + "</td>" +
         "<td>" + (m.png ? '<a href="' + esc(m.png) + '" target="_blank">PNG</a>' : "–") + "</td></tr>";
     }).join("");
-    host.innerHTML = "<table><thead><tr><th>MD</th><th>Date</th><th>Home</th><th>Score</th><th>Away</th><th>xG H</th><th>xG A</th><th>Info</th></tr></thead><tbody>" + body + "</tbody></table>";
+    host.innerHTML = "<table><thead><tr><th>MD</th><th>Date</th><th>Home</th><th>Score</th><th>Away</th>" +
+      "<th title='Our own shot model (v3), H–A'>xG (ours)</th>" +
+      "<th title='FotMob official xG stat, H–A — only present for recently-scraped matches'>xG (FotMob)</th>" +
+      "<th title='Understat official xG, H–A'>xG (Understat)</th>" +
+      "<th>Info</th></tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   /* ================= wiring ================= */

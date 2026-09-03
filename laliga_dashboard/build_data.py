@@ -85,6 +85,49 @@ def _find_png(season, fotmob_id):
     return None
 
 
+UNDERSTAT_CACHE_DIR = os.path.join(ROOT, "laliga", "understat_cache")
+_understat_index_cache: dict[str, dict] = {}
+
+
+def _team_key(name):
+    """Same accent-fold + suffix-strip as laliga.understat._key, inlined so build_data.py
+    doesn't have to import a module that pulls in Selenium at import time."""
+    import re
+    import unicodedata
+    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
+    for junk in ("cf ", "cd ", "rcd ", "ud ", "sd ", "deportivo ", " balompie", " club", "real ", "fc "):
+        s = s.replace(junk, " ")
+    return re.sub(r"[^a-z0-9]", "", s)
+
+
+def _understat_index(season):
+    """{(home_key, away_key): {h,a} xG} for a season, from laliga/understat_cache/<year>.json
+    — a one-shot getLeagueData dump per season (py -m laliga.understat has no season-bulk CLI;
+    the cache files are written by a one-off fetch script, see PROGRESS.md). Missing file =
+    Understat comparison simply isn't available for that season yet (not an error)."""
+    if season in _understat_index_cache:
+        return _understat_index_cache[season]
+    start_year = season.split("-")[0]
+    path = os.path.join(UNDERSTAT_CACHE_DIR, f"{start_year}.json")
+    idx = {}
+    if os.path.exists(path):
+        try:
+            for m in json.load(open(path, encoding="utf-8")):
+                if not m.get("isResult"):
+                    continue
+                hk, ak = _team_key(m["h"]["title"]), _team_key(m["a"]["title"])
+                idx[(hk, ak)] = (float(m["xG"]["h"]), float(m["xG"]["a"]))
+        except Exception:
+            idx = {}
+    _understat_index_cache[season] = idx
+    return idx
+
+
+def _understat_xg(season, home, away):
+    idx = _understat_index(season)
+    return idx.get((_team_key(home), _team_key(away)), (None, None))
+
+
 def _load_rich(season, fotmob_id):
     """Return the rich scraped match JSON for a fixture, or None."""
     for cand in (os.path.join(MATCH_DIR, season, f"{fotmob_id}.json"),
@@ -115,12 +158,19 @@ def build_matches(season, schedule):
         has_events = False
         sources = []
 
+        xg_home_fotmob = xg_away_fotmob = None
+
         rich = _load_rich(season, fid)
         if rich:
             ms = rich.get("match_stats") or {}
             stats = _stat_line(ms)
             sources = rich.get("_sources", [])
             has_events = bool(rich.get("events"))
+            # FotMob's own xG, kept aside BEFORE stats["xg"] below gets overwritten by our
+            # model — so the Data tab can show all three sources side by side instead of
+            # only ever seeing whichever one build_matches() picked as canonical.
+            fm_xg = (rich.get("stats_by_source") or {}).get("fotmob", {}).get("xg") or {}
+            xg_home_fotmob, xg_away_fotmob = fm_xg.get("home"), fm_xg.get("away")
             # The scraped WhoScored fulltime score is authoritative: FotMob's historical
             # feed occasionally reports a real result as 0-0 (seen in 2023-24 & 2024-25),
             # and a stale schedule spine can leave played matches scoreless. Prefer the rich
@@ -150,6 +200,9 @@ def build_matches(season, schedule):
 
         played = hs is not None and as_ is not None
         has_stats = stats["xg"][0] is not None or stats["shots"][0] is not None
+        xg_home_understat = xg_away_understat = None
+        if played:
+            xg_home_understat, xg_away_understat = _understat_xg(season, home, away)
         matches.append({
             "id": str(fid),
             "fotmob_id": fid,
@@ -166,6 +219,8 @@ def build_matches(season, schedule):
             "has_events": has_events,
             "xg_home": xg_home, "xg_away": xg_away,
             "xg_estimated": xg_estimated,
+            "xg_home_fotmob": xg_home_fotmob, "xg_away_fotmob": xg_away_fotmob,
+            "xg_home_understat": xg_home_understat, "xg_away_understat": xg_away_understat,
             "png": _find_png(season, fid),
             "stats": stats,
             "sources": sources,

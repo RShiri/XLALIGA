@@ -1,23 +1,29 @@
 """
 Understat source for La Liga — xG / shots / PPDA / deep completions + shot-level xG.
 
-Understat publishes rich, free xG data for the top-5 leagues (incl. La Liga) as JSON
-blobs embedded in each page (``var X = JSON.parse('...')``). It used to be scrapeable
-with plain ``urllib``, but the site now bot-blocks raw HTTP (returns a ~18 KB shell with
-no data blobs), so we load pages through Selenium — the same browser the WhoScored scrape
-already drives. The scraper passes its existing driver in (efficient, and serialised by
-the run-lock); if none is given we spin up our own.
+Understat used to embed its data as page blobs (``var X = JSON.parse('...')``), but as of
+2026-07 the site serves them via AJAX instead: league pages carry no blob at all, and match
+pages keep only ``match_info``. Everything now comes from two JSON endpoints:
+
+    GET /getLeagueData/<League Name>/<startYear>   e.g. "La liga/2025" (space, not
+        underscore; startYear = season's first calendar year) -> {teams, players, dates}.
+        ``dates`` lists every match in the season (played and upcoming) with per-side
+        goals + xG — this alone is enough for season/team-level xG comparisons.
+    GET /getMatchData/<understat_match_id>          -> {rosters, shots} — shots.h/.a and
+        rosters.h/.a are keyed exactly like the old blobs (minute/X/Y/xG/player/result/...
+        per shot; goals/xG/xA/time/position per roster entry), plus extra fields
+        (shotType, lastAction, player_assisted, xGChain, xGBuildup, ...).
+
+Raw HTTP to either endpoint is bot-blocked (returns an 18 KB shell). What works: load any
+understat.com page in Selenium first (cookies/JS challenge), then run a same-origin
+``fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})`` via
+``execute_async_script`` — no token, ~0.3s/request. We reuse the WhoScored scraper's driver
+when handed one (serialised by the run-lock); otherwise we spin up our own per call.
 
 What we return (``understat_fetch_match_details``) is a **FotMob-shaped** dict so the
 scraper's existing ``_parse_fotmob_*`` consumers can merge it alongside FotMob/WhoScored,
 plus a ``_understat`` block carrying shot-level data (per-shot xG + coords + player) and
 per-player roster stats (goals/assists/xG/xA/minutes) for the dashboard.
-
-Blobs on a match page:
-  · match_info  — h_xg/a_xg, h_shot/a_shot, h_shotOnTarget/a_shotOnTarget, h_deep/a_deep,
-                  h_ppda/a_ppda, team_h/team_a, h/a (team ids), date
-  · shotsData   — {h:[...], a:[...]}, each shot: minute, xG, player, result, X, Y, situation, ...
-  · rostersData — {h:{...}, a:{...}}, each player: player, goals, assists, xG, xA, time, position
 
 Season note: Understat keys a season by its START year — 2025 = 2025/26, 2026 = 2026/27.
 """
@@ -28,12 +34,12 @@ import json
 import time
 import logging
 import unicodedata
-from datetime import datetime
 
 log = logging.getLogger("laliga.understat")
 
 UNDERSTAT = "https://understat.com"
-LEAGUE_SLUG = "La_liga"
+LEAGUE_SLUG = "La_liga"     # legacy page-path slug (kept for reference/back-compat)
+LEAGUE_NAME = "La liga"     # AJAX endpoint's league name (note the space)
 
 
 # ── team-name matching across feeds ───────────────────────────────────────────
@@ -66,13 +72,35 @@ def _new_driver():
         return d
 
 
-def _get_page(url: str, driver=None, wait: float = 4.0) -> str:
+_FETCH_JS = """
+const url = arguments[0];
+const cb = arguments[arguments.length - 1];
+fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+  .then(r => r.text())
+  .then(t => cb({ok: true, body: t}))
+  .catch(e => cb({ok: false, err: String(e)}));
+"""
+
+
+def _fetch_ajax(path: str, driver=None) -> dict | list | None:
+    """GET understat.com<path> as JSON via an in-page fetch (bypasses the raw-HTTP bot
+    block). `path` starts with '/'. Spins up its own driver if none is given."""
     own = driver is None
     d = driver or _new_driver()
     try:
-        d.get(url)
-        time.sleep(wait)
-        return d.page_source
+        if not (d.current_url or "").startswith(UNDERSTAT):
+            d.get(UNDERSTAT + "/")
+            time.sleep(2.5)
+        d.set_script_timeout(20)
+        res = d.execute_async_script(_FETCH_JS, UNDERSTAT + path)
+        if not res or not res.get("ok"):
+            log.warning("Understat AJAX %s failed: %s", path, (res or {}).get("err"))
+            return None
+        try:
+            return json.loads(res["body"])
+        except Exception:
+            log.warning("Understat AJAX %s: non-JSON body (%d bytes)", path, len(res.get("body", "")))
+            return None
     finally:
         if own:
             try:
@@ -81,27 +109,22 @@ def _get_page(url: str, driver=None, wait: float = 4.0) -> str:
                 pass
 
 
-# ── blob decoding ─────────────────────────────────────────────────────────────
-def _decode_blob(raw: str):
-    """Decode an Understat ``JSON.parse('...')`` payload (hex-escaped, UTF-8)."""
-    for attempt in (
-        lambda r: json.loads(r.encode("utf-8").decode("unicode_escape").encode("latin-1").decode("utf-8")),
-        lambda r: json.loads(r.encode("utf-8").decode("unicode_escape")),
-    ):
-        try:
-            return attempt(raw)
-        except Exception:
-            continue
-    return None
+# ── league data (cached per season within a process run) ──────────────────────
+_league_cache: dict[str, dict] = {}
 
 
-def _blobs(page: str) -> dict:
-    out = {}
-    for name, raw in re.findall(r"var\s+(\w+)\s*=\s*JSON\.parse\('(.+?)'\);", page, re.DOTALL):
-        data = _decode_blob(raw)
-        if data is not None:
-            out[name] = data
-    return out
+def get_league_data(season: str, driver=None) -> dict | None:
+    """{teams, players, dates} for a season ('2025-26' style). `dates` covers every
+    fixture (played + upcoming) with per-side goals + xG. Cached per season/process."""
+    if season in _league_cache:
+        return _league_cache[season]
+    start_year = season.split("-")[0]
+    data = _fetch_ajax(f"/getLeagueData/{LEAGUE_NAME}/{start_year}", driver)
+    if not isinstance(data, dict) or not data.get("dates"):
+        log.warning("Understat: no dates for %s %s", LEAGUE_NAME, start_year)
+        return None
+    _league_cache[season] = data
+    return data
 
 
 # ── match discovery ───────────────────────────────────────────────────────────
@@ -109,11 +132,9 @@ def find_understat_match_id(home: str, away: str, date: str | None,
                             season: str, driver=None) -> str | None:
     """Find an Understat match id for home/away (+ optional YYYY-MM-DD) in a season.
     ``season`` is '2025-26' style; Understat uses the start year (2025)."""
-    start_year = season.split("-")[0]
-    page = _get_page(f"{UNDERSTAT}/league/{LEAGUE_SLUG}/{start_year}", driver)
-    dates = _blobs(page).get("datesData")
+    league = get_league_data(season, driver)
+    dates = league.get("dates") if league else None
     if not dates:
-        log.warning("Understat: no datesData for %s %s", LEAGUE_SLUG, start_year)
         return None
     hk, ak = _key(home), _key(away)
     best = None
@@ -142,55 +163,48 @@ def _num(v, cast=float):
 
 
 def fetch_understat_match(match_id: str, driver=None) -> dict | None:
-    """Return the raw parsed blobs {match_info, shotsData, rostersData} for a match id."""
-    page = _get_page(f"{UNDERSTAT}/match/{match_id}", driver)
-    b = _blobs(page)
-    info = b.get("match_info")
-    if not info or "h_xg" not in info:
-        # match_info sometimes appears as a different var; scan for the xG-bearing dict.
-        for v in b.values():
-            if isinstance(v, dict) and "h_xg" in v:
-                info = v
-                break
-    if not info:
-        log.warning("Understat: match_info not found for %s", match_id)
+    """Return {shots: {h, a}, rosters: {h, a}} for a match id, straight from
+    getMatchData (both already keyed by side, same shape the old page blobs used)."""
+    data = _fetch_ajax(f"/getMatchData/{match_id}", driver)
+    if not isinstance(data, dict) or not data.get("shots"):
+        log.warning("Understat: getMatchData empty for %s", match_id)
         return None
-    return {"match_info": info, "shotsData": b.get("shotsData"), "rostersData": b.get("rostersData")}
+    return {"shots": data.get("shots"), "rosters": data.get("rosters")}
 
 
 def understat_fetch_match_details(home: str, away: str, date: str | None,
                                   season: str, driver=None, match_id: str | None = None) -> dict | None:
     """FotMob-shaped stats dict (so the scraper's parsers/merge consume it) + a `_understat`
     block with shot-level + roster data. Returns None if the match can't be found/parsed."""
+    league = get_league_data(season, driver)
+    if not league:
+        return None
     if match_id is None:
         match_id = find_understat_match_id(home, away, date, season, driver)
     if not match_id:
         return None
-    parsed = fetch_understat_match(match_id, driver)
-    if not parsed:
+    info = next((m for m in league["dates"] if str(m.get("id")) == str(match_id)), None)
+    if not info:
         return None
-    info = parsed["match_info"]
+    matched = fetch_understat_match(match_id, driver)
 
-    # Map Understat match_info → the same match_stats keys the scraper/dashboard use.
+    # Map Understat's league-row → the same match_stats keys the scraper/dashboard use.
+    # (Shot/deep/PPDA breakdowns aren't in the league row; only xG/goals are — the rest
+    # would need per-match getMatchData aggregation, which callers don't currently need.)
     ms = {
-        "xg_home": _num(info.get("h_xg")), "xg_away": _num(info.get("a_xg")),
-        "shots_home": _num(info.get("h_shot"), int), "shots_away": _num(info.get("a_shot"), int),
-        "shots_on_target_home": _num(info.get("h_shotOnTarget"), int),
-        "shots_on_target_away": _num(info.get("a_shotOnTarget"), int),
-        "deep_home": _num(info.get("h_deep"), int), "deep_away": _num(info.get("a_deep"), int),
-        "ppda_home": _num(info.get("h_ppda")), "ppda_away": _num(info.get("a_ppda")),
+        "xg_home": _num(info.get("xG", {}).get("h")), "xg_away": _num(info.get("xG", {}).get("a")),
     }
     return {
         "_source": "understat",
         "match_id": match_id,
-        "home_name": info.get("team_h", home),
-        "away_name": info.get("team_a", away),
-        "score": [_num(info.get("h_goals"), int), _num(info.get("a_goals"), int)],
+        "home_name": info.get("h", {}).get("title", home),
+        "away_name": info.get("a", {}).get("title", away),
+        "score": [_num(info.get("goals", {}).get("h"), int), _num(info.get("goals", {}).get("a"), int)],
         "match_stats": ms,
         "_understat": {
             "match_id": match_id,
-            "shots": parsed.get("shotsData"),
-            "rosters": parsed.get("rostersData"),
+            "shots": (matched or {}).get("shots"),
+            "rosters": (matched or {}).get("rosters"),
             "info": info,
         },
     }
