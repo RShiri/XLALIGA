@@ -230,6 +230,7 @@ SEASON_RE = re.compile(r"^\d{4}-\d{2}$")
 IDS_RE = re.compile(r"^\d[\d,\s]*$")
 
 REBUILD_STEPS = [
+    [PY, "laliga/render_missing.py"],            # PNGs for bulk-scraped matches + publish to laliga_png/
     [PY, "laliga_dashboard/build_match_details.py"],
     [PY, "laliga_dashboard/build_players.py"],
     [PY, "laliga_dashboard/build_shots.py"],

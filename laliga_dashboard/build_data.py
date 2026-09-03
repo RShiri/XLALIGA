@@ -21,6 +21,7 @@ import os
 import sys
 import json
 import glob
+import shutil
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -69,10 +70,18 @@ def _stat_line(ms):
 
 
 def _find_png(season, fotmob_id):
-    for d in PNG_DIRS:
-        p = os.path.join(d, f"{fotmob_id}.png")
-        if os.path.exists(p):
-            return os.path.relpath(p, os.path.dirname(OUT)).replace("\\", "/")
+    """Link to the PUBLISHED copy (laliga_png/, tracked) — a PNG that only exists in the
+    git-ignored laliga/output/ works on localhost but 404s on GitHub Pages, so copy it into
+    laliga_png/ here and always emit that path."""
+    published, output = (os.path.join(d, f"{fotmob_id}.png") for d in PNG_DIRS)
+    if not os.path.exists(published) and os.path.exists(output):
+        try:
+            os.makedirs(os.path.dirname(published), exist_ok=True)
+            shutil.copy2(output, published)
+        except OSError:
+            return os.path.relpath(output, os.path.dirname(OUT)).replace("\\", "/")
+    if os.path.exists(published):
+        return os.path.relpath(published, os.path.dirname(OUT)).replace("\\", "/")
     return None
 
 

@@ -312,8 +312,12 @@
         esc(g.scorer) + (g.pen ? " (P)" : "") + (g.own ? " (OG)" : "") + " " + as + "</span>";
     }).join("");
 
-    var pngBtn = D.png
-      ? '<a class="png-btn" href="' + esc(D.png) + '" target="_blank" rel="noopener" download>' +
+    // The detail file records the PNG path at build time; the season bundle (build_data.py)
+    // is rebuilt more often, so fall back to its record when a PNG was rendered later.
+    var recPng = (function () { var r = matchRecord(); return r && r.png; })();
+    var png = D.png || recPng;
+    var pngBtn = png
+      ? '<a class="png-btn" href="' + esc(png) + '" target="_blank" rel="noopener" download>' +
         '🖼️ Infographic PNG</a>'
       : "";
 

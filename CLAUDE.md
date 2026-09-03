@@ -95,7 +95,9 @@ powershell -File laliga/register_tasks.ps1 -Season 2026-27   # arm per-match liv
 # (re)scrape rich per-match data (needs Chrome; ~1h for a full season)
 py laliga/scrape_whoscored.py --season 2025-26                # full season (resumable)
 py laliga/scrape_whoscored.py --season 2025-26 --ids 1914240  # specific WhoScored id(s)
-# then rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
+# then render PNGs for anything the bulk crawler scraped (it saves JSON only) + publish to laliga_png/,
+# and rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
+py laliga/render_missing.py --season 2025-26
 py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_players.py \
   && py laliga_dashboard/build_database.py && py laliga_dashboard/build_shots.py \
   && py laliga_dashboard/build_data.py && py laliga_dashboard/build_player_lab.py \
@@ -197,6 +199,12 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - **players.js fields are `g`/`a`/`xg`/`mp`** (not `goals`/`assists`). `app.js` reads those.
 - **Publish dir is `laliga_png/` NOT `LaLiga/`** — the filesystem is case-insensitive, so
   "LaLiga" aliases the `laliga/` code folder. Env var `LALIGA_PNG_SUBDIR`.
+- **PNGs only exist for matches that went through `run_match.py`/`backfill.py`.** The bulk
+  crawler `scrape_whoscored.py` saves raw JSON only, so a matchday scraped that way has no PNG
+  link in the Data tab and no download button in the Match Centre until `laliga/render_missing.py`
+  runs (it renders from the raw JSONs, no browser, and copies every PNG into `laliga_png/`; it is
+  the first step of the Scraper button's rebuild). `build_data.py` links the *published*
+  `laliga_png/` copy — a PNG that only lives in the git-ignored `laliga/output/` 404s on the live site.
 - **Raw match JSONs are gitignored** (`laliga/matches/20*/*.json`, ~2 MB each, 769 MB/season).
   The dashboard ships the derived `matches_detail/*.js` (~74 MB) instead. If you re-scrape,
   don't commit the raw folder.
