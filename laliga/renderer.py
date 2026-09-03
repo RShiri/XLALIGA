@@ -251,17 +251,41 @@ def _contrasting_text(bg_hex: str) -> str:
     return "#ffffff" if luminance < 0.45 else "#111111"
 
 
+def _crest_path(team_name: str, exts=("png", "jpg", "svg")):
+    """Locate a club crest, tolerating accent drift in the team name.
+
+    FotMob alternates between "Atletico Madrid"/"Atlético Madrid" and
+    "Malaga"/"Málaga" depending on which feed answered, while the files on disk
+    carry one spelling. An exact-name miss used to render the badge blank.
+    """
+    logo_dir = _REPO_ROOT / "team_logos" / "laliga"
+    for ext in exts:
+        p = logo_dir / f"{team_name}.{ext}"
+        if p.exists():
+            return p
+    if not logo_dir.is_dir():
+        return None
+    want = _fold_name(team_name)
+    for cand in logo_dir.iterdir():
+        if cand.suffix.lstrip(".").lower() in exts and _fold_name(cand.stem) == want:
+            return cand
+    return None
+
+
+def _fold_name(name: str) -> str:
+    stripped = unicodedata.normalize("NFKD", (name or "").strip())
+    return "".join(c for c in stripped if not unicodedata.combining(c)).casefold()
+
+
 def _load_logo(team_name: str, size: tuple[int, int] = (80, 80)):
     """Return a PIL Image for the team logo, or None if not found."""
     try:
         from PIL import Image
-        logo_dir = _REPO_ROOT / "team_logos" / "laliga"
-        for ext in ("png", "jpg", "svg"):
-            p = logo_dir / f"{team_name}.{ext}"
-            if p.exists():
-                img = Image.open(p).convert("RGBA")
-                img.thumbnail(size, Image.LANCZOS)
-                return img
+        p = _crest_path(team_name)
+        if p is not None:
+            img = Image.open(p).convert("RGBA")
+            img.thumbnail(size, Image.LANCZOS)
+            return img
     except Exception as e:
         log.exception("Error loading logo for %s: %s", team_name, e)
     return None
@@ -283,42 +307,40 @@ def _place_flag(ax: plt.Axes, team_name: str,
         from PIL import Image
         import numpy as _np
 
-        logo_dir = _REPO_ROOT / "team_logos" / "laliga"
-        for ext in ("png", "jpg"):
-            p = logo_dir / f"{team_name}.{ext}"
-            if p.exists():
-                img = Image.open(p).convert("RGBA")
-                img_w, img_h = img.size
-                img_aspect = img_w / img_h
+        p = _crest_path(team_name, exts=("png", "jpg"))
+        if p is not None:
+            img = Image.open(p).convert("RGBA")
+            img_w, img_h = img.size
+            img_aspect = img_w / img_h
 
-                # Calculate the correct width in axes units to maintain aspect ratio
-                fig = ax.get_figure()
-                fig_w, fig_h = fig.get_size_inches()
-                bbox = ax.get_position()
-                W_inches = bbox.width * fig_w
-                H_inches = bbox.height * fig_h
-                axes_aspect = W_inches / H_inches
+            # Calculate the correct width in axes units to maintain aspect ratio
+            fig = ax.get_figure()
+            fig_w, fig_h = fig.get_size_inches()
+            bbox = ax.get_position()
+            W_inches = bbox.width * fig_w
+            H_inches = bbox.height * fig_h
+            axes_aspect = W_inches / H_inches
 
-                # Compute w to preserve aspect ratio
-                w_real = h * img_aspect / axes_aspect
+            # Compute w to preserve aspect ratio
+            w_real = h * img_aspect / axes_aspect
 
-                # Determine x_ctr based on alignment
-                if align == "left":
-                    x_ctr = x + w_real / 2
-                elif align == "right":
-                    x_ctr = x - w_real / 2
-                else:
-                    x_ctr = x
+            # Determine x_ctr based on alignment
+            if align == "left":
+                x_ctr = x + w_real / 2
+            elif align == "right":
+                x_ctr = x - w_real / 2
+            else:
+                x_ctr = x
 
-                ax.imshow(
-                    _np.array(img),
-                    extent=[x_ctr - w_real / 2, x_ctr + w_real / 2,
-                            y_ctr - h / 2, y_ctr + h / 2],
-                    aspect="auto",
-                    zorder=6,
-                    interpolation="lanczos",
-                )
-                return
+            ax.imshow(
+                _np.array(img),
+                extent=[x_ctr - w_real / 2, x_ctr + w_real / 2,
+                        y_ctr - h / 2, y_ctr + h / 2],
+                aspect="auto",
+                zorder=6,
+                interpolation="lanczos",
+            )
+            return
         log.warning("Flag file not found for team: %s", team_name)
     except Exception as e:
         log.exception("Error placing flag for %s: %s", team_name, e)
@@ -1357,6 +1379,11 @@ def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | No
         ("wc_dashboard_shots", "build_shots.py", "shots.js (Team Lab)"),
         ("wc_dashboard_database", "build_database.py", "database export"),
         ("wc_dashboard_player_lab", "build_player_lab.py", "player_lab per-team events"),
+        # MUST stay last: the site only loads data/index.js + data/<season>.js, which
+        # build_split.py derives from data.js/players.js/shots.js. Without this step a
+        # batch scrape (backfill.py / the scheduled tasks) rebuilds every builder output
+        # yet the live site silently keeps showing the previous bundles.
+        ("wc_dashboard_split", "build_split.py", "per-season bundles (data/)"),
     ):
         if modname == "wc_dashboard_details_all" and not full_rebuild:
             continue                       # the single page was already written above
@@ -1379,9 +1406,4 @@ def output_filename(match_data: dict, output_dir: str = ".") -> str:
     home   = match_data.get("home", {}).get("name", "Home").replace(" ", "_")
     away   = match_data.get("away", {}).get("name", "Away").replace(" ", "_")
     fname  = f"{date}_{home}_vs_{away}.png"
-        # MUST stay last: the site only loads data/index.js + data/<season>.js, which
-        # build_split.py derives from data.js/players.js/shots.js. Without this step a
-        # batch scrape (backfill.py / the scheduled tasks) rebuilds every builder output
-        # yet the live site silently keeps showing the previous bundles.
-        ("wc_dashboard_split", "build_split.py", "per-season bundles (data/)"),
     return os.path.join(output_dir, fname)

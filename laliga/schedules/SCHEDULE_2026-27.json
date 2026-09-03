@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-02T11:22:54.569318+00:00",
+  "generated_utc": "2026-09-03T22:00:01.928952+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -713,10 +713,10 @@
       "away": "Celta Vigo",
       "home_id": "8560",
       "away_id": "9910",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868069,
