@@ -15,6 +15,14 @@ of every season, and a completed season's bundle never changes again (long cache
 `v` is a content hash of the bundles, used as the ?v= cache-buster for the per-season
 files and the per-match detail files. Run this after build_data / build_players /
 build_shots (build_site.py does).
+
+Also rewrites index.html/match.html's <link>/<script> tags for the front-end code itself
+(styles.css, app.js, control.js, match.css, match.js, match_export.js) to `file?v=<hash>`.
+Those tags are static (no document.write cache-buster — that was itself a bug we fixed:
+it forced a fresh download on every single visit), so without a real per-deploy version a
+browser can keep serving a stale cached copy for its full Cache-Control lifetime after a
+push that fixed something on screen. Re-running this is idempotent: it replaces any
+existing ?v=... rather than appending another one.
 """
 import hashlib
 import json
@@ -49,13 +57,47 @@ def _dump(obj):
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
 
 
+# Front-end code (not data) that index.html / match.html load with a plain, un-cache-busted
+# <link>/<script src>. Versioned together as one hash — they're edited together in practice,
+# and a single shared query string keeps this simple.
+ASSET_FILES = ["styles.css", "app.js", "control.js", "match.css", "match.js", "match_export.js"]
+HTML_FILES = ["index.html", "match.html"]
+
+
+def _asset_version():
+    h = hashlib.sha1()
+    for name in ASSET_FILES:
+        p = os.path.join(HERE, name)
+        if os.path.exists(p):
+            with open(p, "rb") as fh:
+                h.update(fh.read())
+    return h.hexdigest()[:10]
+
+
+def _version_html(av):
+    names = "|".join(re.escape(n) for n in ASSET_FILES)
+    tag = re.compile(r'((?:href|src)=")(' + names + r')(?:\?v=[0-9a-f]+)?(")')
+    for html_name in HTML_FILES:
+        p = os.path.join(HERE, html_name)
+        if not os.path.exists(p):
+            continue
+        txt = open(p, encoding="utf-8").read()
+        new_txt = tag.sub(lambda m: m.group(1) + m.group(2) + "?v=" + av + m.group(3), txt)
+        if new_txt != txt:
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(new_txt)
+
+
 def main():
+    asset_v = _asset_version()
+    _version_html(asset_v)
+
     data = _read_js(os.path.join(HERE, "data.js"))
     players = _read_js(os.path.join(HERE, "players.js"))
     shots = _read_js(os.path.join(HERE, "shots.js"))
     seasons = data.get("seasons", {})
     if not seasons:
-        print("build_split: data.js has no seasons; nothing to do")
+        print(f"build_split: data.js has no seasons (asset version {asset_v} still written); nothing else to do")
         return
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -101,7 +143,7 @@ def main():
 
     for key, size in written:
         print(f"  data/{key}.js  {size / 1024:.0f} KB")
-    print(f"build_split: {len(written)} season bundles, v={index['v']}")
+    print(f"build_split: {len(written)} season bundles, v={index['v']}, asset v={asset_v}")
 
 
 if __name__ == "__main__":
