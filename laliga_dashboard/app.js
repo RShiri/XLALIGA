@@ -223,10 +223,11 @@
     var c = D.counts || {};
     var wrap = document.getElementById("overviewStats");
     wrap.innerHTML = "";
+    // Teams and current-matchday were dropped: fixed/uninteresting once a season is under
+    // way, and "MD 3" reads oddly next to "350 still to come" early on. Three tiles that
+    // actually move as the season does.
     [["v", c.played || 0, "Matches played"],
      ["v", (c.total || 0) - (c.played || 0), "Still to come"],
-     ["v", c.teams || 0, "Teams"],
-     ["v", "MD " + (c.current_matchday || 0), "Current matchday"],
      ["v", c.with_xg || 0, "Matches with xG"]
     ].forEach(function (it) {
       var s = el("div", "stat");
