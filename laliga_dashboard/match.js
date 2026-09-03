@@ -232,16 +232,21 @@
       var oldText = btn.textContent;
       btn.disabled = true; btn.textContent = "Rendering…";
       var sum = function (side) { return D.shots.filter(function (s) { return s.team === side; }).reduce(function (t, s) { return t + (s.xg || 0); }, 0); };
+      var dt = D.date ? new Date(D.date + "T00:00:00") : null;
       var M = {
         home: { name: D.home.name, color: D.home.color, score: D.home.score },
         away: { name: D.away.name, color: D.away.color, score: D.away.score },
-        meta: metaLine(D).replace(/ \u00b7 La Liga [^\u00b7]*$/, ""),
+        matchday: rec && rec.matchday,
+        date: dt && !isNaN(dt) ? dt.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : D.date,
+        venue: D.venue || "",
         season: SEASON,
         xg: D.shots && D.shots.length ? [sum("home"), sum("away")] : null,
         xgNote: D.shots && D.shots.length ? "model-estimated from " + D.shots.length + " shots" : "",
         goals: D.goals || [],
         stats: statRows(rec, D),
         shots: D.shots || [],
+        passes: D.passes || [],
+        lineups: D.lineups || null,
         crests: { home: LOGO + encodeURIComponent(D.home.name) + ".png", away: LOGO + encodeURIComponent(D.away.name) + ".png" },
         source: "Data: WhoScored · xG: our own shot model"
       };
