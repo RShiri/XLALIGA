@@ -1,31 +1,31 @@
 match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_estimated
-5868011,2026-08-15,,Estadio de Mendizorroza,Deportivo Alavés,Getafe,3,0,1.93,0.24,0
-5868019,2026-08-15,,Estadio Ramón Sánchez Pizjuán,Sevilla,Rayo Vallecano,2,1,2.19,1.89,0
-5868017,2026-08-16,,Campos de Sport de El Sardinero,Racing Santander,Villarreal,2,2,1.87,0.67,0
-5868015,2026-08-16,,RCDE Stadium,Espanyol,Levante,3,0,1.47,0.19,0
-5868014,2026-08-17,,Estadio Abanca-Riazor,Deportivo A Coruña,Elche,1,1,0.34,1.23,0
-5868012,2026-08-19,,Riyadh Air Metropolitano,Atletico Madrid,Málaga,2,0,0.92,0.15,0
-5868020,2026-08-25,,Estadio de Mestalla,Valencia,Real Betis,0,1,1.12,0.71,0
-5868018,2026-08-26,,Estadio Bernabéu,Real Madrid,Real Sociedad,4,1,3.18,0.65,0
-5868013,2026-08-27,,Estadio Abanca-Balaídos,Celta Vigo,Osasuna,1,2,0.14,2.6,0
-5868016,2026-08-27,,Spotify Camp Nou,Barcelona,Athletic Club,2,0,4.23,0.25,0
-5868029,2026-08-20,,Estadio de Vallecas,Rayo Vallecano,Deportivo Alavés,1,1,0.42,2.0,0
-5868023,2026-08-21,,Estadio La Cartuja de Sevilla,Real Betis,Real Sociedad,1,0,1.24,1.36,0
-5868021,2026-08-22,,Estadio de San Mamés,Athletic Club,Sevilla,1,3,1.37,1.26,0
-5868030,2026-08-22,,Estadio de Mestalla,Valencia,Celta Vigo,0,0,0.7,0.62,0
-5868025,2026-08-22,,RCDE Stadium,Espanyol,Real Madrid,1,2,1.05,2.71,0
-5868022,2026-08-23,,Riyadh Air Metropolitano,Atletico Madrid,Villarreal,2,2,0.78,3.6,0
-5868026,2026-08-23,,Estadio Coliseum,Getafe,Racing Santander,1,0,1.24,1.31,0
-5868024,2026-08-23,,Estadio Manuel Martínez Valero,Elche,Barcelona,0,5,0.7,4.38,0
-5868028,2026-08-24,,Estadio El Sadar,Osasuna,Levante,0,0,0.7,1.28,0
-5868027,2026-08-24,,Estadio La Rosaleda,Málaga,Deportivo A Coruña,1,1,1.95,1.12,0
-5868037,2026-08-28,,,Racing Santander,Elche,3,2,,,0
-5868031,2026-08-28,,,Deportivo Alavés,Villarreal,1,0,,,0
-5868035,2026-08-29,,,Levante,Real Betis,5,2,,,0
-5868039,2026-08-29,,,Real Sociedad,Espanyol,2,1,,,0
-5868040,2026-08-29,,,Sevilla,Atletico Madrid,1,3,,,0
-5868038,2026-08-30,,,Real Madrid,Málaga,4,0,,,0
+5868011,2026-08-15,,Estadio de Mendizorroza,Deportivo Alavés,Getafe,3,0,1.77,0.23,1
+5868019,2026-08-15,,Estadio Ramón Sánchez Pizjuán,Sevilla,Rayo Vallecano,2,1,2.04,1.71,1
+5868017,2026-08-16,,Campos de Sport de El Sardinero,Racing Santander,Villarreal,2,2,1.67,0.72,1
+5868015,2026-08-16,,RCDE Stadium,Espanyol,Levante,3,0,1.6,0.18,1
+5868014,2026-08-17,,Estadio Abanca-Riazor,Deportivo A Coruña,Elche,1,1,0.57,0.02,1
+5868012,2026-08-19,,Riyadh Air Metropolitano,Atletico Madrid,Málaga,2,0,1.33,0.21,1
+5868020,2026-08-25,,Estadio de Mestalla,Valencia,Real Betis,0,1,1.02,0.97,1
+5868018,2026-08-26,,Estadio Bernabéu,Real Madrid,Real Sociedad,4,1,2.51,0.68,1
+5868013,2026-08-27,,Estadio Abanca-Balaídos,Celta Vigo,Osasuna,1,2,0.13,2.33,1
+5868016,2026-08-27,,Spotify Camp Nou,Barcelona,Athletic Club,2,0,2.73,0.22,1
+5868029,2026-08-20,,Estadio de Vallecas,Rayo Vallecano,Deportivo Alavés,1,1,0.58,1.88,1
+5868023,2026-08-21,,Estadio La Cartuja de Sevilla,Real Betis,Real Sociedad,1,0,1.21,1.12,1
+5868021,2026-08-22,,Estadio de San Mamés,Athletic Club,Sevilla,1,3,1.48,0.95,1
+5868030,2026-08-22,,Estadio de Mestalla,Valencia,Celta Vigo,0,0,0.67,0.54,1
+5868025,2026-08-22,,RCDE Stadium,Espanyol,Real Madrid,1,2,0.97,2.39,1
+5868022,2026-08-23,,Riyadh Air Metropolitano,Atletico Madrid,Villarreal,2,2,1.01,1.61,1
+5868026,2026-08-23,,Estadio Coliseum,Getafe,Racing Santander,1,0,0.99,1.31,1
+5868024,2026-08-23,,Estadio Manuel Martínez Valero,Elche,Barcelona,0,5,1.04,3.67,1
+5868028,2026-08-24,,Estadio El Sadar,Osasuna,Levante,0,0,0.76,1.02,1
+5868027,2026-08-24,,Estadio La Rosaleda,Málaga,Deportivo A Coruña,1,1,1.2,0.01,1
+5868037,2026-08-28,,,Racing Santander,Elche,3,2,1.94,0.84,1
+5868031,2026-08-28,,,Deportivo Alavés,Villarreal,1,0,0.65,1.21,1
+5868035,2026-08-29,,,Levante,Real Betis,5,2,2.56,1.56,1
+5868039,2026-08-29,,,Real Sociedad,Espanyol,2,1,2.31,0.74,1
+5868040,2026-08-29,,,Sevilla,Atletico Madrid,1,3,1.08,0.94,1
+5868038,2026-08-30,,,Real Madrid,Málaga,4,0,2.57,0.69,1
 5868033,2026-08-30,,,Deportivo A Coruña,Valencia,3,1,,,0
-5868032,2026-08-30,,,Celta Vigo,Athletic Club,0,2,,,0
-5868036,2026-08-31,,,Osasuna,Getafe,1,0,,,0
-5868034,2026-08-31,,,Barcelona,Rayo Vallecano,5,2,,,0
+5868032,2026-08-30,,,Celta Vigo,Athletic Club,0,2,1.17,2.67,1
+5868036,2026-08-31,,,Osasuna,Getafe,1,0,1.66,1.0,1
+5868034,2026-08-31,,,Barcelona,Rayo Vallecano,5,2,3.33,1.71,1
