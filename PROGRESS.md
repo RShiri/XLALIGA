@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-03** — feat/dashboard-beta: Broadcast Kinetic skin (direction B) applied site-wide: lime signal colour, chamfered plates, slanted tabs/chips, hatched bars, Barlow Condensed/Barlow, champion lower-third, winner-coloured match-stat bars
 - **2026-09-02** — backfill.py's end-of-batch rebuild (renderer._refresh_web_dashboard_db) now runs build_split.py last, so the scheduled weekly/per-fixture tasks regenerate the per-season bundles the redesigned site actually loads (data/index.js + data/<season>.js). Before this only the Scraper button and build_site.py did, so an automated scrape would have left the live site on stale bundles.
 - **2026-09-02** — feat/dashboard-beta: new 'Telemetry' skin (cyan signal colour, grid ground, bracketed panels, Chakra Petch + IBM Plex), plus phases 3-5 of the UI audit (single-row header, KPI readouts, sticky phone standings, Match Centre section bar, Player Lab grid, collapsible explainers, empty/loading states)
 - **2026-09-02** — feat/dashboard-beta: per-season data bundles (build_split.py -> data/index.js + data/<season>.js, no document.write/Date.now), player_lab keyed by season (fixes cross-season stat bloat), Match Centre team-colour collision guard, design tokens + Bricolage Grotesque/IBM Plex, ARIA tabs + URL hash state, labels/focus/reduced-motion, red text contrast fix

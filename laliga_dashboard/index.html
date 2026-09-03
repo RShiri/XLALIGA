@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#05070d" />
+<meta name="theme-color" content="#0c0d10" />
 <title>La Liga Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="laliga">
@@ -107,9 +107,9 @@
          flat, hardly anyone does. Most players cluster near the average, so the curve peaks there and tails off.
          A player <b>far to the right</b> of the crowd is doing something rare — we measure exactly how rare in
          <b>σ (sigma) over average</b>: +1σ beats ~84% of players, +2σ beats ~98%, +3σ is a genuine outlier.</p>
-      <p class="explainer-note">Dots are coloured <span style="color:var(--goal);font-weight:700">pink</span> once a
+      <p class="explainer-note">Dots are coloured <span style="color:var(--goal);font-weight:700">lime</span> once a
          player is 2σ or more above average. Pick a player to spotlight them in <span
-         style="color:var(--accent);font-weight:700">gold</span> and see their percentile.</p>
+         style="color:#fff;font-weight:700">white</span> and see their percentile.</p>
     </details>
 
     <div class="so-controls">
@@ -160,9 +160,9 @@
       <h3>Two-stat scatter</h3>
       <p class="hint">Plot every player on <b>two stats at once</b> and let the <b>dot size</b> carry a third.
          Top-right = strong in both; a dot that's big <i>and</i> top-right is a genuinely complete player. The
-         dashed lines are the averages. <span style="color:var(--goal);font-weight:700">Pink</span> = above average
+         dashed lines are the averages. <span style="color:var(--goal);font-weight:700">Lime</span> = above average
          in both; the player you spotlight above shows here in <span
-         style="color:var(--accent);font-weight:700">gold</span> too. Start from a preset:</p>
+         style="color:#fff;font-weight:700">white</span> too. Start from a preset:</p>
       <div class="so-presets" id="soPresets"></div>
       <div class="so-controls">
         <label>X axis<select id="soScX"></select></label>
@@ -254,8 +254,8 @@
     <div class="card full-card">
       <h3 id="tlMapTitle">Shot map</h3>
       <p class="hint">Attacking <b>↑</b> (toward the top goal). In <b>Shot dots</b> mode each dot is a shot,
-         sized by xG: <span style="color:var(--goal);font-weight:700">goals pink</span>,
-         <span style="color:var(--info);font-weight:700">on-target blue</span>, off-target grey. Switch to
+         sized by xG: <span style="color:var(--goal);font-weight:700">goals lime</span>,
+         <span style="color:var(--info);font-weight:700">on-target pale blue</span>, off-target grey. Switch to
          <b>xG heatmap</b> to shade the pitch by where chance-quality is concentrated. Pick a
          <b>Compare</b> team (or two) to line up shot maps side by side.</p>
       <div class="tl-maps" id="tlMaps"></div>

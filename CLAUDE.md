@@ -163,10 +163,17 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
   a 3-matchday season is not empty. Explainers are `<details>` that remember their state in localStorage.
 - **Match Centre section bar** (`match.js buildSectionNav`) is generated from the `.mv-block` list; a new
   block automatically gets a link. The page header is static there; the bar is what sticks.
-- **Design tokens live at the top of `styles.css`** (colour, type scale, radii). `--accent-2`, `--good`,
+- **Design tokens live at the top of `styles.css`** (colour, type scale, geometry). `--accent-2`, `--good`,
   `--bad`, `--card`, `--radius` remain as aliases for older inline references; use the semantic names
-  (`--brand-red`, `--positive`, `--negative`, `--info`, `--goal`) in new code. Red is `#e04a52` because
-  the old `#a91d22` failed contrast as text (2.6:1).
+  (`--accent`, `--positive`, `--negative`, `--info`, `--goal`) in new code.
+- **Current skin = "Broadcast Kinetic"** (feat/dashboard-beta, design direction B): carbon ground `#0c0d10`
+  with a faint diagonal hatch, ONE signal colour (lime `#d7ff3a` = ahead / active / positive), red `#ff2a4d`
+  the only other semantic colour, no border-radius anywhere (chamfered plates via `--plate-cut`, slanted
+  tabs/chips via `--slant`), hatched bar fills (`--hatch-*`), Barlow Condensed for display/labels/numbers
+  and Barlow for prose, both from Google Fonts. Match-stat bars colour the winning side with
+  `:has(.sc-val.win)`. Chart colour literals in app.js/match.js mirror the tokens (lime, pale-blue
+  `#9fd0ff` for on-target/info, red negative); change both when changing the palette. The header
+  readout (`#hudStatus`) only shows at >=1500px so the nine tabs fit.
 - **Current skin = "Telemetry"** (feat/dashboard-beta): void ground `#05070d` with a faint 48px grid, ONE
   signal colour (cyan `#35e0ff`), all-sharp radii (2/3/4px), bracketed panel corners (`.card::before/::after`),
   Chakra Petch for display/tabs/KPIs, IBM Plex Sans for body + tables (tabular figures), IBM Plex Mono for
