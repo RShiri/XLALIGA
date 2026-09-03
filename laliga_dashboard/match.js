@@ -8,22 +8,42 @@
   var PW = 100, PH = 64; // pitch SVG units (length x width)
   var tooltip = document.getElementById("tooltip");
 
-  // The dashboard data is season-keyed (window.LL_DATA.seasons[season]); the rest of this
-  // file reads window.WC_DATA for head-to-head context, so alias the right season into it.
-  (function () {
-    var season = (location.search.match(/[?&]season=([^&]+)/) || [])[1];
-    var LL = window.LL_DATA;
-    if (LL && LL.seasons) {
-      season = season ? decodeURIComponent(season) : LL.defaultSeason;
-      window.WC_DATA = LL.seasons[season] || LL.seasons[LL.defaultSeason] || { matches: [] };
-    }
+  // Per-season bundles: data/index.js (loaded statically) lists the seasons and the cache
+  // version; the season's bundle data/<season>.js is fetched on demand and aliased into
+  // window.WC_DATA, which the rest of this file reads for head-to-head context.
+  var IDX = window.LL_INDEX || { seasons: {}, defaultSeason: "", v: "", teamColors: {} };
+  var SEASON = (function () {
+    var s = (location.search.match(/[?&]season=([^&]+)/) || [])[1];
+    s = s ? decodeURIComponent(s) : "";
+    return (s && IDX.seasons[s]) ? s : (IDX.defaultSeason || "");
   })();
+  var VER = "?v=" + encodeURIComponent(IDX.v || "");
+  function loadScript(src, ok, err) {
+    var sc = document.createElement("script");
+    sc.src = src; sc.onload = ok; sc.onerror = err || ok;
+    document.head.appendChild(sc);
+  }
+  function loadSeasonData(cb) {
+    var LL = window.LL_DATA;
+    if (LL && LL.seasons && LL.seasons[SEASON]) { window.WC_DATA = LL.seasons[SEASON]; cb(); return; }
+    if (!SEASON) { window.WC_DATA = { matches: [] }; cb(); return; }
+    loadScript("data/" + encodeURIComponent(SEASON) + ".js" + VER, function () {
+      var L2 = window.LL_DATA;
+      window.WC_DATA = (L2 && L2.seasons && L2.seasons[SEASON]) || { matches: [] };
+      cb();
+    });
+  }
+  // Keep aria-pressed in sync on every filter chip (their own handlers toggle the .on class).
+  document.addEventListener("click", function (e) {
+    var c = e.target && e.target.closest ? e.target.closest(".chip-toggle") : null;
+    if (c) c.setAttribute("aria-pressed", c.classList.contains("on") ? "true" : "false");
+  });
 
   function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function logoImg(team) {
-    return '<img src="' + LOGO + encodeURIComponent(team) + '.png" alt="" ' +
+    return '<img src="' + LOGO + encodeURIComponent(team) + '.png" alt="" width="44" height="44" loading="lazy" ' +
       'onerror="this.style.visibility=\'hidden\'">';
   }
   function qid() {
@@ -34,15 +54,13 @@
   var id = qid();
   if (!id) { fail("No match id in the URL. Open this page from the dashboard."); return; }
 
-  // Inject the match data file.
-  var s = document.createElement("script");
-  s.src = "matches_detail/" + encodeURIComponent(id) + ".js?v=" + Date.now();
-  s.onload = function () {
-    if (window.MATCH_DETAIL) boot(window.MATCH_DETAIL);
-    else fail("Match data loaded but was empty.");
-  };
-  s.onerror = function () { fail("No detailed data for this match (it may not have shot/pass events yet)."); };
-  document.head.appendChild(s);
+  // Load the season bundle (head-to-head stats), then the match's own event file.
+  loadSeasonData(function () {
+    loadScript("matches_detail/" + encodeURIComponent(id) + ".js" + VER, function () {
+      if (window.MATCH_DETAIL) boot(window.MATCH_DETAIL);
+      else fail("Match data loaded but was empty.");
+    }, function () { fail("No detailed data for this match (it may not have shot/pass events yet)."); });
+  });
 
   function fail(msg) {
     document.getElementById("matchRoot").innerHTML =
@@ -128,11 +146,122 @@
              barY: barY, frame: frame, viewBox: "-2 -2 " + (GW + 4) + " " + (GROUND + 8) };
   })();
 
+  /* ---- team colours with a collision guard ----
+     Two clubs whose primaries are near-identical (Sevilla #D81E05 vs Atlético #CB3524) would make
+     every home/away-coloured mark on the page indistinguishable. Measure the CIE76 ΔE between the
+     two; below the threshold, move the away side to its secondary kit colour (LL_INDEX.teamColors,
+     from laliga/team_colors.py), then to a neutral fallback that also reads against the pitch. */
+  function hexRgb(h) {
+    h = String(h || "").replace("#", "");
+    if (h.length === 3) h = h.replace(/./g, function (c) { return c + c; });
+    var n = parseInt(h, 16);
+    return (isNaN(n) || h.length !== 6) ? null : [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgbLab(rgb) {
+    var f = function (v) { v /= 255; return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92; };
+    var r = f(rgb[0]), g = f(rgb[1]), b = f(rgb[2]);
+    var x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+    var y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    var z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+    var t = function (v) { return v > 0.008856 ? Math.cbrt(v) : 7.787 * v + 16 / 116; };
+    return [116 * t(y) - 16, 500 * (t(x) - t(y)), 200 * (t(y) - t(z))];
+  }
+  function deltaE(a, b) {
+    var A = hexRgb(a), B = hexRgb(b);
+    if (!A || !B) return 100;
+    var la = rgbLab(A), lb = rgbLab(B);
+    return Math.sqrt(Math.pow(la[0] - lb[0], 2) + Math.pow(la[1] - lb[1], 2) + Math.pow(la[2] - lb[2], 2));
+  }
+  function inkFor(hex) { var c = hexRgb(hex); return (c && rgbLab(c)[0] > 62) ? "#0b0e16" : "#ffffff"; }
+  function teamColours(D) {
+    var MIN = 28, PITCH = "#0f3d22", tc = IDX.teamColors || {};
+    var home = D.home.color || "#9aa5bf", away = D.away.color || "#e6e9f2";
+    function ok(c) { return !!c && deltaE(c, home) >= MIN && deltaE(c, PITCH) >= 18; }
+    if (!ok(away)) {
+      var secondary = (tc[D.away.raw] || tc[D.away.name] || [])[1];
+      var cands = [secondary, "#e6e9f2", "#f0b64a", "#6fb3ff", "#ff4d93"];
+      for (var i = 0; i < cands.length; i++) if (ok(cands[i])) { away = cands[i]; break; }
+    }
+    return { home: home, away: away, swapped: away !== D.away.color };
+  }
+
+  /* ---- sticky jump bar: one link per block, the block in view is underlined ---- */
+  function buildSectionNav(root) {
+    var blocks = Array.prototype.slice.call(root.querySelectorAll(".mv-block"));
+    if (blocks.length < 3) return;
+    var nav = el("nav", "mv-nav");
+    nav.setAttribute("aria-label", "Match sections");
+    nav.innerHTML = '<div class="mv-nav-inner">' + blocks.map(function (b) {
+      var host = b.querySelector("[id]"), t = b.querySelector(".mv-title");
+      return '<a href="#' + host.id + '">' + esc(t.textContent) + "</a>";
+    }).join("") + "</div>";
+    root.insertBefore(nav, blocks[0]);
+    var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
+    function mark(id) {
+      links.forEach(function (a) {
+        var on = a.getAttribute("href") === "#" + id;
+        a.classList.toggle("current", on);
+        if (on) { try { a.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
+      });
+    }
+    if (window.IntersectionObserver) {
+      var io = new IntersectionObserver(function (ents) {
+        ents.forEach(function (en) { if (en.isIntersecting) mark(en.target.querySelector("[id]").id); });
+      }, { rootMargin: "-30% 0px -60% 0px" });
+      blocks.forEach(function (b) { io.observe(b); });
+    }
+    nav.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest("a") : null;
+      if (!a) return;
+      var target = document.getElementById(a.getAttribute("href").slice(1));
+      if (!target) return;
+      e.preventDefault();
+      var sec = target.closest(".mv-block") || target;
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      sec.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      history.replaceState(null, "", a.getAttribute("href"));
+      mark(target.id);
+    });
+  }
+
+  /* ---- in-browser PNG export ---- */
+  function wireExport(D, rec) {
+    var btn = document.getElementById("exportPng");
+    if (!btn || !window.LL_EXPORT) return;
+    btn.addEventListener("click", function () {
+      var oldText = btn.textContent;
+      btn.disabled = true; btn.textContent = "Rendering…";
+      var sum = function (side) { return D.shots.filter(function (s) { return s.team === side; }).reduce(function (t, s) { return t + (s.xg || 0); }, 0); };
+      var M = {
+        home: { name: D.home.name, color: D.home.color, score: D.home.score },
+        away: { name: D.away.name, color: D.away.color, score: D.away.score },
+        meta: metaLine(D).replace(/ \u00b7 La Liga [^\u00b7]*$/, ""),
+        season: SEASON,
+        xg: D.shots && D.shots.length ? [sum("home"), sum("away")] : null,
+        xgNote: D.shots && D.shots.length ? "model-estimated from " + D.shots.length + " shots" : "",
+        goals: D.goals || [],
+        stats: statRows(rec, D),
+        shots: D.shots || [],
+        crests: { home: LOGO + encodeURIComponent(D.home.name) + ".png", away: LOGO + encodeURIComponent(D.away.name) + ".png" },
+        source: "Data: WhoScored · xG: our own shot model"
+      };
+      var slug = function (s) { return String(s).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); };
+      var name = slug(D.home.name) + "-" + (D.home.score == null ? "" : D.home.score) + "-" + (D.away.score == null ? "" : D.away.score) + "-" + slug(D.away.name) + (D.date ? "-" + D.date : "") + ".png";
+      window.LL_EXPORT.render(M).then(function (cv) { return window.LL_EXPORT.download(cv, name); })
+        .catch(function (e) { alert("Could not render the image: " + (e && e.message ? e.message : e)); })
+        .then(function () { btn.disabled = false; btn.textContent = oldText; });
+    });
+  }
+
   /* ================= BOOT ================= */
   function boot(D) {
     document.title = D.home.name + " " + D.home.score + "-" + D.away.score + " " + D.away.name + " · LALIGA";
-    document.documentElement.style.setProperty("--c-home", D.home.color);
-    document.documentElement.style.setProperty("--c-away", D.away.color);
+    var cols = teamColours(D);
+    D.home.color = cols.home; D.away.color = cols.away;   // every downstream mark reads these
+    document.documentElement.style.setProperty("--c-home", cols.home);
+    document.documentElement.style.setProperty("--c-away", cols.away);
+    document.documentElement.style.setProperty("--c-home-ink", inkFor(cols.home));
+    document.documentElement.style.setProperty("--c-away-ink", inkFor(cols.away));
 
     var rec = matchRecord();                       // head-to-head team stats from data.js
     var hasStats = !!(rec && rec.stats);
@@ -166,6 +295,8 @@
       (hasGoals ? block("Goal replays", "mv-goals-anim") : "") +
       // Penalty shootout (goal-mouth placement) is the last block — below all graphs.
       (hasShootout ? block("Penalty shootout", "mv-shootout") : "");
+    buildSectionNav(root);
+    wireExport(D, rec);
 
     if (hasStats) buildMatchStats(rec, D);
     if (hasWinProb) buildWinProb(D);
@@ -179,6 +310,22 @@
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
     if (hasShootout) buildShootout(D);
+  }
+
+  // "Matchday 3 · Sat 29 Aug 2026 · La Liga 2026/27". The detail files still carry a
+  // "Group Stage" label inherited from the World Cup port; the matchday from the season
+  // bundle replaces it.
+  function metaLine(D) {
+    var rec = matchRecord(), parts = [];
+    if (rec && rec.matchday) parts.push("Matchday " + rec.matchday);
+    else if (D.stage && !/group stage/i.test(D.stage)) parts.push(D.stage);
+    if (D.date) {
+      var dt = new Date(D.date + "T00:00:00");
+      parts.push(isNaN(dt) ? D.date : dt.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" }));
+    }
+    if (D.venue) parts.push(D.venue);
+    if (SEASON) parts.push("La Liga " + SEASON.replace("-", "/"));
+    return parts.map(esc).join(" · ");
   }
 
   function scoreboard(D) {
@@ -195,13 +342,16 @@
         esc(g.scorer) + (g.pen ? " (P)" : "") + (g.own ? " (OG)" : "") + " " + as + "</span>";
     }).join("");
 
-    var pngBtn = D.png
-      ? '<a class="png-btn" href="' + esc(D.png) + '" target="_blank" rel="noopener" download>' +
-        '🖼️ Infographic PNG</a>'
-      : "";
+    // The detail file records the PNG path at build time; the season bundle (build_data.py)
+    // is rebuilt more often, so fall back to its record when a PNG was rendered later.
+    var recPng = (function () { var r = matchRecord(); return r && r.png; })();
+    var png = D.png || recPng;
+    // Drawn in the browser (match_export.js): works on the static site, any device, no server.
+    var pngBtn = (window.LL_EXPORT ? '<button type="button" class="png-btn" id="exportPng">⬇ Download image</button>' : "") +
+      (png ? '<a class="png-btn png-btn-alt" href="' + esc(png) + '" target="_blank" rel="noopener" download title="Infographic rendered by the pipeline">Pipeline PNG</a>' : "");
 
     return '<div class="match-top">' + pngBtn + "</div>" +
-      '<div class="scoreboard"><div class="sb-main">' +
+      '<div class="scoreboard"><h1 class="sb-main">' +
         '<div class="sb-team home"><span class="nm">' + esc(D.home.name) + "</span>" + logoImg(D.home.name) + "</div>" +
         '<div class="sb-score">' + (D.home.score == null ? "-" : D.home.score) + " : " +
           (D.away.score == null ? "-" : D.away.score) +
@@ -209,9 +359,8 @@
             ? '<span class="sb-pens">(' + D.home.pens + "-" + D.away.pens + " pens)</span>" : "") +
           "</div>" +
         '<div class="sb-team away">' + logoImg(D.away.name) + '<span class="nm">' + esc(D.away.name) + "</span></div>" +
-      "</div>" + xgTxt +
-      '<div class="sb-meta">' + esc(D.stage || "") + (D.venue ? " · " + esc(D.venue) : "") +
-        (D.date ? " · " + esc(D.date) : "") + "</div>" +
+      "</h1>" + xgTxt +
+      '<div class="sb-meta">' + metaLine(D) + "</div>" +
       (goals ? '<div class="timeline">' + goals + "</div>" : "") +
       "</div>";
   }
@@ -255,33 +404,36 @@
     return { home: compute("home"), away: compute("away") };
   }
 
+  // One row per STAT_DEFS entry that has a value: {label, h, a, hpct, hBetter, aBetter, isXg, pct}.
+  // Provider stats first, event-derived numbers as the fallback. Shared by the stats panel
+  // and the in-browser image export.
+  function statRows(rec, D) {
+    var s = (rec && rec.stats) || {};
+    var es = eventStats(D);
+    return STAT_DEFS.map(function (def) {
+      var key = def[0];
+      var pair = s[key] || [null, null];
+      if (pair[0] == null && pair[1] == null && es.home[key] != null) pair = [es.home[key], es.away[key]];
+      var h = pair[0], a = pair[1];
+      if (h == null && a == null) return null;
+      var hv = h == null ? 0 : h, av = a == null ? 0 : a, total = hv + av;
+      return { label: def[1], h: h, a: a, hpct: total > 0 ? (hv / total) * 100 : 50,
+               hBetter: def[3] ? hv > av : hv < av, aBetter: def[3] ? av > hv : av < hv,
+               isXg: key === "xg", pct: !!def[2] };
+    }).filter(Boolean);
+  }
+
   function buildMatchStats(rec, D) {
     var host = document.getElementById("mv-stats");
     if (!host) return;
-    var s = rec.stats || {};
-    var es = eventStats(D);
-    var rows = STAT_DEFS.map(function (def) {
-      var key = def[0];
-      var pair = s[key] || [null, null];
-      // fall back to event-derived numbers when the provider gave us nothing
-      if (pair[0] == null && pair[1] == null && es.home[key] != null) {
-        pair = [es.home[key], es.away[key]];
-      }
-      var h = pair[0], a = pair[1];
-      if (h == null && a == null) return "";
-      var hv = h == null ? 0 : h, av = a == null ? 0 : a;
-      var total = hv + av;
-      var hpct = total > 0 ? (hv / total) * 100 : 50;
-      var suffix = def[2] ? "%" : "";
-      function disp(x) { return x == null ? "–" : (def[0] === "xg" ? x.toFixed(2) : x) + suffix; }
-      var hBetter = def[3] ? hv > av : hv < av;
-      var aBetter = def[3] ? av > hv : av < hv;
+    var rows = statRows(rec, D).map(function (r) {
+      function disp(x) { return x == null ? "–" : (r.isXg ? x.toFixed(2) : x) + (r.pct ? "%" : ""); }
       return '<div class="stat-cmp">' +
-        '<div class="sc-val ' + (hBetter ? "win" : "") + '">' + disp(h) + "</div>" +
-        '<div class="sc-mid"><div class="sc-label">' + def[1] + '</div>' +
-          '<div class="sc-bar"><div class="sc-fill h" style="width:' + hpct.toFixed(1) + '%"></div>' +
-          '<div class="sc-fill a" style="width:' + (100 - hpct).toFixed(1) + '%"></div></div></div>' +
-        '<div class="sc-val ' + (aBetter ? "win" : "") + '">' + disp(a) + "</div>" +
+        '<div class="sc-val ' + (r.hBetter ? "win" : "") + '">' + disp(r.h) + "</div>" +
+        '<div class="sc-mid"><div class="sc-label">' + r.label + '</div>' +
+          '<div class="sc-bar"><div class="sc-fill h" style="width:' + r.hpct.toFixed(1) + '%"></div>' +
+          '<div class="sc-fill a" style="width:' + (100 - r.hpct).toFixed(1) + '%"></div></div></div>' +
+        '<div class="sc-val ' + (r.aBetter ? "win" : "") + '">' + disp(r.a) + "</div>" +
         "</div>";
     }).join("");
     var LABELS = { fotmob: "FotMob", whoscored: "WhoScored", sofascore: "SofaScore",
@@ -381,7 +533,7 @@
     var finH = ptsH[ptsH.length - 1][1], finA = ptsA[ptsA.length - 1][1], finD = ptsD[ptsD.length - 1][1];
 
     /* ---- colours (fall back to a high-contrast pair for near-identical kits) ---- */
-    var colH = D.home.color || "#9d6bff", colA = D.away.color || "#ff6a3d";
+    var colH = D.home.color || "#9aa5bf", colA = D.away.color || "#e6e9f2";
     function hex(c) { var m = /^#?([0-9a-f]{6})$/i.exec(c || ""); if (!m) return null; var n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
     var ch = hex(colH), ca = hex(colA);
     if (ch && ca && Math.sqrt(Math.pow(ch[0] - ca[0], 2) + Math.pow(ch[1] - ca[1], 2) + Math.pow(ch[2] - ca[2], 2)) < 90) {
@@ -601,9 +753,9 @@
     var host = document.getElementById("mv-shots");
     host.innerHTML =
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="shHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle on away" id="shAway">' + esc(D.away.name) + "</span>" +
-        '<span class="chip-toggle" id="shGoals">Goals only</span>' +
+        '<button type="button" class="chip-toggle on home" id="shHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle on away" id="shAway" aria-pressed="true">' + esc(D.away.name) + "</button>" +
+        '<button type="button" class="chip-toggle" id="shGoals" aria-pressed="false">Goals only</button>' +
         '<span class="grp">Min xG <input type="text" id="shMinXg" value="0" size="3" style="width:42px"></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
@@ -613,7 +765,7 @@
         '<g id="shotLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffd34e"></i>Goal (team colour)</span>' +
+        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffb020"></i>Goal (team colour)</span>' +
         '<span><i class="dot" style="background:var(--c-home)"></i>On target</span>' +
         '<span><i class="dot" style="background:transparent;border:1px solid var(--muted)"></i>Off target</span>' +
         '<span><i class="dot" style="background:#7a869f"></i>Blocked</span>' +
@@ -646,7 +798,7 @@
           var ring = document.createElementNS(NS, "circle");
           ring.setAttribute("cx", cx.toFixed(2)); ring.setAttribute("cy", cy.toFixed(2));
           ring.setAttribute("r", (r + 0.55).toFixed(2));
-          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffd34e");
+          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffb020");
           ring.setAttribute("stroke-width", "0.45");
           layer.appendChild(ring);
         }
@@ -705,12 +857,12 @@
       host.innerHTML = '<div class="shot-detail empty">No on-target shots with goal-placement data for this match.</div>';
       return;
     }
-    var GOAL_COL = "#37c978", SAVE_COL = "#5a9bff";
+    var GOAL_COL = "#d7ff3a", SAVE_COL = "#5a9bff";
     host.innerHTML =
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="otHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle on away" id="otAway">' + esc(D.away.name) + "</span>" +
-        '<span class="chip-toggle" id="otGoals">Goals only</span>' +
+        '<button type="button" class="chip-toggle on home" id="otHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle on away" id="otAway" aria-pressed="true">' + esc(D.away.name) + "</button>" +
+        '<button type="button" class="chip-toggle" id="otGoals" aria-pressed="false">Goals only</button>' +
         '<span class="ot-count" id="otCount"></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="' + GM.viewBox + '">' +
@@ -800,8 +952,8 @@
 
     host.innerHTML =
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="paHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle on away" id="paAway">' + esc(D.away.name) + "</span>" +
+        '<button type="button" class="chip-toggle on home" id="paHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle on away" id="paAway" aria-pressed="true">' + esc(D.away.name) + "</button>" +
         '<span class="grp">Player <select id="paPlayer"><option value="">All players</option>' +
           '<optgroup label="' + esc(D.home.name) + '" data-side="home">' + opts("home") + "</optgroup>" +
           '<optgroup label="' + esc(D.away.name) + '" data-side="away">' + opts("away") + "</optgroup></select></span>" +
@@ -811,12 +963,12 @@
           '<option value="key">Key passes</option>' +
           '<option value="assist">Assists</option><option value="cross">Crosses</option>' +
           '<option value="through">Through balls</option></select></span>' +
-        '<span class="chip-toggle" id="paThird">Final third</span>' +
-        '<span class="chip-toggle" id="paWindow">5-min window</span>' +
+        '<button type="button" class="chip-toggle" id="paThird" aria-pressed="false">Final third</button>' +
+        '<button type="button" class="chip-toggle" id="paWindow" aria-pressed="false">5-min window</button>' +
       "</div>" +
       '<div class="timeline-scrub">' +
-        '<button class="play-btn" id="paPlay">▶</button>' +
-        '<input type="range" id="paRange" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
+        '<button class="play-btn" id="paPlay" aria-label="Play or pause the pass timeline">▶</button>' +
+        '<input type="range" id="paRange" aria-label="Minute" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
         '<span class="minlab" id="paMinLab"></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
@@ -826,9 +978,9 @@
         '<g id="passLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:#43e8a0"></i>completed · progressive/key</span>' +
-        '<span><i class="dot" style="background:#1f9d5e"></i>completed · normal</span>' +
-        '<span><i class="dot" style="background:#ff5e7a"></i>incomplete · forward/key</span>' +
+        '<span><i class="dot" style="background:#d7ff3a"></i>completed · progressive/key</span>' +
+        '<span><i class="dot" style="background:#96b328"></i>completed · normal</span>' +
+        '<span><i class="dot" style="background:#ff2a4d"></i>incomplete · forward/key</span>' +
         '<span><i class="dot" style="background:#a83646"></i>incomplete · normal</span>' +
         '<span>dashed = incomplete · dot = start</span>' +
       "</div>" +
@@ -871,8 +1023,8 @@
         // two reds for incomplete (bright = forward/key attempt, dim = normal).
         var dangerous = p.prog || p.key || p.assist || p.through;
         var col = p.ok
-          ? (dangerous ? "#43e8a0" : "#1f9d5e")
-          : (dangerous ? "#ff5e7a" : "#a83646");
+          ? (dangerous ? "#d7ff3a" : "#96b328")
+          : (dangerous ? "#ff2a4d" : "#a83646");
         var ln = document.createElementNS(SVGNS, "line");
         var cls = "pass-line" + (p.assist ? " assist" : p.key || p.prog ? " key" : "");
         ln.setAttribute("class", cls);
@@ -943,25 +1095,25 @@
 
     host.innerHTML =
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="drHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle on away" id="drAway">' + esc(D.away.name) + "</span>" +
+        '<button type="button" class="chip-toggle on home" id="drHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle on away" id="drAway" aria-pressed="true">' + esc(D.away.name) + "</button>" +
         '<span class="grp">Player <select id="drPlayer"><option value="">All players</option>' +
           '<optgroup label="' + esc(D.home.name) + '">' + opts("home") + "</optgroup>" +
           '<optgroup label="' + esc(D.away.name) + '">' + opts("away") + "</optgroup></select></span>" +
         '<span class="grp">Outcome <select id="drType">' +
           '<option value="all">All dribbles</option><option value="ok">Successful</option>' +
           '<option value="fail">Unsuccessful</option></select></span>' +
-        '<span class="chip-toggle" id="drWindow">5-min window</span>' +
+        '<button type="button" class="chip-toggle" id="drWindow" aria-pressed="false">5-min window</button>' +
       "</div>" +
       '<div class="timeline-scrub">' +
-        '<button class="play-btn" id="drPlay">▶</button>' +
-        '<input type="range" id="drRange" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
+        '<button class="play-btn" id="drPlay" aria-label="Play or pause the take-on timeline">▶</button>' +
+        '<input type="range" id="drRange" aria-label="Minute" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
         '<span class="minlab" id="drMinLab"></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
         '<defs>' +
-          '<marker id="drArrG" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#43e8a0"/></marker>' +
-          '<marker id="drArrR" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ff5e7a"/></marker>' +
+          '<marker id="drArrG" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#d7ff3a"/></marker>' +
+          '<marker id="drArrR" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ff2a4d"/></marker>' +
         "</defs>" +
         pitchMarkup() +
         '<text class="dir-label" x="3" y="' + (PH + 4) + '">◀ ' + esc(D.away.name) + "</text>" +
@@ -969,8 +1121,8 @@
         '<g id="dribLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:#43e8a0"></i>successful</span>' +
-        '<span><i class="dot" style="background:transparent;border:1px solid #ff5e7a"></i>unsuccessful</span>' +
+        '<span><i class="dot" style="background:#d7ff3a"></i>successful</span>' +
+        '<span><i class="dot" style="background:transparent;border:1px solid #ff2a4d"></i>unsuccessful</span>' +
         '<span>● = where the take-on happened · → carry direction (next touch)</span>' +
       "</div>" +
       '<div class="stat-note" id="drCount"></div>';
@@ -1017,7 +1169,7 @@
         if (!filt(p)) return;
         shown++; if (p.ok) ok++;
         var cx = tx(p.team, p.x), cy = ty(p.team, p.y);
-        var col = p.ok ? "#43e8a0" : "#ff5e7a";
+        var col = p.ok ? "#d7ff3a" : "#ff2a4d";
         if (p._ex != null) {
           var ax = tx(p.team, p._ex), ay = ty(p.team, p._ey);
           var arr = document.createElementNS(SVGNS, "line");
@@ -1098,9 +1250,9 @@
 
     host.innerHTML =
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="nwHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle away" id="nwAway">' + esc(D.away.name) + "</span>" +
-        '<span class="grp">Min. combined passes <input type="range" id="nwMin" min="1" max="10" value="3" style="width:90px"> <b id="nwMinLab">3</b></span>' +
+        '<button type="button" class="chip-toggle on home" id="nwHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle away" id="nwAway" aria-pressed="false">' + esc(D.away.name) + "</button>" +
+        '<span class="grp">Min. combined passes <input type="range" id="nwMin" aria-label="Minimum combined passes" min="1" max="10" value="3" style="width:90px"> <b id="nwMinLab">3</b></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
         pitchMarkup() +
@@ -1227,7 +1379,7 @@
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
         c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0b0f1a"); c.setAttribute("stroke-width", "0.3");
+        c.setAttribute("stroke", "#0c0d10"); c.setAttribute("stroke-width", "0.3");
         c.addEventListener("mousemove", function (e) {
           showTip(e, "<b>" + esc(nd.name) + "</b><br>" + nd.passes + " passes involved");
         });
@@ -1285,8 +1437,8 @@
 
     host.innerHTML =
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="apHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle away" id="apAway">' + esc(D.away.name) + "</span>" +
+        '<button type="button" class="chip-toggle on home" id="apHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle away" id="apAway" aria-pressed="false">' + esc(D.away.name) + "</button>" +
         '<span class="grp">Window <select id="apWin">' +
           '<option value="10">10 min</option><option value="15" selected>15 min</option>' +
           '<option value="20">20 min</option><option value="0">Full (0→now)</option></select></span>' +
@@ -1398,7 +1550,7 @@
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
         c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0b0f1a"); c.setAttribute("stroke-width", "0.3");
+        c.setAttribute("stroke", "#0c0d10"); c.setAttribute("stroke-width", "0.3");
         (function (pl) {
           c.addEventListener("mousemove", function (e) {
             var pi = info[state.side][pl.name] || {};
@@ -1659,10 +1811,10 @@
   function agmExportStyle() {
     var rc = getComputedStyle(document.documentElement);
     function v(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-    var TEXT = v("--text", "#e8edf7"), BAD = v("--bad", "#ff6b81"), WARN = v("--warn", "#ffb454"),
-        MUTED = v("--muted", "#93a0bd"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#0b0f1a");
+    var TEXT = v("--text", "#f5f7fa"), BAD = v("--bad", "#ff2a4d"), WARN = v("--warn", "#ffb454"),
+        MUTED = v("--muted", "#b9bfc9"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#0c0d10");
     return "<style>" +
-      ".pitch-bg{fill:#14361f}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
+      ".pitch-bg{fill:#0f3d22}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
       ".dir-label{fill:rgba(255,255,255,.5);font-size:2.4px;font-weight:700;font-family:sans-serif}" +
       ".agm-pass{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
       ".agm-cross{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
@@ -1688,8 +1840,8 @@
     try {
       var rc = getComputedStyle(document.documentElement);
       function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
-          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var bg = cvar("--card", "#15171c"), text = cvar("--text", "#f5f7fa"), muted = cvar("--muted", "#b9bfc9"),
+          bad = cvar("--bad", "#ff2a4d"), line = cvar("--line", "#23262e");
       var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var clone = svgEl.cloneNode(true);
       clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -1978,8 +2130,8 @@
     try {
       var rc = getComputedStyle(document.documentElement);
       function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
-          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var bg = cvar("--card", "#15171c"), text = cvar("--text", "#f5f7fa"), muted = cvar("--muted", "#b9bfc9"),
+          bad = cvar("--bad", "#ff2a4d"), line = cvar("--line", "#23262e");
       var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var wrap = document.createElement("div"); wrap.innerHTML = agmSeqSVG(seq, numMap, D);
       var s = wrap.firstChild; s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2091,7 +2243,7 @@
       feat.innerHTML = metaLine(g) +
         '<div class="agm-anim-bar">' +
           '<button type="button" class="agm-dl agm-play">▶ Play</button>' +
-          '<span class="spd">Speed <input type="range" class="agm-spd" min="0.5" max="2" step="0.5" value="1"><b class="agm-spdv">1×</b></span>' +
+          '<span class="spd">Speed <input type="range" class="agm-spd" aria-label="Replay speed" min="0.5" max="2" step="0.5" value="1"><b class="agm-spdv">1×</b></span>' +
           '<button type="button" class="agm-dl agm-vid">⤓ Download video</button>' +
           '<span class="agm-action">Press play</span>' +
         "</div>" +
@@ -2134,7 +2286,7 @@
     function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
     function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
-    var OUT_COL = { goal: "#37c978", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
+    var OUT_COL = { goal: "#d7ff3a", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
     var OUT_LBL = { goal: "Scored", saved: "Saved", missed: "Off target", post: "Hit post" };
     var OUT_ICON = { goal: "⚽", saved: "🧤", missed: "✗", post: "▮" };
 
@@ -2162,8 +2314,8 @@
 
     host.innerHTML = summary +
       '<div class="controls-bar">' +
-        '<span class="chip-toggle on home" id="soHome">' + esc(D.home.name) + "</span>" +
-        '<span class="chip-toggle on away" id="soAway">' + esc(D.away.name) + "</span>" +
+        '<button type="button" class="chip-toggle on home" id="soHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle on away" id="soAway" aria-pressed="true">' + esc(D.away.name) + "</button>" +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (GW + 4) + ' ' + (GROUND + 8) + '">' +
         net.join("") +

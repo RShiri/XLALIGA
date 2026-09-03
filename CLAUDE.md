@@ -34,12 +34,15 @@ laliga_dashboard/              the website (static, no build step at view time)
   index.html match.html        main dashboard + per-match "Match Centre"
   app.js match.js              front-end (app.js = league views; match.js = match centre)
   styles.css match.css
-  data.js                      window.LL_DATA, season-keyed  ← generated
-  players.js                   window.LL_PLAYERS, season-keyed ← generated
-  shots.js                     window.LL_SHOTS, season-keyed (Team Lab shot maps) ← generated
+  data.js players.js shots.js  season-keyed builder outputs ← generated (NOT loaded by the site any more)
+  data/index.js                window.LL_INDEX: season list + cache version `v` + team colours ← build_split.py (SHIPPED)
+  data/<season>.js             ONE bundle per season (LL_DATA.seasons[s] + LL_PLAYERS[s] + LL_SHOTS[s]),
+                               fetched on demand by app.js / match.js ← build_split.py (SHIPPED)
+  player_lab/<season>/<team>.js per-team, per-SEASON player event maps ← build_player_lab.py (SHIPPED)
   matches_detail/<id>.js       per-match shots/passes/dribbles/goals/lineups ← generated (SHIPPED)
   database/                    CSV + sqlite exports ← generated
   build_data.py build_players.py build_match_details.py build_database.py build_shots.py  builders
+  build_split.py               splits the builder outputs into data/index.js + data/<season>.js (run LAST)
   xg_model.py                  shared shot-extraction + xG/xA (routes through xg_core/)
 xg_core/                       THE CANONICAL calibrated models: v2 xG + pass-level xA
                                artifacts + XGScorer/XAScorer + training CLIs (see its
@@ -82,21 +85,27 @@ py server.py --no-control  # static files only (plain viewer, no API)
 
 # refresh 2025/26 results/standings (fast, token-free)
 py laliga/build_schedule.py --season 2025-26
-py laliga_dashboard/build_data.py
+py laliga_dashboard/build_data.py && py laliga_dashboard/build_split.py
 
 # bring 2026/27 online once FotMob lists fixtures
 py laliga/build_schedule.py --season 2026-27
-py laliga_dashboard/build_data.py
+py laliga_dashboard/build_data.py && py laliga_dashboard/build_split.py
 powershell -File laliga/register_tasks.ps1 -Season 2026-27   # arm per-match live auto-runs
 
 # (re)scrape rich per-match data (needs Chrome; ~1h for a full season)
 py laliga/scrape_whoscored.py --season 2025-26                # full season (resumable)
 py laliga/scrape_whoscored.py --season 2025-26 --ids 1914240  # specific WhoScored id(s)
-# then rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
+# then render PNGs for anything the bulk crawler scraped (it saves JSON only) + publish to laliga_png/,
+# and rebuild everything (build_shots.py reads matches_detail → shots.js for the Team Lab):
+py laliga/render_missing.py --season 2025-26
 py laliga_dashboard/build_match_details.py && py laliga_dashboard/build_players.py \
   && py laliga_dashboard/build_database.py && py laliga_dashboard/build_shots.py \
-  && py laliga_dashboard/build_data.py
+  && py laliga_dashboard/build_data.py && py laliga_dashboard/build_player_lab.py \
+  && py laliga_dashboard/build_split.py
 ```
+**`build_split.py` must run last** (after build_data / build_players / build_shots): the site only
+loads `data/index.js` + `data/<season>.js`, so without it the dashboard silently shows the previous
+build. `build_site.py` and the Scraper button's rebuild already include it.
 **`scrape_whoscored.py` is the workhorse** for rich data: WhoScored match ids aren't
 range-enumerable, so it pages the **weekly** fixtures calendar back (`#dayChangeBtn-prev`),
 scrapes each `/Matches/<id>/Live` `matchCentreData`, and maps it to the schedule by team names.
@@ -136,6 +145,43 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - `run_match.py` auto-pushes generated files via `git_ops.py` when `GIT_TOKEN` is set.
 
 ## Gotchas (hard-won — don't re-break these)
+- **The site loads per-season bundles, not data.js.** `index.html`/`match.html` load `data/index.js`
+  statically and `app.js`/`match.js` inject `data/<season>.js?v=<hash>` on demand (`loadSeason`).
+  No `document.write`, no `Date.now()` cache-busters: `LL_INDEX.v` (a content hash written by
+  `build_split.py`) is the cache-buster for season bundles, player_lab files and matches_detail.
+  Forgetting `build_split.py` = the site silently shows the previous build.
+- **player_lab files are keyed by season** (`LL_PLAYERLAB[season][team]`, under `player_lab/<season>/`).
+  The old team-only files summed every scraped season into one player (Raphinha "327 shots" in a
+  3-match season). `build_player_lab.py` needs `data.js` for the id→season map: run it after `build_data.py`.
+- **Match Centre team colours go through a collision guard** (`match.js teamColours`): if the two
+  primaries are within ΔE 28 (Sevilla vs Atlético) the away side gets its secondary kit colour from
+  `LL_INDEX.teamColors` (built from `laliga/team_colors.py`), then a neutral fallback. Keep the
+  secondary colours in `team_colors.py` meaningful.
+- **Dashboard state lives in the URL hash** (`#<season>/<view>`, e.g. `#2025-26/xg`); tabs are real
+  ARIA tabs (`role=tab`, roving tabindex, arrow keys). A new view needs both a `<nav>` button and a
+  `<section role="tabpanel">` with matching ids.
+- **Minute floors scale with the season** (`app.js minsFloor`): Standouts filters default to "Auto"
+  (30% of minutes played so far, capped at 450 / 900) and the per-90 leaderboards use the same floor, so
+  a 3-matchday season is not empty. Explainers are `<details>` that remember their state in localStorage.
+- **Match Centre section bar** (`match.js buildSectionNav`) is generated from the `.mv-block` list; a new
+  block automatically gets a link. The page header is static there; the bar is what sticks.
+- **Design tokens live at the top of `styles.css`** (colour, type scale, geometry). `--accent-2`, `--good`,
+  `--bad`, `--card`, `--radius` remain as aliases for older inline references; use the semantic names
+  (`--accent`, `--positive`, `--negative`, `--info`, `--goal`) in new code.
+- **Current skin = "Broadcast Kinetic"** (feat/dashboard-beta, design direction B): carbon ground `#0c0d10`
+  with a faint diagonal hatch, ONE signal colour (lime `#d7ff3a` = ahead / active / positive), red `#ff2a4d`
+  the only other semantic colour, no border-radius anywhere (chamfered plates via `--plate-cut`, slanted
+  tabs/chips via `--slant`), hatched bar fills (`--hatch-*`), Barlow Condensed for display/labels/numbers
+  and Barlow for prose, both from Google Fonts. Match-stat bars colour the winning side with
+  `:has(.sc-val.win)`. Chart colour literals in app.js/match.js mirror the tokens (lime, pale-blue
+  `#9fd0ff` for on-target/info, red negative); change both when changing the palette. The header
+  readout (`#hudStatus`) only shows at >=1500px so the nine tabs fit.
+- **Current skin = "Telemetry"** (feat/dashboard-beta): void ground `#05070d` with a faint 48px grid, ONE
+  signal colour (cyan `#35e0ff`), all-sharp radii (2/3/4px), bracketed panel corners (`.card::before/::after`),
+  Chakra Petch for display/tabs/KPIs, IBM Plex Sans for body + tables (tabular figures), IBM Plex Mono for
+  readout labels; all from Google Fonts. The header readout (`#hudStatus`, filled in `renderAll`) only shows
+  at ≥1500px so the nine tabs fit. Chart colour literals in app.js/match.js mirror the tokens (cyan, pink
+  `#ff3d8b` for goals, mint `#3dffb0` positive, `#ff5c7a` negative); change both when changing the palette.
 - **Rebuilding derived data in THIS clone needs `LALIGA_MATCH_DIR`** — the raw scrapes are
   git-ignored and absent here; point it at the dev copy before running the builders:
   `$env:LALIGA_MATCH_DIR = "..\XWORLDCUPTWIT\laliga\matches"`. The old
@@ -153,6 +199,17 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - **players.js fields are `g`/`a`/`xg`/`mp`** (not `goals`/`assists`). `app.js` reads those.
 - **Publish dir is `laliga_png/` NOT `LaLiga/`** — the filesystem is case-insensitive, so
   "LaLiga" aliases the `laliga/` code folder. Env var `LALIGA_PNG_SUBDIR`.
+- **PNGs only exist for matches that went through `run_match.py`/`backfill.py`.** The bulk
+  crawler `scrape_whoscored.py` saves raw JSON only, so a matchday scraped that way has no PNG
+  link in the Data tab and no download button in the Match Centre until `laliga/render_missing.py`
+  runs (it renders from the raw JSONs, no browser, and copies every PNG into `laliga_png/`; it is
+  the first step of the Scraper button's rebuild). `build_data.py` links the *published*
+  `laliga_png/` copy — a PNG that only lives in the git-ignored `laliga/output/` 404s on the live site.
+- **The Match Centre also draws its own PNG in the browser** (`match_export.js`, the
+  "Download image" button): scoreboard, goals, stat bars and shot map on a canvas in the site's
+  skin, saved via `canvas.toBlob`. It needs no server, so it works on GitHub Pages for every match
+  that has a detail file. The pipeline PNG (matplotlib) stays for WhatsApp/X posts and shows as the
+  secondary "Pipeline PNG" link when it exists.
 - **Raw match JSONs are gitignored** (`laliga/matches/20*/*.json`, ~2 MB each, 769 MB/season).
   The dashboard ships the derived `matches_detail/*.js` (~74 MB) instead. If you re-scrape,
   don't commit the raw folder.
