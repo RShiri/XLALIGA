@@ -104,6 +104,9 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-03 19:32 | 2026-27 | scrape_whoscored.py | WhoScored ids 1993919 | ✅ 1 saved | 16s | — |
+| 2026-09-03 19:31 | 2026-27 | scrape_whoscored.py | fixtures sweep | ⚠️ 27 already had data, 11 failed | 11m 22s | 3 id(s) not in the schedule |
+| 2026-09-03 19:19 | 2026-27 | scrape_whoscored.py | WhoScored ids 5868033 | ⚠️ 1 failed | 25s | — |
 | 2026-09-02 14:36 | 2026-27 | scrape_whoscored.py | fixtures sweep | ⚠️ 9 saved, 18 already had data, 11 failed | 11m 12s | 3 id(s) not in the schedule |
 | 2026-08-28 19:02 | 2026-27 | backfill.py | 6 match(es) | ✅ 6 saved | 20m 38s | — |
 | 2026-08-28 16:13 | 2026-27 | dashboard button | Scrape every played match not scraped yet | ✅ done | 15s | — |

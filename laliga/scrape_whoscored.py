@@ -40,7 +40,13 @@ def _key(name: str) -> str:
     # "realmadrid" vs "atleticomadrid" distinct. Contains-matching still handles short/long
     # variants (WhoScored "Betis"/"Alaves"/"Athletic Bilbao" vs schedule "Real Betis"/
     # "Deportivo Alaves"/"Athletic Club").
-    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
+    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower().strip()
+    if s == "deportivo":
+        # WhoScored's bare "Deportivo" (no suffix) is the traditional short name for
+        # Deportivo de La Coruna specifically -- no other current La Liga club goes by
+        # "Deportivo" alone. Stripping "deportivo " below would otherwise erase this to
+        # an empty string, which _teams_match()'s `x and y` guard can never match.
+        return "acoruna"
     for j in ("deportivo ", "rcd ", "cd ", "cf ", "ud ", "sd ", "club", " balompie", " fc"):
         s = s.replace(j, " ")
     return re.sub(r"[^a-z0-9]", "", s)

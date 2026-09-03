@@ -125,7 +125,19 @@ def _understat_index(season):
 
 def _understat_xg(season, home, away):
     idx = _understat_index(season)
-    return idx.get((_team_key(home), _team_key(away)), (None, None))
+    hk, ak = _team_key(home), _team_key(away)
+    exact = idx.get((hk, ak))
+    if exact:
+        return exact
+    # Fall back to substring overlap for naming variants an exact key misses — e.g.
+    # Understat's "Deportivo La Coruna" (-> "lacoruna") vs the schedule's "Deportivo A
+    # Coruna" (-> "acoruna"): different strings, but one contains the other.
+    def ov(x, y):
+        return bool(x) and bool(y) and (x in y or y in x)
+    for (uh, ua), xg in idx.items():
+        if ov(hk, uh) and ov(ak, ua):
+            return xg
+    return (None, None)
 
 
 def _load_rich(season, fotmob_id):

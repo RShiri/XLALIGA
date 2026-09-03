@@ -602,6 +602,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 5868032,2026-08-30,Athletic Club,Celta Vigo,408449,Nico Williams,Sub,0,19,0,0,0,0,6.1,0.41,0.0,2,0,3,3,0,14,2,1,0,0,0,0,0,0
 5868032,2026-08-30,Athletic Club,Celta Vigo,511120,Mikel Jauregizar,Sub,0,28,0,0,0,0,6.3,0.0,0.0,0,0,15,12,0,21,1,2,0,0,1,0,0,0
 5868032,2026-08-30,Athletic Club,Celta Vigo,536242,Peio Canales,Sub,0,28,0,0,0,0,6.2,0.0,0.0,0,0,12,11,0,16,0,0,0,0,0,1,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,423420,Leo Roman,GK,1,93,0,0,0,0,6.5,0.0,0.0,0,0,37,24,0,43,0,0,0,0,0,0,0,3
+5868033,2026-08-30,Deportivo A Coruña,Valencia,100881,Ximo Navarro,DR,1,82,0,0,0,0,6.5,0.05,0.0,2,0,36,31,0,53,0,2,1,0,0,1,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,431768,Lucas Noubi,DC,1,93,0,0,0,0,7.0,0.0,0.0,0,0,46,39,0,58,0,3,2,1,0,7,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,631884,Bright Ede,DC,1,93,0,0,0,0,6.1,0.0,0.0,0,0,57,52,0,71,2,1,1,0,0,8,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,393081,Giacomo Quagliata,DL,1,93,0,0,0,0,6.8,0.0,0.55,0,0,36,28,2,55,1,2,0,1,1,1,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,428620,Luismi Cruz,MR,1,72,0,0,0,0,6.5,0.0,0.01,0,0,34,31,1,46,5,0,1,1,4,0,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,470032,Lorenzo Amatucci,MC,1,93,0,0,0,0,7.8,0.0,0.0,0,0,52,45,0,74,4,2,4,1,1,7,1,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,409130,Mario Soriano,MC,1,72,0,1,0,0,7.4,0.02,0.22,1,0,57,55,2,66,1,1,0,0,0,0,1,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,448450,Riki Rodriguez,ML,1,63,0,0,0,0,6.3,0.0,0.01,0,0,38,31,0,44,0,1,0,0,1,1,1,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,44120,Pierre-Emerick Aubameyang,FW,1,93,1,0,0,0,7.8,0.72,0.05,5,3,21,18,1,35,1,0,2,1,0,1,1,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,598590,Bil Nsongo,FW,1,82,0,0,0,0,7.4,0.17,0.01,2,0,25,18,2,54,2,0,4,1,3,1,6,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,513251,Teun Gijselhart,Sub,0,30,0,0,0,0,6.2,0.0,0.0,0,0,4,2,1,8,2,0,0,0,1,2,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,448041,Adria Alti,Sub,0,21,0,0,2,1,5.3,0.0,0.0,0,0,2,2,0,12,3,1,0,1,1,2,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,448011,Yeremay Hernandez,Sub,0,21,0,0,0,0,6.3,0.0,0.0,0,0,5,2,0,9,2,0,0,0,0,1,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,448273,Miguel Loureiro,Sub,0,11,0,0,0,0,6.2,0.0,0.0,0,0,3,0,0,8,1,0,0,0,1,2,0,0
+5868033,2026-08-30,Deportivo A Coruña,Valencia,527113,Jonathan Asp Jensen,Sub,0,11,0,0,0,0,6.2,0.03,0.0,1,1,1,1,0,2,0,0,0,0,1,0,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,141499,Stole Dimitrievski,GK,1,93,0,0,0,0,6.0,0.0,0.0,0,0,34,21,0,42,0,0,0,0,0,1,0,3
+5868033,2026-08-30,Valencia,Deportivo A Coruña,381713,Luis Rioja,DR,1,59,0,0,0,0,5.8,0.0,0.0,0,0,21,16,1,29,0,0,0,0,0,1,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,322095,Mouctar Diakhaby,DC,1,93,0,0,1,0,6.0,0.0,0.0,0,0,65,55,0,81,3,1,4,0,1,7,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,444239,Arnau Martinez,DC,1,81,0,0,0,0,5.7,0.0,0.0,0,0,63,59,0,80,1,0,0,0,0,0,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,427831,Cesar Tarrega,DC,1,93,0,0,0,0,5.5,0.02,0.0,1,0,64,57,0,80,3,0,0,0,1,6,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,408732,Jesus Vazquez,DL,1,93,0,0,0,0,6.2,0.0,0.0,0,0,44,39,0,72,3,0,1,2,1,0,2,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,562981,Ryunosuke Sato,MR,1,59,0,0,0,0,5.5,0.06,0.0,1,0,23,19,0,29,3,0,1,0,0,0,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,302889,Pepelu,MC,1,65,0,0,0,0,6.1,0.0,0.08,0,0,48,43,1,53,2,0,1,0,0,1,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,379684,Filip Ugrinic,MC,1,93,0,0,0,0,6.9,0.16,0.02,3,1,71,67,1,95,6,1,0,1,1,0,2,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,431507,Javi Guerra,ML,1,59,0,0,0,0,5.8,0.11,0.0,2,0,27,22,0,40,1,1,0,0,0,0,3,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,297546,Umar Sadiq,FW,1,93,1,0,0,0,7.4,0.65,0.01,2,2,13,11,1,29,2,0,4,1,0,1,2,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,431121,Aliou Dieng,Sub,0,28,0,0,0,0,6.1,0.0,0.01,0,0,28,25,0,32,1,0,0,0,1,0,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,323625,Arnaut Danjuma,Sub,0,34,0,0,0,0,6.4,0.05,0.16,2,1,12,8,1,28,1,0,0,1,0,0,1,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,510999,David Otorbi,Sub,0,34,0,0,0,0,6.2,0.0,0.17,0,0,21,19,1,31,0,0,0,0,0,0,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,354526,Hugo Duro,Sub,0,34,0,0,0,0,6.1,0.0,0.01,0,0,12,11,0,15,0,0,1,0,0,1,0,0
+5868033,2026-08-30,Valencia,Deportivo A Coruña,334221,Dani Raba,Sub,0,12,0,0,0,0,6.3,0.02,0.0,1,0,9,6,1,16,0,0,0,1,0,0,0,0
 5868034,2026-08-31,Barcelona,Rayo Vallecano,422824,Joan Garcia,GK,1,94,0,0,0,0,6.3,0.0,0.0,0,0,29,24,0,42,0,0,0,0,0,0,0,3
 5868034,2026-08-31,Barcelona,Rayo Vallecano,301019,Jules Kounde,DR,1,94,0,0,0,0,6.4,0.0,0.01,0,0,72,66,1,100,1,0,2,2,1,4,1,0
 5868034,2026-08-31,Barcelona,Rayo Vallecano,130331,Andreas Christensen,DC,1,94,0,0,0,0,6.7,0.34,0.08,1,0,72,70,0,87,2,2,1,0,1,2,0,0
