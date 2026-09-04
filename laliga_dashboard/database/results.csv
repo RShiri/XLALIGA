@@ -29,4 +29,5 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868032,2026-08-30,,,Celta Vigo,Athletic Club,0,2,1.11,2.61,1
 5868036,2026-08-31,,,Osasuna,Getafe,1,0,1.65,0.99,1
 5868034,2026-08-31,,,Barcelona,Rayo Vallecano,5,2,3.31,1.72,1
+5868043,2026-09-04,,Estadio La Cartuja de Sevilla,Real Betis,Real Madrid,1,0,0.36,0.91,1
 5868070,2026-09-03,,Estadio Municipal de Anoeta,Real Sociedad,Celta Vigo,0,0,0.73,0.04,1

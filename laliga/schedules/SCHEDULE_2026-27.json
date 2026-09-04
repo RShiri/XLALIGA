@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-03T22:00:01.928952+00:00",
+  "generated_utc": "2026-09-04T22:00:01.476560+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -433,10 +433,10 @@
       "away": "Real Madrid",
       "home_id": "8603",
       "away_id": "8633",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868042,

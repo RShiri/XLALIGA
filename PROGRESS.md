@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-04** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 882s
 - **2026-09-03** — Match Centre: in-browser 'Download image' (match_export.js) draws scoreboard, goals, stat bars and shot map to a canvas PNG in the Broadcast skin; works on GitHub Pages with no server. Pipeline PNG kept as secondary link.
 - **2026-09-03** — render_missing.py: renders PNGs from raw JSONs for bulk-scraped matches (MD3 26/27 had none) and publishes to laliga_png/; build_data links the published copy; Match Centre PNG button falls back to the season record; first rebuild step in server.py
 - **2026-09-03** — feat/dashboard-beta: Broadcast Kinetic skin (direction B) applied site-wide: lime signal colour, chamfered plates, slanted tabs/chips, hatched bars, Barlow Condensed/Barlow, champion lower-third, winner-coloured match-stat bars
@@ -104,6 +105,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-05 01:14 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 14m 42s | — |
 | 2026-09-04 01:14 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 14m 13s | — |
 | 2026-09-03 19:32 | 2026-27 | scrape_whoscored.py | WhoScored ids 1993919 | ✅ 1 saved | 16s | — |
 | 2026-09-03 19:31 | 2026-27 | scrape_whoscored.py | fixtures sweep | ⚠️ 27 already had data, 11 failed | 11m 22s | 3 id(s) not in the schedule |
