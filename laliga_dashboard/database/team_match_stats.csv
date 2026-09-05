@@ -61,5 +61,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868034,2026-08-31,Rayo Vallecano,Barcelona,away,2,5,32,12,8,331,74,4,2,12,11,42,1.72
 5868043,2026-09-04,Real Betis,Real Madrid,home,1,0,42,10,8,412,87,1,0,6,11,55,0.36
 5868043,2026-09-04,Real Madrid,Real Betis,away,0,1,58,20,11,586,91,7,7,4,13,45,0.91
+5868042,2026-09-05,Athletic Club,Atletico Madrid,home,3,0,38,11,7,386,81,3,0,5,8,52,0.59
+5868042,2026-09-05,Atletico Madrid,Athletic Club,away,0,3,62,15,6,632,90,0,0,1,6,48,0.09
 5868070,2026-09-03,Real Sociedad,Celta Vigo,home,0,0,51,16,13,527,86,1,1,2,15,58,0.73
 5868070,2026-09-03,Celta Vigo,Real Sociedad,away,0,0,49,7,4,522,87,1,1,5,11,42,0.04
