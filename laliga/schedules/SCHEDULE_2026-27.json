@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-05T19:30:01.605726+00:00",
+  "generated_utc": "2026-09-05T22:00:01.480061+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -475,10 +475,10 @@
       "away": "Deportivo A Coruña",
       "home_id": "10205",
       "away_id": "9783",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 2,
+      "away_score": 3,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868049,
