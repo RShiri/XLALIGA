@@ -23,6 +23,8 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-06** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git commit failed: On branch feat/dashboard-beta Changes not staged for commit: (use "git add/rm <file>..." to update what will be committed) (use "git restore <file>..." to discard changes in working directory) mo, took 980s
+- **2026-09-06** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 850s
 - **2026-09-06** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 859s
 - **2026-09-05** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 851s
 - **2026-09-05** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 834s
@@ -109,6 +111,8 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-06 22:46 | 2026-27 | backfill.py | 2 match(es) | ✅ 2 saved | 16m 24s | — |
+| 2026-09-06 22:46 | 2026-27 | backfill.py | 2 match(es) | ✅ 2 saved | 16m 09s | — |
 | 2026-09-06 20:29 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 13m 52s | — |
 | 2026-09-06 01:14 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 14m 10s | — |
 | 2026-09-05 22:44 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 13m 58s | — |

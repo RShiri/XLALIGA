@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-06T17:15:02.018695+00:00",
+  "generated_utc": "2026-09-06T19:30:01.392021+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -503,10 +503,10 @@
       "away": "Osasuna",
       "home_id": "9866",
       "away_id": "8371",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 5,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868047,
@@ -517,10 +517,10 @@
       "away": "Levante",
       "home_id": "9864",
       "away_id": "8581",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868045,
@@ -533,7 +533,7 @@
       "away_id": "8302",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
