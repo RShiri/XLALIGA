@@ -1,5 +1,5 @@
 position,team,played,won,drawn,lost,gf,ga,gd,points
-1,Barcelona,3,3,0,0,12,2,10,9
+1,Barcelona,4,4,0,0,17,2,15,12
 2,Real Madrid,4,3,0,1,10,3,7,9
 3,Real Betis,4,3,0,1,5,5,0,9
 4,Deportivo A Coruña,4,2,2,0,8,5,3,8
@@ -16,6 +16,6 @@ position,team,played,won,drawn,lost,gf,ga,gd,points
 15,Getafe,3,1,0,2,1,4,-3,3
 16,Villarreal,4,0,2,2,6,8,-2,2
 17,Celta Vigo,4,0,2,2,1,4,-3,2
-18,Valencia,3,0,1,2,1,4,-3,1
-19,Elche,3,0,1,2,3,9,-6,1
-20,Málaga,3,0,1,2,1,7,-6,1
+18,Elche,3,0,1,2,3,9,-6,1
+19,Málaga,3,0,1,2,1,7,-6,1
+20,Valencia,4,0,1,3,1,9,-8,1

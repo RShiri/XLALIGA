@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-05T22:00:01.480061+00:00",
+  "generated_utc": "2026-09-06T17:15:02.018695+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -489,10 +489,10 @@
       "away": "Barcelona",
       "home_id": "10267",
       "away_id": "8634",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 5,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868041,
@@ -505,7 +505,7 @@
       "away_id": "8371",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
@@ -519,7 +519,7 @@
       "away_id": "8581",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
