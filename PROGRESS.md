@@ -120,6 +120,8 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-13 14:35 | 2026-27 | backfill.py | 19 match(es) | ✅ 19 saved | 28m 45s | — |
+| 2026-09-13 04:06 | 2026-27 | backfill.py | 19 match(es) | ✅ 19 saved | 29m 29s | — |
 | 2026-09-13 03:14 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-08 07:00 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-08 01:43 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 13m 51s | — |
