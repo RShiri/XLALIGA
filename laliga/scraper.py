@@ -29,6 +29,7 @@ import time
 import logging
 import argparse
 import re
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -1131,6 +1132,31 @@ def _ws_slug_key(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", lower).strip("-")
 
 
+def _ws_team_key(name: str) -> str:
+    """La Liga club-name key for matching a schedule team name against a WhoScored
+    href/label, ported verbatim from scrape_whoscored.py's proven _key() (that module
+    imports FROM this one, so this can't import back -- kept identical by hand instead).
+    Plain re.sub(r"[^a-z0-9]", "", name.lower()) is NOT enough: it just DELETES an
+    accented char instead of transliterating it (e.g. "Deportivo A Coruña" ->
+    "deportivoacorua", dropping the second n) and keeps club-suffix noise ("Deportivo ",
+    "RCD ", "CF "...) that WhoScored's own href/label often omits -- both cause a
+    substring match that should succeed to silently fail. Confirmed 2026-09-13:
+    Deportivo A Coruña vs Elche reported "not found" after scanning all 82 weeks (both
+    stage pages) for exactly this reason. Critically do NOT strip "real": collapsing
+    "Real Madrid" -> "madrid" substring-matches "atletico**madrid**" and scrambles the
+    two Madrid clubs (see CLAUDE.md).
+    """
+    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower().strip()
+    if s == "deportivo":
+        # WhoScored's bare "Deportivo" (no suffix) is the traditional short name for
+        # Deportivo de La Coruna specifically -- no other current La Liga club goes by
+        # "Deportivo" alone.
+        return "acoruna"
+    for j in ("deportivo ", "rcd ", "cd ", "cf ", "ud ", "sd ", "club", " balompie", " fc"):
+        s = s.replace(j, " ")
+    return re.sub(r"[^a-z0-9]", "", s)
+
+
 def _ws_cache_lookup(home_name: str, away_name: str) -> int | None:
     """Check whoscored_ids.json for a pre-known match ID."""
     cache_path = Path(__file__).parent / "whoscored_ids.json"
@@ -1182,8 +1208,13 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
         from selenium.webdriver.common.by import By
-        h_key = re.sub(r"[^a-z0-9]", "", home_name.lower())
-        a_key = re.sub(r"[^a-z0-9]", "", away_name.lower())
+        # _ws_team_key (defined above) accent-folds AND strips club-suffix noise the way
+        # scrape_whoscored.py's proven _key() does -- plain re.sub(r"[^a-z0-9]", "", ...)
+        # on the raw name used to just DELETE an accented char instead of transliterating
+        # it, and kept "Deportivo "/"RCD "/etc. noise WhoScored's own href/label usually
+        # doesn't carry. See _ws_team_key's docstring for the confirmed failure.
+        h_key = _ws_team_key(home_name)
+        a_key = _ws_team_key(away_name)
         # WhoScored's tournament page is now a WEEKLY calendar (like scrape_whoscored.py's
         # bulk crawler already assumes), not the season-long fixture list this function's
         # single-page scan used to see. Without paging back, this only ever sees whatever
@@ -1204,7 +1235,27 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
                     driver.get(base)
                 except Exception as exc:
                     log.warning("WhoScored: failed to load %s (%s)", base, exc)
-                    break  # navigation itself failed -- try the next base, not worth a retry here
+                    if _looks_like_conn_reset(exc):
+                        # A reset here means the chromedriver SESSION itself is usually
+                        # dead, not just this one navigation -- confirmed 2026-09-13
+                        # (fotmob-id 5868048): the reset on base 1 was immediately
+                        # followed by WinError 10061 "actively refused" retries on the
+                        # SAME driver, then base 2 failed too for the same reason,
+                        # reporting "scanned 0 week(s)" even though neither base was
+                        # genuinely exhausted. Recreate AND actually retry the SAME base
+                        # (continue, not break) -- confirmed 2026-09-14 (Atlético Madrid
+                        # vs Villarreal) that a `break` here still lost the match: BOTH
+                        # bases got reset on their very first driver.get(), one attempt
+                        # each, with the stage_attempt budget never spent retrying a get()
+                        # failure (only the week-scan loop below used to consume it).
+                        try:
+                            driver.quit()
+                        except Exception:
+                            pass
+                        driver = _new_ws_driver(window_size="1600,1000")
+                        if stage_attempt < 2:
+                            continue  # retry THIS base's driver.get() with the fresh driver
+                    break  # not a reset, or already retried this base once -- try the next base
                 time.sleep(14)
                 stage = re.search(r"/Stages/(\d+)/", base)
                 log.info("WhoScored: scanning stage %s … (attempt %d/2)",
