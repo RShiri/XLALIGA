@@ -814,12 +814,20 @@ def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]
     events = []
     for s in shots_raw:
         tid = s.get("teamId")
-        # FotMob x/y are 0-100 from attacking perspective; flip away team
+        # FotMob x/y already come per-shooting-team, attacking perspective (target
+        # goal always toward x=100), exactly like WhoScored's own event x/y — see
+        # build_match_details.py's shots.append() and xg_core/features.py's fixed
+        # x_sb=120 target: NEITHER flips by side. A now-removed `if tid == away_id:
+        # x = 100-x; y = 100-y` here used to re-mirror already-correct away-team
+        # coordinates back toward their OWN goal, so every away shot in a
+        # FotMob-only match (no WhoScored event stream) scored near the model's
+        # clip floor regardless of true quality -- confirmed on Valencia 0-5
+        # Barcelona (2026-09-06, id 5868049): the match's total model xG was 0.15
+        # for a 5-goal side because each real near-post finish (raw x up to 103.9,
+        # i.e. inside the six-yard box) was flipped to x<0 (behind the away team's
+        # OWN goal line) before scoring.
         x = float(s.get("x", 50))
         y = float(s.get("y", 50))
-        if tid == away_id:
-            x = 100 - x
-            y = 100 - y
 
         outcome_map = {
             "Goal":          "Goal",
@@ -1112,21 +1120,41 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
         driver = uc.Chrome(options=options)
     except Exception as _uc_exc:
         _mark_uc_broken(_uc_exc)
+        import tempfile
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
         options = Options()
         if os.environ.get("LALIGA_VISIBLE") != "1":
             options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36")
+        # Match scrape_whoscored.py's _plain_driver(): a fresh, isolated profile + an
+        # explicit window size + masking navigator.webdriver. This function used to skip
+        # all three, unlike the bulk crawler -- plausible reason WhoScored/Cloudflare was
+        # serving it a stripped/challenge page with none of the expected calendar markup,
+        # which is why the calendar-paging added above found nothing to click on week 0
+        # and gave up instantly instead of ever paging back (confirmed on 2026-09-13: 21
+        # matches, every one "not found" within one page load, no evidence of any click).
+        for a in ("--no-sandbox", "--disable-dev-shm-usage", "--window-size=1600,1000",
+                  "--user-data-dir=" + tempfile.mkdtemp(prefix="laliga_chrome_"),
+                  "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"):
+            options.add_argument(a)
         driver = webdriver.Chrome(options=options)
+        driver.execute_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined})")
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
+        from selenium.webdriver.common.by import By
         h_key = re.sub(r"[^a-z0-9]", "", home_name.lower())
         a_key = re.sub(r"[^a-z0-9]", "", away_name.lower())
+        # WhoScored's tournament page is now a WEEKLY calendar (like scrape_whoscored.py's
+        # bulk crawler already assumes), not the season-long fixture list this function's
+        # single-page scan used to see. Without paging back, this only ever sees whatever
+        # week the page opens to (the current/upcoming one), so any earlier match "not
+        # found" here even when it genuinely exists on WhoScored -- confirmed missing
+        # Real Madrid vs Rayo Vallecano (MD5) and 18 other 2026-27 matches this way despite
+        # each one being reachable a few '#dayChangeBtn-prev' clicks back. Page back the
+        # same way harvest_ids() does, up to a season's worth of weeks, before giving up.
+        weeks_scanned = 0
         for base in LALIGA_WS_BASES:
             try:
                 driver.get(base)
@@ -1136,17 +1164,63 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
             time.sleep(14)
             stage = re.search(r"/Stages/(\d+)/", base)
             log.info("WhoScored: scanning stage %s …", stage.group(1) if stage else base)
-            for el in driver.find_elements("css selector", "a[href*='/matches/']"):
-                href = el.get_attribute("href") or ""
-                combined = re.sub(r"[^a-z0-9]", "", href.lower())
-                if h_key in combined and a_key in combined:
-                    m = re.search(r"/matches/(\d+)/", href)
-                    if m:
-                        mid = int(m.group(1))
-                        log.info("WhoScored: found match ID %d", mid)
-                        return mid
-        log.warning("WhoScored: match ID not found for %s vs %s (scanned %d stage page(s))",
-                    home_name, away_name, len(LALIGA_WS_BASES))
+            for week in range(41):  # ~38 La Liga matchdays + a little slack
+                weeks_scanned += 1
+                # The page can still be mid-load (SPA hydration / a Cloudflare check) right
+                # after driver.get() or a calendar click -- harvest_ids() in
+                # scrape_whoscored.py already retries on an empty read for exactly this
+                # reason; this function never did. Retry a few times before concluding
+                # THIS week's fixture list is genuinely empty (must re-read every week, not
+                # just week 0 -- a stale list from an earlier week would never match).
+                match_links = []
+                for attempt in range(6):
+                    match_links = driver.find_elements("css selector", "a[href*='/matches/']")
+                    if match_links:
+                        break
+                    time.sleep(3)
+                for el in match_links:
+                    href = el.get_attribute("href") or ""
+                    combined = re.sub(r"[^a-z0-9]", "", href.lower())
+                    if h_key in combined and a_key in combined:
+                        m = re.search(r"/matches/(\d+)/", href)
+                        if m:
+                            mid = int(m.group(1))
+                            log.info("WhoScored: found match ID %d (%d week(s) back)", mid, week)
+                            return mid
+                clicked = False
+                prev_seen = 0
+                for sel in ["#dayChangeBtn-prev", "button.Calendar-module_dayChangeBtn__sEvC8",
+                            "[id='dayChangeBtn-prev']", "a.previous"]:
+                    try:
+                        found = driver.find_elements(By.CSS_SELECTOR, sel)
+                        prev_seen += len(found)
+                        for btn in found:
+                            if btn.is_displayed():
+                                driver.execute_script("arguments[0].click();", btn)
+                                clicked = True
+                                break
+                        if clicked:
+                            break
+                    except Exception:
+                        continue
+                if not clicked:
+                    # Diagnose WHY, so a repeat failure gives a concrete next lead instead of
+                    # another guess: is this a Cloudflare/consent wall (no real page loaded
+                    # at all) or a genuine "reached the start of the season" (real page, no
+                    # prev button left)?
+                    if week == 0:
+                        src = driver.page_source or ""
+                        blocked = any(marker in src for marker in
+                                     ("Just a moment", "cf-browser-verification",
+                                      "Attention Required", "Enable JavaScript and cookies"))
+                        log.warning("WhoScored: no calendar control on %s (week 0, %d match "
+                                   "link(s) seen, %d prev-button element(s) matched, "
+                                   "%d byte(s) of HTML%s)", base, len(match_links), prev_seen,
+                                   len(src), ", looks Cloudflare-blocked" if blocked else "")
+                    break  # no calendar on this page (or reached its start) — try next base
+                time.sleep(5)
+        log.warning("WhoScored: match ID not found for %s vs %s (scanned %d week(s) across "
+                    "%d stage page(s))", home_name, away_name, weeks_scanned, len(LALIGA_WS_BASES))
         return None
     except Exception as exc:
         log.error("WhoScored search error: %s", exc)
