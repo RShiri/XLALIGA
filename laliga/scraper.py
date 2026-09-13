@@ -57,12 +57,21 @@ POLL_INTERVAL = int(os.environ.get("LALIGA_SCRAPE_POLL_SECONDS", 300))  # 5 min
 LALIGA_FOTMOB_ID = int(os.environ.get("LALIGA_FOTMOB_LEAGUE_ID", 87))
 LALIGA_FOTMOB_NAMES = {"laliga", "laliga ea sports", "la liga"}
 
-# WhoScored La Liga fixtures page. WhoScored serves the CURRENT season from the
-# season-less tournament URL (Region 206 = Spain, Tournament 4 = LaLiga), which is
-# what we want for a live season. For an archived season set LALIGA_WHOSCORED_URLS
+# WhoScored La Liga fixtures page. WhoScored used to serve the CURRENT season from
+# the season-less tournament URL (Region 206 = Spain, Tournament 4 = LaLiga), but by
+# 2026-09 that no longer reliably lands on the 2026-27 fixtures list — the match-id
+# lookup started missing recent fixtures (e.g. Real Madrid vs Rayo Vallecano, WhoScored
+# id 1994162, MD5) even though the match existed at
+# .../Regions/206/Tournaments/4/Seasons/11213/Spain-LaLiga. Season id 11213 is 2026-27;
+# it changes every season (bump it here, or override via LALIGA_WHOSCORED_URLS, once
+# 2027-28 starts) — the season-less URL is kept second as a fallback in case WhoScored's
+# redirect starts working again.  For an archived season set LALIGA_WHOSCORED_URLS
 # (pipe-separated) to the season-specific .../Seasons/<sid>/Stages/<stid>/Fixtures/...
 # page. LALIGA_WHOSCORED_URL still works for a single page.
-_WS_DEFAULT_URLS = "https://www.whoscored.com/Regions/206/Tournaments/4/Spain-LaLiga"
+_WS_DEFAULT_URLS = (
+    "https://www.whoscored.com/Regions/206/Tournaments/4/Seasons/11213/Spain-LaLiga"
+    "|https://www.whoscored.com/Regions/206/Tournaments/4/Spain-LaLiga"
+)
 LALIGA_WS_BASES = [
     u.strip() for u in os.environ.get(
         "LALIGA_WHOSCORED_URLS",
