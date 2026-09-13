@@ -30,13 +30,18 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868036,2026-08-31,,,Osasuna,Getafe,1,0,1.65,0.99,1
 5868034,2026-08-31,,,Barcelona,Rayo Vallecano,5,2,3.31,1.72,1
 5868043,2026-09-04,,Estadio La Cartuja de Sevilla,Real Betis,Real Madrid,1,0,0.36,0.91,1
-5868042,2026-09-05,,Estadio de San Mamés,Athletic Club,Atletico Madrid,3,0,0.59,0.09,1
-5868048,2026-09-05,,Estadio Ontime Butarque,Rayo Vallecano,Racing Santander,3,2,1.05,0.05,1
-5868050,2026-09-05,,Estadio de la Cerámica,Villarreal,Deportivo A Coruña,2,3,0.69,0.08,1
-5868049,2026-09-06,,Estadio de Mestalla,Valencia,Barcelona,0,5,0.16,0.15,1
+5868042,2026-09-05,,Estadio de San Mamés,Athletic Club,Atletico Madrid,3,0,0.55,0.09,1
+5868048,2026-09-05,,Estadio Ontime Butarque,Rayo Vallecano,Racing Santander,3,2,1.07,0.05,1
+5868050,2026-09-05,,Estadio de la Cerámica,Villarreal,Deportivo A Coruña,2,3,0.66,0.08,1
+5868049,2026-09-06,,Estadio de Mestalla,Valencia,Barcelona,0,5,0.15,0.15,1
 5868041,2026-09-06,,Estadio de Mendizorroza,Deportivo Alavés,Osasuna,5,2,0.54,0.83,1
 5868047,2026-09-06,,Estadio La Rosaleda,Málaga,Levante,0,0,1.16,0.07,1
 5868045,2026-09-06,,RCDE Stadium,Espanyol,Sevilla,1,1,0.52,0.05,1
-5868046,2026-09-07,,Estadio Coliseum,Getafe,Celta Vigo,1,1,0.54,0.1,1
-5868044,2026-09-07,,Estadio Manuel Martínez Valero,Elche,Real Sociedad,2,3,1.28,0.08,1
-5868070,2026-09-03,,Estadio Municipal de Anoeta,Real Sociedad,Celta Vigo,0,0,0.73,0.04,1
+5868046,2026-09-07,,Estadio Coliseum,Getafe,Celta Vigo,1,1,0.52,0.1,1
+5868044,2026-09-07,,Estadio Manuel Martínez Valero,Elche,Real Sociedad,2,3,1.29,0.08,1
+5868059,2026-09-11,,Estadio Ramón Sánchez Pizjuán,Sevilla,Valencia,1,0,0.59,0.02,1
+5868056,2026-09-12,,Campos de Sport de El Sardinero,Racing Santander,Deportivo Alavés,2,1,0.51,0.1,1
+5868055,2026-09-12,,Estadio El Sadar,Osasuna,Espanyol,0,2,0.59,0.04,1
+5868051,2026-09-12,,Estadio de San Mamés,Athletic Club,Elche,1,1,1.44,0.81,1
+5868057,2026-09-12,,Estadio Bernabéu,Real Madrid,Rayo Vallecano,4,1,2.23,0.11,1
+5868070,2026-09-03,,Estadio Municipal de Anoeta,Real Sociedad,Celta Vigo,0,0,0.75,0.04,1
