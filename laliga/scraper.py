@@ -814,12 +814,20 @@ def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]
     events = []
     for s in shots_raw:
         tid = s.get("teamId")
-        # FotMob x/y are 0-100 from attacking perspective; flip away team
+        # FotMob x/y already come per-shooting-team, attacking perspective (target
+        # goal always toward x=100), exactly like WhoScored's own event x/y — see
+        # build_match_details.py's shots.append() and xg_core/features.py's fixed
+        # x_sb=120 target: NEITHER flips by side. A now-removed `if tid == away_id:
+        # x = 100-x; y = 100-y` here used to re-mirror already-correct away-team
+        # coordinates back toward their OWN goal, so every away shot in a
+        # FotMob-only match (no WhoScored event stream) scored near the model's
+        # clip floor regardless of true quality -- confirmed on Valencia 0-5
+        # Barcelona (2026-09-06, id 5868049): the match's total model xG was 0.15
+        # for a 5-goal side because each real near-post finish (raw x up to 103.9,
+        # i.e. inside the six-yard box) was flipped to x<0 (behind the away team's
+        # OWN goal line) before scoring.
         x = float(s.get("x", 50))
         y = float(s.get("y", 50))
-        if tid == away_id:
-            x = 100 - x
-            y = 100 - y
 
         outcome_map = {
             "Goal":          "Goal",
