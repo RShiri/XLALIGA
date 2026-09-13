@@ -1357,6 +1357,11 @@ def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | No
         ("wc_dashboard_shots", "build_shots.py", "shots.js (Team Lab)"),
         ("wc_dashboard_database", "build_database.py", "database export"),
         ("wc_dashboard_player_lab", "build_player_lab.py", "player_lab per-team events"),
+        # MUST stay last: the site only loads data/index.js + data/<season>.js, which
+        # build_split.py derives from data.js/players.js/shots.js. Without this step a
+        # batch scrape (backfill.py / the scheduled tasks) rebuilds every builder output
+        # yet the live site silently keeps showing the previous bundles.
+        ("wc_dashboard_split", "build_split.py", "per-season bundles (data/)"),
     ):
         if modname == "wc_dashboard_details_all" and not full_rebuild:
             continue                       # the single page was already written above
@@ -1379,9 +1384,4 @@ def output_filename(match_data: dict, output_dir: str = ".") -> str:
     home   = match_data.get("home", {}).get("name", "Home").replace(" ", "_")
     away   = match_data.get("away", {}).get("name", "Away").replace(" ", "_")
     fname  = f"{date}_{home}_vs_{away}.png"
-        # MUST stay last: the site only loads data/index.js + data/<season>.js, which
-        # build_split.py derives from data.js/players.js/shots.js. Without this step a
-        # batch scrape (backfill.py / the scheduled tasks) rebuilds every builder output
-        # yet the live site silently keeps showing the previous bundles.
-        ("wc_dashboard_split", "build_split.py", "per-season bundles (data/)"),
     return os.path.join(output_dir, fname)
