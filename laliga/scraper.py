@@ -1133,8 +1133,18 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
+        from selenium.webdriver.common.by import By
         h_key = re.sub(r"[^a-z0-9]", "", home_name.lower())
         a_key = re.sub(r"[^a-z0-9]", "", away_name.lower())
+        # WhoScored's tournament page is now a WEEKLY calendar (like scrape_whoscored.py's
+        # bulk crawler already assumes), not the season-long fixture list this function's
+        # single-page scan used to see. Without paging back, this only ever sees whatever
+        # week the page opens to (the current/upcoming one), so any earlier match "not
+        # found" here even when it genuinely exists on WhoScored -- confirmed missing
+        # Real Madrid vs Rayo Vallecano (MD5) and 18 other 2026-27 matches this way despite
+        # each one being reachable a few '#dayChangeBtn-prev' clicks back. Page back the
+        # same way harvest_ids() does, up to a season's worth of weeks, before giving up.
+        weeks_scanned = 0
         for base in LALIGA_WS_BASES:
             try:
                 driver.get(base)
@@ -1144,17 +1154,35 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
             time.sleep(14)
             stage = re.search(r"/Stages/(\d+)/", base)
             log.info("WhoScored: scanning stage %s …", stage.group(1) if stage else base)
-            for el in driver.find_elements("css selector", "a[href*='/matches/']"):
-                href = el.get_attribute("href") or ""
-                combined = re.sub(r"[^a-z0-9]", "", href.lower())
-                if h_key in combined and a_key in combined:
-                    m = re.search(r"/matches/(\d+)/", href)
-                    if m:
-                        mid = int(m.group(1))
-                        log.info("WhoScored: found match ID %d", mid)
-                        return mid
-        log.warning("WhoScored: match ID not found for %s vs %s (scanned %d stage page(s))",
-                    home_name, away_name, len(LALIGA_WS_BASES))
+            for week in range(41):  # ~38 La Liga matchdays + a little slack
+                weeks_scanned += 1
+                for el in driver.find_elements("css selector", "a[href*='/matches/']"):
+                    href = el.get_attribute("href") or ""
+                    combined = re.sub(r"[^a-z0-9]", "", href.lower())
+                    if h_key in combined and a_key in combined:
+                        m = re.search(r"/matches/(\d+)/", href)
+                        if m:
+                            mid = int(m.group(1))
+                            log.info("WhoScored: found match ID %d (%d week(s) back)", mid, week)
+                            return mid
+                clicked = False
+                for sel in ["#dayChangeBtn-prev", "button.Calendar-module_dayChangeBtn__sEvC8",
+                            "[id='dayChangeBtn-prev']", "a.previous"]:
+                    try:
+                        for btn in driver.find_elements(By.CSS_SELECTOR, sel):
+                            if btn.is_displayed():
+                                driver.execute_script("arguments[0].click();", btn)
+                                clicked = True
+                                break
+                        if clicked:
+                            break
+                    except Exception:
+                        continue
+                if not clicked:
+                    break  # no calendar on this page (or reached its start) — try next base
+                time.sleep(5)
+        log.warning("WhoScored: match ID not found for %s vs %s (scanned %d week(s) across "
+                    "%d stage page(s))", home_name, away_name, weeks_scanned, len(LALIGA_WS_BASES))
         return None
     except Exception as exc:
         log.error("WhoScored search error: %s", exc)
