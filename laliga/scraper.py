@@ -962,17 +962,22 @@ def _mark_uc_broken(exc: Exception) -> None:
 
 # WhoScored/Cloudflare (or an overloaded local Chrome under memory pressure -- see
 # PROGRESS.md 2026-09-02) periodically kills the Selenium<->chromedriver connection
-# mid-request. Confirmed on 2026-09-13 (fotmob-id 5868057, LALIGA_VISIBLE=1): the
-# search function got PAST the initial page load and into the week-paging loop, then
-# died with exactly this signature. Recognise it so callers can retry instead of
-# treating it the same as "page genuinely has no data".
+# mid-request, or just stalls it past the 120s Selenium read timeout. Confirmed
+# 2026-09-13 (fotmob-id 5868057, LALIGA_VISIBLE=1): the search function got PAST the
+# initial page load and into the week-paging loop, then died with exactly this
+# signature. Also confirmed 2026-09-14 (Malaga vs Deportivo A Coruna): base 1 hit
+# ConnectionResetError twice, then base 2's driver.get() just hung and timed out
+# instead -- same underlying network flakiness, different urllib3 error class.
+# Recognise both so callers can retry instead of treating it the same as "page
+# genuinely has no data".
 def _looks_like_conn_reset(exc: Exception) -> bool:
     if isinstance(exc, ConnectionResetError):
         return True
     text = str(exc)
     return any(marker in text for marker in
                ("10054", "10061", "Connection aborted", "forcibly closed",
-                "ConnectionResetError", "RemoteDisconnected"))
+                "ConnectionResetError", "RemoteDisconnected", "Read timed out",
+                "Max retries exceeded"))
 
 
 def _new_plain_ws_driver(isolate_profile: bool = True, window_size: str = "1920,1080"):
