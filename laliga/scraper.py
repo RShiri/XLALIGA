@@ -57,20 +57,23 @@ POLL_INTERVAL = int(os.environ.get("LALIGA_SCRAPE_POLL_SECONDS", 300))  # 5 min
 LALIGA_FOTMOB_ID = int(os.environ.get("LALIGA_FOTMOB_LEAGUE_ID", 87))
 LALIGA_FOTMOB_NAMES = {"laliga", "laliga ea sports", "la liga"}
 
-# WhoScored La Liga fixtures page. WhoScored used to serve the CURRENT season from
-# the season-less tournament URL (Region 206 = Spain, Tournament 4 = LaLiga), but by
-# 2026-09 that no longer reliably lands on the 2026-27 fixtures list — the match-id
-# lookup started missing recent fixtures (e.g. Real Madrid vs Rayo Vallecano, WhoScored
-# id 1994162, MD5) even though the match existed at
-# .../Regions/206/Tournaments/4/Seasons/11213/Spain-LaLiga. Season id 11213 is 2026-27;
-# it changes every season (bump it here, or override via LALIGA_WHOSCORED_URLS, once
-# 2027-28 starts) — the season-less URL is kept second as a fallback in case WhoScored's
-# redirect starts working again.  For an archived season set LALIGA_WHOSCORED_URLS
-# (pipe-separated) to the season-specific .../Seasons/<sid>/Stages/<stid>/Fixtures/...
-# page. LALIGA_WHOSCORED_URL still works for a single page.
+# WhoScored La Liga fixtures page. Earlier in 2026-09 the season-less tournament URL
+# (Region 206 = Spain, Tournament 4 = LaLiga) stopped reliably landing on the 2026-27
+# fixtures list, so the season-specific URL was pinned FIRST as the fix. That has since
+# flipped: on 2026-09-13 the season-specific URL (.../Seasons/11213/Spain-LaLiga) hung
+# for a full 120s Selenium read-timeout before falling through, while the season-less
+# URL resolved instantly and correctly found the SAME match cited as the original
+# counter-example (Real Madrid vs Rayo Vallecano, WhoScored id 1994162, MD5) at week 0.
+# Costing ~2 minutes per search on a bad first candidate is expensive across a 21-match
+# batch, so the season-less URL is first again; the season-specific one stays second as
+# a fallback in case the redirect breaks again (both are always tried, in this order).
+# Season id 11213 is 2026-27 -- bump it here (or override via LALIGA_WHOSCORED_URLS)
+# once 2027-28 starts. For an archived season set LALIGA_WHOSCORED_URLS (pipe-separated)
+# to the season-specific .../Seasons/<sid>/Stages/<stid>/Fixtures/... page.
+# LALIGA_WHOSCORED_URL still works for a single page.
 _WS_DEFAULT_URLS = (
-    "https://www.whoscored.com/Regions/206/Tournaments/4/Seasons/11213/Spain-LaLiga"
-    "|https://www.whoscored.com/Regions/206/Tournaments/4/Spain-LaLiga"
+    "https://www.whoscored.com/Regions/206/Tournaments/4/Spain-LaLiga"
+    "|https://www.whoscored.com/Regions/206/Tournaments/4/Seasons/11213/Spain-LaLiga"
 )
 LALIGA_WS_BASES = [
     u.strip() for u in os.environ.get(
@@ -956,12 +959,48 @@ def _mark_uc_broken(exc: Exception) -> None:
                  "for the rest of this run", str(exc).splitlines()[0][:120])
 
 
-def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
-    """
-    Open a WhoScored match URL with Selenium, extract matchCentreData JSON.
-    Returns the parsed dict or None on failure.
-    """
-    driver = None
+# WhoScored/Cloudflare (or an overloaded local Chrome under memory pressure -- see
+# PROGRESS.md 2026-09-02) periodically kills the Selenium<->chromedriver connection
+# mid-request. Confirmed on 2026-09-13 (fotmob-id 5868057, LALIGA_VISIBLE=1): the
+# search function got PAST the initial page load and into the week-paging loop, then
+# died with exactly this signature. Recognise it so callers can retry instead of
+# treating it the same as "page genuinely has no data".
+def _looks_like_conn_reset(exc: Exception) -> bool:
+    if isinstance(exc, ConnectionResetError):
+        return True
+    text = str(exc)
+    return any(marker in text for marker in
+               ("10054", "10061", "Connection aborted", "forcibly closed",
+                "ConnectionResetError", "RemoteDisconnected"))
+
+
+def _new_plain_ws_driver(isolate_profile: bool = True, window_size: str = "1920,1080"):
+    """Plain-Selenium fallback driver, matching scrape_whoscored.py's proven
+    _plain_driver(): isolated --user-data-dir + masked navigator.webdriver. Used as the
+    uc-broken fallback AND to recreate a driver after a connection-reset mid-scrape."""
+    import tempfile
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    options = Options()
+    if os.environ.get("LALIGA_VISIBLE") != "1":
+        options.add_argument("--headless=new")
+    args = ["--no-sandbox", "--disable-dev-shm-usage", f"--window-size={window_size}",
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"]
+    if isolate_profile:
+        args.append("--user-data-dir=" + tempfile.mkdtemp(prefix="laliga_chrome_"))
+    for a in args:
+        options.add_argument(a)
+    driver = webdriver.Chrome(options=options)
+    if isolate_profile:
+        driver.execute_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined})")
+    return driver
+
+
+def _new_ws_driver(window_size: str = "1920,1080"):
+    """Try undetected-chromedriver first, fall back to the isolated plain-Selenium
+    driver above. Shared by whoscored_fetch_match and whoscored_search_match_id so a
+    connection-reset mid-scrape can recreate the SAME kind of driver it started with."""
     try:
         if _uc_is_broken():
             raise RuntimeError("undetected-chromedriver already known broken this run")
@@ -971,65 +1010,96 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
             options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--window-size=1920,1080")
-        driver = uc.Chrome(options=options)
+        options.add_argument(f"--window-size={window_size}")
+        return uc.Chrome(options=options)
     except Exception as _uc_exc:
         # undetected-chromedriver breaks on Chrome version bumps (ImportError OR
         # SessionNotCreatedException); plain Selenium + Selenium Manager is the robust
-        # fallback and clears WhoScored's Cloudflare fine in practice.
+        # fallback and clears WhoScored's Cloudflare fine in practice. Give it the same
+        # isolated-profile + masked-webdriver setup scrape_whoscored.py already proved
+        # out -- whoscored_fetch_match used to skip both (only --window-size), a
+        # plausible reason its connection got reset when the search function's matching
+        # setup didn't fail the same way (see PROGRESS.md 2026-09-13).
         _mark_uc_broken(_uc_exc)
-        from selenium import webdriver
-        from selenium.webdriver.chrome.options import Options
-        options = Options()
-        if os.environ.get("LALIGA_VISIBLE") != "1":
-            options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36")
-        driver = webdriver.Chrome(options=options)
+        return _new_plain_ws_driver(isolate_profile=True, window_size=window_size)
 
-    log.info("WhoScored: loading %s …", ws_url)
+
+def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
+    """
+    Open a WhoScored match URL with Selenium, extract matchCentreData JSON.
+    Returns the parsed dict or None on failure. Retries up to 3 times, recreating the
+    browser session, on a connection-reset -- a fixed single attempt used to surface
+    WinError 10054 as a hard failure even though a fresh session usually recovers.
+    """
+    driver = None
+    last_exc: Exception | None = None
     try:
-        driver.get(ws_url)
-        time.sleep(timeout)
+        for attempt in range(1, 4):
+            try:
+                if driver is None:
+                    driver = _new_ws_driver()
+                log.info("WhoScored: loading %s … (attempt %d/3)", ws_url, attempt)
+                driver.get(ws_url)
+                time.sleep(timeout)
 
-        html   = driver.page_source
-        marker = "matchCentreData:"
-        idx    = html.find(marker)
-        if idx == -1:
-            log.warning("WhoScored: matchCentreData not found in page source.")
-            return None
+                html   = driver.page_source
+                marker = "matchCentreData:"
+                idx    = html.find(marker)
+                if idx == -1:
+                    log.warning("WhoScored: matchCentreData not found in page source "
+                                "(attempt %d/3).", attempt)
+                    if attempt < 3:
+                        time.sleep(5)
+                        continue
+                    return None
 
-        snippet = html[idx + len(marker):].strip()
+                snippet = html[idx + len(marker):].strip()
 
-        # Extract JSON by matching braces
-        if "matchCentreEventTypeJson" in snippet:
-            json_str = snippet.split("matchCentreEventTypeJson")[0].strip().rstrip(",")
-        else:
-            # Fallback: count braces
-            depth, end = 0, 0
-            for i, ch in enumerate(snippet):
-                if ch == "{":
-                    depth += 1
-                elif ch == "}":
-                    depth -= 1
-                    if depth == 0:
-                        end = i + 1
+                # Extract JSON by matching braces
+                if "matchCentreEventTypeJson" in snippet:
+                    json_str = snippet.split("matchCentreEventTypeJson")[0].strip().rstrip(",")
+                else:
+                    # Fallback: count braces
+                    depth, end = 0, 0
+                    for i, ch in enumerate(snippet):
+                        if ch == "{":
+                            depth += 1
+                        elif ch == "}":
+                            depth -= 1
+                            if depth == 0:
+                                end = i + 1
+                                break
+                    json_str = snippet[:end]
+
+                data = json.loads(json_str)
+                log.info("WhoScored: parsed %d events.", len(data.get("events", [])))
+                return data
+
+            except Exception as exc:
+                last_exc = exc
+                reset = _looks_like_conn_reset(exc)
+                log.warning("WhoScored fetch attempt %d/3 failed (%s): %s", attempt,
+                            "connection reset -- recreating session" if reset else "error", exc)
+                try:
+                    driver.quit()
+                except Exception:
+                    pass
+                driver = None
+                if not reset or attempt == 3:
+                    # Not a reset (JSON/parse error etc.) -- retrying a fresh session
+                    # won't fix a page that genuinely has no/garbled data, but still
+                    # give it the remaining attempts since a bad read can also be a
+                    # one-off SPA-hydration hiccup.
+                    if attempt == 3:
                         break
-            json_str = snippet[:end]
-
-        data = json.loads(json_str)
-        log.info("WhoScored: parsed %d events.", len(data.get("events", [])))
-        return data
-
-    except Exception as exc:
-        log.error("WhoScored scrape error: %s", exc)
+                time.sleep(4)
+        if last_exc:
+            log.error("WhoScored scrape error after retries: %s", last_exc)
         return None
     finally:
         try:
-            driver.quit()
+            if driver:
+                driver.quit()
         except Exception:
             pass
 
@@ -1107,39 +1177,7 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
     if cached:
         return cached
 
-    driver = None
-    try:
-        if _uc_is_broken():
-            raise RuntimeError("undetected-chromedriver already known broken this run")
-        import undetected_chromedriver as uc
-        options = uc.ChromeOptions()
-        if os.environ.get("LALIGA_VISIBLE") != "1":
-            options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        driver = uc.Chrome(options=options)
-    except Exception as _uc_exc:
-        _mark_uc_broken(_uc_exc)
-        import tempfile
-        from selenium import webdriver
-        from selenium.webdriver.chrome.options import Options
-        options = Options()
-        if os.environ.get("LALIGA_VISIBLE") != "1":
-            options.add_argument("--headless=new")
-        # Match scrape_whoscored.py's _plain_driver(): a fresh, isolated profile + an
-        # explicit window size + masking navigator.webdriver. This function used to skip
-        # all three, unlike the bulk crawler -- plausible reason WhoScored/Cloudflare was
-        # serving it a stripped/challenge page with none of the expected calendar markup,
-        # which is why the calendar-paging added above found nothing to click on week 0
-        # and gave up instantly instead of ever paging back (confirmed on 2026-09-13: 21
-        # matches, every one "not found" within one page load, no evidence of any click).
-        for a in ("--no-sandbox", "--disable-dev-shm-usage", "--window-size=1600,1000",
-                  "--user-data-dir=" + tempfile.mkdtemp(prefix="laliga_chrome_"),
-                  "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"):
-            options.add_argument(a)
-        driver = webdriver.Chrome(options=options)
-        driver.execute_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined})")
+    driver = _new_ws_driver(window_size="1600,1000")
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
@@ -1156,69 +1194,92 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
         # same way harvest_ids() does, up to a season's worth of weeks, before giving up.
         weeks_scanned = 0
         for base in LALIGA_WS_BASES:
-            try:
-                driver.get(base)
-            except Exception as exc:
-                log.warning("WhoScored: failed to load %s (%s)", base, exc)
-                continue
-            time.sleep(14)
-            stage = re.search(r"/Stages/(\d+)/", base)
-            log.info("WhoScored: scanning stage %s …", stage.group(1) if stage else base)
-            for week in range(41):  # ~38 La Liga matchdays + a little slack
-                weeks_scanned += 1
-                # The page can still be mid-load (SPA hydration / a Cloudflare check) right
-                # after driver.get() or a calendar click -- harvest_ids() in
-                # scrape_whoscored.py already retries on an empty read for exactly this
-                # reason; this function never did. Retry a few times before concluding
-                # THIS week's fixture list is genuinely empty (must re-read every week, not
-                # just week 0 -- a stale list from an earlier week would never match).
-                match_links = []
-                for attempt in range(6):
-                    match_links = driver.find_elements("css selector", "a[href*='/matches/']")
-                    if match_links:
-                        break
-                    time.sleep(3)
-                for el in match_links:
-                    href = el.get_attribute("href") or ""
-                    combined = re.sub(r"[^a-z0-9]", "", href.lower())
-                    if h_key in combined and a_key in combined:
-                        m = re.search(r"/matches/(\d+)/", href)
-                        if m:
-                            mid = int(m.group(1))
-                            log.info("WhoScored: found match ID %d (%d week(s) back)", mid, week)
-                            return mid
-                clicked = False
-                prev_seen = 0
-                for sel in ["#dayChangeBtn-prev", "button.Calendar-module_dayChangeBtn__sEvC8",
-                            "[id='dayChangeBtn-prev']", "a.previous"]:
-                    try:
-                        found = driver.find_elements(By.CSS_SELECTOR, sel)
-                        prev_seen += len(found)
-                        for btn in found:
-                            if btn.is_displayed():
-                                driver.execute_script("arguments[0].click();", btn)
-                                clicked = True
+            # The scan can die mid-week with a Selenium<->chromedriver connection reset
+            # (WinError 10054/10061 -- confirmed 2026-09-13 on fotmob-id 5868057, ~21s
+            # into this exact loop). That used to abort the WHOLE search and fall back to
+            # FotMob-only even though the match was reachable. Retry the stage from week 0
+            # with a fresh driver (up to 2 attempts) before giving up on it.
+            for stage_attempt in range(1, 3):
+                try:
+                    driver.get(base)
+                except Exception as exc:
+                    log.warning("WhoScored: failed to load %s (%s)", base, exc)
+                    break  # navigation itself failed -- try the next base, not worth a retry here
+                time.sleep(14)
+                stage = re.search(r"/Stages/(\d+)/", base)
+                log.info("WhoScored: scanning stage %s … (attempt %d/2)",
+                         stage.group(1) if stage else base, stage_attempt)
+                try:
+                    for week in range(41):  # ~38 La Liga matchdays + a little slack
+                        weeks_scanned += 1
+                        # The page can still be mid-load (SPA hydration / a Cloudflare check)
+                        # right after driver.get() or a calendar click -- harvest_ids() in
+                        # scrape_whoscored.py already retries on an empty read for exactly
+                        # this reason; this function never did. Retry a few times before
+                        # concluding THIS week's fixture list is genuinely empty (must
+                        # re-read every week, not just week 0 -- a stale list from an
+                        # earlier week would never match).
+                        match_links = []
+                        for attempt in range(6):
+                            match_links = driver.find_elements("css selector", "a[href*='/matches/']")
+                            if match_links:
                                 break
-                        if clicked:
-                            break
-                    except Exception:
-                        continue
-                if not clicked:
-                    # Diagnose WHY, so a repeat failure gives a concrete next lead instead of
-                    # another guess: is this a Cloudflare/consent wall (no real page loaded
-                    # at all) or a genuine "reached the start of the season" (real page, no
-                    # prev button left)?
-                    if week == 0:
-                        src = driver.page_source or ""
-                        blocked = any(marker in src for marker in
-                                     ("Just a moment", "cf-browser-verification",
-                                      "Attention Required", "Enable JavaScript and cookies"))
-                        log.warning("WhoScored: no calendar control on %s (week 0, %d match "
-                                   "link(s) seen, %d prev-button element(s) matched, "
-                                   "%d byte(s) of HTML%s)", base, len(match_links), prev_seen,
-                                   len(src), ", looks Cloudflare-blocked" if blocked else "")
-                    break  # no calendar on this page (or reached its start) — try next base
-                time.sleep(5)
+                            time.sleep(3)
+                        for el in match_links:
+                            href = el.get_attribute("href") or ""
+                            combined = re.sub(r"[^a-z0-9]", "", href.lower())
+                            if h_key in combined and a_key in combined:
+                                m = re.search(r"/matches/(\d+)/", href)
+                                if m:
+                                    mid = int(m.group(1))
+                                    log.info("WhoScored: found match ID %d (%d week(s) back)", mid, week)
+                                    return mid
+                        clicked = False
+                        prev_seen = 0
+                        for sel in ["#dayChangeBtn-prev", "button.Calendar-module_dayChangeBtn__sEvC8",
+                                    "[id='dayChangeBtn-prev']", "a.previous"]:
+                            try:
+                                found = driver.find_elements(By.CSS_SELECTOR, sel)
+                                prev_seen += len(found)
+                                for btn in found:
+                                    if btn.is_displayed():
+                                        driver.execute_script("arguments[0].click();", btn)
+                                        clicked = True
+                                        break
+                                if clicked:
+                                    break
+                            except Exception:
+                                continue
+                        if not clicked:
+                            # Diagnose WHY, so a repeat failure gives a concrete next lead
+                            # instead of another guess: is this a Cloudflare/consent wall (no
+                            # real page loaded at all) or a genuine "reached the start of the
+                            # season" (real page, no prev button left)?
+                            if week == 0:
+                                src = driver.page_source or ""
+                                blocked = any(marker in src for marker in
+                                             ("Just a moment", "cf-browser-verification",
+                                              "Attention Required", "Enable JavaScript and cookies"))
+                                log.warning("WhoScored: no calendar control on %s (week 0, %d match "
+                                           "link(s) seen, %d prev-button element(s) matched, "
+                                           "%d byte(s) of HTML%s)", base, len(match_links), prev_seen,
+                                           len(src), ", looks Cloudflare-blocked" if blocked else "")
+                            break  # no calendar on this page (or reached its start) — try next base
+                        time.sleep(5)
+                    break  # scanned this base's calendar to the end with no reset — next base
+                except Exception as exc:
+                    if _looks_like_conn_reset(exc) and stage_attempt < 2:
+                        log.warning("WhoScored: connection reset scanning %s at week %d "
+                                   "(%s) -- recreating the browser session and retrying "
+                                   "this stage from week 0 (attempt %d/2)",
+                                   base, weeks_scanned, exc, stage_attempt + 1)
+                        try:
+                            driver.quit()
+                        except Exception:
+                            pass
+                        driver = _new_ws_driver(window_size="1600,1000")
+                        continue  # retry this base from week 0 with the fresh driver
+                    raise  # not a reset, or already retried once -- surface as a search error
         log.warning("WhoScored: match ID not found for %s vs %s (scanned %d week(s) across "
                     "%d stage page(s))", home_name, away_name, weeks_scanned, len(LALIGA_WS_BASES))
         return None

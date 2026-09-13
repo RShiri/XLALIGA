@@ -8,7 +8,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868015,2026-08-16,Espanyol,Levante,home,3,0,54,16,10,500,84,2,0,0,17,44,1.63
 5868015,2026-08-16,Levante,Espanyol,away,0,3,46,4,1,433,85,0,0,7,7,56,0.16
 5868014,2026-08-17,Deportivo A Coruña,Elche,home,1,1,39,8,4,401,81,0,0,5,17,47,0.61
-5868014,2026-08-17,Elche,Deportivo A Coruña,away,1,1,61,11,9,641,88,2,2,2,12,53,0.07
+5868014,2026-08-17,Elche,Deportivo A Coruña,away,1,1,61,11,9,641,88,2,2,2,12,53,0.5
 5868012,2026-08-19,Atletico Madrid,Málaga,home,2,0,53,15,10,556,88,3,3,3,17,49,1.37
 5868012,2026-08-19,Málaga,Atletico Madrid,away,0,2,47,5,3,494,85,0,0,8,11,51,0.2
 5868020,2026-08-25,Valencia,Real Betis,home,0,1,42,16,11,423,78,1,1,7,10,47,1.0
@@ -30,7 +30,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868025,2026-08-22,Espanyol,Real Madrid,home,1,2,37,8,4,363,84,2,1,12,19,37,0.97
 5868025,2026-08-22,Real Madrid,Espanyol,away,2,1,63,21,14,595,92,3,2,3,7,63,2.35
 5868022,2026-08-23,Atletico Madrid,Villarreal,home,2,2,52,19,14,520,88,0,0,4,12,56,1.04
-5868022,2026-08-23,Villarreal,Atletico Madrid,away,2,2,48,13,10,498,88,6,4,2,13,44,1.66
+5868022,2026-08-23,Villarreal,Atletico Madrid,away,2,2,48,13,10,498,88,6,4,2,13,44,2.27
 5868026,2026-08-23,Getafe,Racing Santander,home,1,0,43,12,3,384,73,1,0,3,14,48,1.03
 5868026,2026-08-23,Racing Santander,Getafe,away,0,1,57,6,3,509,81,2,2,2,17,52,1.29
 5868024,2026-08-23,Elche,Barcelona,home,0,5,46,7,2,479,80,3,3,2,13,40,1.04
@@ -87,7 +87,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868055,2026-09-12,Espanyol,Osasuna,away,2,0,39,6,5,325,78,2,0,4,24,43,0.04
 5868051,2026-09-12,Athletic Club,Elche,home,1,1,67,19,6,614,88,4,3,0,11,44,1.44
 5868051,2026-09-12,Elche,Athletic Club,away,1,1,33,3,1,317,78,1,0,2,12,56,0.81
-5868057,2026-09-12,Real Madrid,Rayo Vallecano,home,4,1,56,24,16,543,91,4,2,6,9,61,2.23
-5868057,2026-09-12,Rayo Vallecano,Real Madrid,away,1,4,44,18,12,415,87,1,1,7,13,39,0.11
+5868057,2026-09-12,Real Madrid,Rayo Vallecano,home,4,1,56,24,16,580,91,4,2,12,9,61,2.73
+5868057,2026-09-12,Rayo Vallecano,Real Madrid,away,1,4,44,18,12,458,87,1,1,13,13,39,1.03
 5868070,2026-09-03,Real Sociedad,Celta Vigo,home,0,0,51,16,13,526,86,1,1,2,15,57,0.75
 5868070,2026-09-03,Celta Vigo,Real Sociedad,away,0,0,49,7,4,522,87,1,1,5,11,43,0.04
