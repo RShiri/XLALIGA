@@ -16,6 +16,13 @@ whichever season is currently in progress):
 Every run appends one line to PROGRESS.md (via log_platform) so a scheduled
 run that silently failed doesn't go unnoticed forever.
 
+Only ONE instance runs at a time (laliga/_runlock.py). The per-fixture tasks
+from register_fixture_tasks.ps1 use -StartWhenAvailable, so every trigger
+missed while the PC was off fires together at boot; without the lock five
+copies of this script then refresh, scrape, rebuild and push concurrently.
+A second instance waits for the running one (up to LOCK_WAIT_S) and, since a
+single run re-scans the whole season anyway, exits if the first is still busy.
+
 Usage:
     py laliga/weekly_update.py                  # auto-detect season
     py laliga/weekly_update.py --season 2026-27  # force a season
@@ -37,8 +44,13 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from laliga.progress_log import log_platform  # noqa: E402
+from laliga._runlock import scrape_lock  # noqa: E402
 
 PY = sys.executable or "py"
+
+# The per-fixture tasks are killed by Task Scheduler after 25 min, so give up
+# waiting for the lock a little before that and leave a PROGRESS.md line.
+LOCK_WAIT_S = 20 * 60
 
 
 def _newest_season() -> str:
@@ -66,6 +78,17 @@ def main() -> None:
     args = ap.parse_args()
 
     season = args.season or _newest_season()
+    with scrape_lock(timeout=LOCK_WAIT_S) as acquired:
+        if not acquired:
+            note = (f"Weekly update ({season}): skipped — another update was still "
+                    f"running after {LOCK_WAIT_S // 60} min (it re-scans the whole season)")
+            print(note)
+            log_platform(note)
+            return
+        _update(season, args.no_push)
+
+
+def _update(season: str, no_push: bool) -> None:
     started = time.time()
     print(f"── Weekly update — season {season} ──")
 
@@ -74,7 +97,7 @@ def main() -> None:
 
     pushed = False
     push_note = ""
-    if not args.no_push:
+    if not no_push:
         rc, status = _git("status", "--porcelain")
         if status.strip():
             _git("add", "-A")
