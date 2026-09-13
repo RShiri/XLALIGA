@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-08** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 13s
 - **2026-09-08** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 840s
 - **2026-09-07** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 856s
 - **2026-09-07** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: fatal: The current branch feat/dashboard-beta has no upstream branch. To push the current branch and set the remote as upstream, use git push --set-upstream origin feat/dashboard-beta To have th, took 832s
@@ -115,6 +116,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-13 03:14 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-08 07:00 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-08 01:43 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 13m 51s | — |
 | 2026-09-07 23:14 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 14m 00s | — |
