@@ -38,6 +38,7 @@
   --info: #9fd0ff;
   --info-soft: rgba(159, 208, 255, 0.08);
   --goal: #d7ff3a;
+  --win: var(--accent);
   --warn: #ffb020;
   --neutral: #4a505b;
 
@@ -268,7 +269,7 @@ tr.z-rel  { background: rgba(255, 42, 77, 0.05); }
 /* last-5 form: slanted plates */
 .form { display: inline-flex; gap: 3px; }
 .fd { width: 20px; height: 18px; clip-path: var(--slant-sm); font-family: var(--font-display); font-size: 12px; font-weight: 800; line-height: 18px; text-align: center; }
-.fd.f-W { background: var(--accent); color: var(--accent-ink); }
+.fd.f-W { background: var(--win); color: var(--accent-ink); }
 .fd.f-D { background: var(--neutral); color: var(--text); }
 .fd.f-L { background: var(--negative); color: #fff; }
 .form-cell { min-width: 96px; }
