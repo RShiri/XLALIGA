@@ -257,16 +257,20 @@ def _norm_player(name):
 
 
 def _cross_provider_xg_buckets(match_data):
-    """(team, normalized_surname, minute) -> [xg, xg, ...] for FotMob and Understat.
+    """(team, normalized_surname, minute) -> [xg, xg, ...] for FotMob and Understat,
+    plus FotMob's per-shot xGOT (expected goals on target) in the same key space.
 
     No shared shot id exists across providers, so shots are matched by team + player
     surname + minute — best-effort, not guaranteed 1:1 (two shots by the same player
     in the same minute will match in scrape order). Callers pop() from each bucket so
-    a source shot is never assigned to more than one real shot."""
-    fm_buckets, us_buckets = {}, {}
+    a source shot is never assigned to more than one real shot. fm_buckets and
+    fm_xgot_buckets are built from the same _fotmob_shots list in the same order, so
+    popping both for the same real shot always pulls from the same source entry."""
+    fm_buckets, us_buckets, fm_xgot_buckets = {}, {}, {}
     for s in match_data.get("_fotmob_shots") or []:
         key = (s.get("team"), _norm_player(s.get("player")), s.get("min", 0))
         fm_buckets.setdefault(key, []).append(s.get("xg"))
+        fm_xgot_buckets.setdefault(key, []).append(s.get("xgot"))
     us = (match_data.get("_understat") or {}).get("shots") or {}
     for side_key, side in (("h", "home"), ("a", "away")):
         for s in us.get(side_key) or []:
@@ -277,7 +281,7 @@ def _cross_provider_xg_buckets(match_data):
                 continue
             key = (side, _norm_player(s.get("player")), minute)
             us_buckets.setdefault(key, []).append(round(xg, 4))
-    return fm_buckets, us_buckets
+    return fm_buckets, us_buckets, fm_xgot_buckets
 
 
 def _pop_xg(buckets, team, player, minute):
@@ -333,7 +337,7 @@ def extract(match_data):
                 receiver[i] = player_full_name(match_data, nxt.get("playerId"))
                 break
 
-    fm_xg_buckets, us_xg_buckets = _cross_provider_xg_buckets(match_data)
+    fm_xg_buckets, us_xg_buckets, fm_xgot_buckets = _cross_provider_xg_buckets(match_data)
     shots, passes, goals, dribbles, saves = [], [], [], [], []
     max_min = 0
     for _i, ev in enumerate(events):
@@ -399,6 +403,10 @@ def extract(match_data):
                 # matching shot for this match/player/minute (see _pop_xg).
                 "xg_fotmob": _pop_xg(fm_xg_buckets, side, shot_player, minute),
                 "xg_understat": _pop_xg(us_xg_buckets, side, shot_player, minute),
+                # FotMob's own expected-goals-on-target for this shot — see
+                # scraper.py's _fotmob_shot_xg_list(). null when FotMob didn't report
+                # one (only shown for shots it considers on target) or no match found.
+                "xgot_fotmob": _pop_xg(fm_xgot_buckets, side, shot_player, minute),
                 "goal": tname == "Goal",
                 "onTarget": tname in ("Goal", "SavedShot"),
                 "blocked": tname == "BlockedShot",
