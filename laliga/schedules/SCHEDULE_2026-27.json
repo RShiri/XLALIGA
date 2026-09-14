@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-13T22:00:02.967351+00:00",
+  "generated_utc": "2026-09-14T22:00:02.745723+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -699,10 +699,10 @@
       "away": "Real Betis",
       "home_id": "10205",
       "away_id": "8603",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868070,
