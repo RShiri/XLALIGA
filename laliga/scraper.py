@@ -912,6 +912,37 @@ def _fotmob_shot_xg_list(fm_data: dict, home_id, away_id) -> list[dict]:
     return out
 
 
+def _fotmob_player_ids(fm_data: dict) -> list[dict]:
+    """FotMob's numeric player id per starting/sub player, for headshot lookups
+    (images.fotmob.com/image_resources/playerimages/<id>.png).
+
+    Called unconditionally (even when WhoScored is the primary lineup source, the
+    common case) so this id survives instead of being fetched and thrown away — see
+    _parse_fotmob_lineup, which only runs on the FotMob-only fallback path and would
+    otherwise be the sole place this id is read. Matched to our own (WhoScored-keyed)
+    player records later, by team + normalized surname, since FotMob and WhoScored use
+    unrelated player id schemes. Side ("home"/"away") comes straight from FotMob's own
+    homeTeam/awayTeam keys, same as _parse_fotmob_lineup — no team-id matching needed."""
+    lineup = fm_data.get("content", {}).get("lineup", {})
+    if not isinstance(lineup, dict):
+        return []
+    out = []
+    for side, key in (("home", "homeTeam"), ("away", "awayTeam")):
+        team = lineup.get(key)
+        if not isinstance(team, dict):
+            continue
+        for group in (team.get("starters") or [], team.get("subs") or []):
+            for p in group:
+                if not isinstance(p, dict):
+                    continue
+                fmid = p.get("id")
+                name = p.get("name") or p.get("fullName") or ""
+                if fmid is None or not name:
+                    continue
+                out.append({"team": side, "player": name, "fotmob_id": fmid})
+    return out
+
+
 def _parse_fotmob_lineup(fm_data: dict, side: str) -> list[dict]:
     """Extract player list from FotMob lineup (home or away).
 
@@ -1640,6 +1671,10 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         # build_match_details.py (team+player+minute; no shared shot id exists).
         "_fotmob_shots": (_fotmob_shot_xg_list(fm_data, home_id, away_id)
                           if not fotmob_unavailable else []),
+        # FotMob's numeric player id, kept for headshot lookups — see
+        # _fotmob_player_ids() and build_players.py's photo matching.
+        "_fotmob_player_ids": (_fotmob_player_ids(fm_data)
+                                if not fotmob_unavailable else []),
     }
 
 

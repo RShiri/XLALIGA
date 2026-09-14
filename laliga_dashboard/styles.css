@@ -448,6 +448,9 @@ code { background: var(--plate-2); border: 1px solid var(--line); padding: 1px 5
 .crest { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
 .crest.noimg { display: inline-block; background: var(--plate-2); }
 
+.ph-photo { width: 22px; height: 22px; object-fit: cover; border-radius: 50%; flex: 0 0 auto; background: var(--plate-2); }
+.ph-photo.noimg { display: inline-block; }
+
 /* ---------------- projection: champion lower-third + hatched probability bars ---------------- */
 .champ-card { position: relative; display: inline-grid; grid-template-columns: 120px 1fr; gap: 24px; align-items: center; background: var(--plate); padding: 30px 40px 24px 46px; clip-path: polygon(18px 0, 100% 0, calc(100% - 18px) 100%, 0 100%); min-width: 420px; }
 .champ-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 26px; background: var(--accent); clip-path: polygon(18px 0, 26px 0, 8px 100%, 0 100%); }

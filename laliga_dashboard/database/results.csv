@@ -48,4 +48,5 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868054,2026-09-13,,Estadio Ciudad de Valencia,Levante,Barcelona,2,4,2.2,2.12,1
 5868053,2026-09-13,,Estadio Coliseum,Getafe,Deportivo A Coruña,1,1,0.92,0.64,1
 5868058,2026-09-13,,Estadio Municipal de Anoeta,Real Sociedad,Atletico Madrid,0,3,0.54,2.15,1
+5868060,2026-09-14,,,Villarreal,Real Betis,1,2,,,0
 5868070,2026-09-03,,Estadio Municipal de Anoeta,Real Sociedad,Celta Vigo,0,0,0.93,0.61,1

@@ -41,13 +41,40 @@ def _sum_stat(stats, key):
 
 
 def _new_player(pid, name, team, pos):
-    rec = dict(pid=pid, name=name, team=team, pos=pos,
+    rec = dict(pid=pid, name=name, team=team, pos=pos, photo=None,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0, pen=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0, xa=0.0,
                npxg=0.0, bc_missed=0, bc_missed_xg=0.0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
+
+
+def _norm_player(name):
+    """Loose match key for a player name across providers (accents/case/whitespace
+    differ — e.g. WhoScored's 'Kylian Mbappe' vs FotMob's 'K. Mbappe'). Keeps only the
+    last token (surname), which varies least across providers' naming conventions."""
+    a = ascii_name(name or "").lower().strip()
+    parts = [p for p in a.replace(".", " ").split() if p]
+    return parts[-1] if parts else a
+
+
+def _fotmob_photo_lookup(match_data):
+    """(side, normalized surname) -> FotMob player id, for headshot URLs.
+
+    No shared player id exists across providers, so this matches by team side +
+    surname — best-effort, not guaranteed 1:1. A surname that appears more than once
+    on the same side in the same match is dropped rather than guessed at: a wrong
+    photo is worse than a missing one."""
+    counts, ids = {}, {}
+    for entry in match_data.get("_fotmob_player_ids") or []:
+        fmid = entry.get("fotmob_id")
+        if fmid is None:
+            continue
+        key = (entry.get("team"), _norm_player(entry.get("player")))
+        counts[key] = counts.get(key, 0) + 1
+        ids[key] = fmid
+    return {k: v for k, v in ids.items() if counts[k] == 1}
 
 
 def _player_shot_extras(match_data):
@@ -102,6 +129,7 @@ def aggregate(match_dir=MATCH_DIR):
         ex = _match_extras(d)
         shot_extras = _player_shot_extras(d)
         xa_map = player_xa_from_events(d)
+        photo_lookup = _fotmob_photo_lookup(d)
         for side in ("home", "away"):
             team = norm(d[side].get("name", ""))
             for p in d[side].get("players", []):
@@ -115,6 +143,10 @@ def aggregate(match_dir=MATCH_DIR):
                 rec = players.get(pid)
                 if rec is None:
                     rec = players[pid] = _new_player(pid, ascii_name(p.get("name", "")), team, p.get("position", ""))
+                if not rec.get("photo"):
+                    fmid = photo_lookup.get((side, _norm_player(p.get("name", ""))))
+                    if fmid:
+                        rec["photo"] = f"https://images.fotmob.com/image_resources/playerimages/{fmid}.png"
                 rec["mp"] += 1
                 if started:
                     rec["starts"] += 1

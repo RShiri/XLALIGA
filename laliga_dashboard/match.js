@@ -46,6 +46,14 @@
     return '<img src="' + LOGO + encodeURIComponent(team) + '.png" alt="" width="44" height="44" loading="lazy" ' +
       'onerror="this.style.visibility=\'hidden\'">';
   }
+  // Player headshot (FotMob, matched by team+surname at build time — see
+  // build_match_details.py's _fotmob_photo_lookup). Not every player has one (name
+  // matching isn't perfect); omitting the <img> entirely is the fallback, no broken-image icon.
+  function photoImg(p) {
+    if (!p.photo) return '<span class="ph-photo noimg" aria-hidden="true"></span>';
+    return '<img class="ph-photo" src="' + esc(p.photo) + '" alt="" width="28" height="28" loading="lazy" ' +
+      'onerror="this.style.visibility=\'hidden\'">';
+  }
   function qid() {
     var m = location.search.match(/[?&]id=([^&]+)/);
     return m ? decodeURIComponent(m[1]) : null;
@@ -1670,6 +1678,7 @@
         : '<span class="rt none">–</span>';
       var mins = p.mins != null ? '<span class="mins">' + p.mins + "'</span>" : "";
       return "<li><span class='no'>" + (p.num == null ? "" : p.num) + "</span>" +
+        photoImg(p) +
         "<span class='pname'>" + (p.motm ? "<span class='star'>★</span> " : "") + esc(p.name) +
         "<span class='pos'>" + esc(p.pos) + "</span></span>" +
         "<span class='badges'>" + badges(p) + "</span>" + mins + rt + "</li>";
