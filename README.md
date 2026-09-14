@@ -44,7 +44,9 @@ git add -A && git commit -m "refresh data" && git push
 ## Data sources
 **FotMob** (league 87 — fixtures/results/xG), **WhoScored** (event stream: shots/passes/
 dribbles/coords), **Understat** (xG + shot-level xG + PPDA + player xG/xA). See
-[`DATA_SOURCES.md`](DATA_SOURCES.md). Full operating guide: [`laliga/README.md`](laliga/README.md).
+[`DATA_SOURCES.md`](DATA_SOURCES.md) — includes a full field-by-field table of every stat we
+scrape, what's already live on the dashboard vs. fetched-but-unused, and what's genuinely not
+available from any current source. Full operating guide: [`laliga/README.md`](laliga/README.md).
 
 ## Layout
 `laliga/` pipeline · `laliga_dashboard/` static site + builders · `laliga_png/` published PNGs ·
