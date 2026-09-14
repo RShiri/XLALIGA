@@ -72,6 +72,7 @@ unused" means the API response has it but nothing parses it into our schema yet 
 | Per-shot xG from FotMob and Understat, matched to the real shot | FotMob shotmap + Understat shots, best-effort matched by team+surname+minute | ✅ captured (added 2026-09-14, Match Centre shot detail panel) |
 | Per-shot xGOT (expected goals *on target*) | FotMob shotmap `expectedGoalsOnTarget` | ⚠️ fetched and stored (`_fotmob_shots[].xgot`), not yet matched to real shots or surfaced — see `xg_core/PLAN_new_models.md` item 1 |
 | Age, nationality, market value | FotMob lineup player objects | ⚠️ fetched, unused — no field in `build_players.py`'s player record at all |
+| Profile photo | FotMob (`images.fotmob.com/image_resources/playerimages/<id>.png`, confirmed live) | ⚠️ URL pattern known and free, but needs FotMob-id↔WhoScored-id matching first — no shared id exists; see `DATA_AUDIT_AND_STATS_PLAN.md` |
 | Progressive passes/carries, PPDA (team pressing) | Derivable from existing pass/tackle coordinates — no new scrape needed | ❌ not built — see `xg_core/PLAN_new_models.md` items 3-4 |
 | xGChain / xGBuildup (possession-chain xG credit) | Understat per-shot fields | ⚠️ fetched (where Understat coverage exists), unused |
 | Goalkeeper-specific: claims, punches, sweeper actions, penalty saves | WhoScored `KeeperSweeper`/`Claim`/`Punch`/`Smother`/`KeeperPickup`/`PenaltyFaced` events | ❌ not built — no goalkeeper section exists anywhere in the dashboard yet |

@@ -32,6 +32,19 @@ parse.** `laliga/scraper.py`'s `_parse_fotmob_stats()` only reads a handful of t
   starters[].marketValue`, e.g. a keeper valued at €12.2M) — none of this is captured
   today; `build_players.py`'s player records have no age/nationality/value fields at
   all.
+- **Player profile photos**: FotMob serves headshots at a predictable URL —
+  `https://images.fotmob.com/image_resources/playerimages/<fotmob_player_id>.png`
+  (confirmed live, 2026-09-15: returns 200 for a real player id). Not a data-capture
+  gap so much as an ID-matching one: `build_players.py` keys every player by
+  **WhoScored's** player id, and FotMob's lineup objects carry a *different* numeric
+  id (`content.lineup.*Team.starters[].id`) with no shared key between the two — the
+  same "no shared id across providers" problem the shot-matching and referee/market-
+  value work above already ran into, just for players instead of shots. Matching would
+  need to go by name (+ team, to disambiguate common surnames) the same best-effort way
+  `_norm_player()`/`_pop_xg()` in `build_match_details.py` already match shots across
+  providers — reuse that matching approach rather than inventing a new one. Once
+  matched, this is a genuine UI win: player photos in the Players table, Match Centre
+  lineups, and Player Lab, none of which show any image today.
 - **Head-to-head history** (`content.h2h`: `summary` + `matches`), **momentum**
   (`content.momentum` — live match-swing data), **attacking zones**
   (`content.attackingZones`), **player of the match + top performers**
