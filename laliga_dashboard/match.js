@@ -371,9 +371,15 @@
   }
 
   /* ================= MATCH STATS (head-to-head, from data.js) ================= */
+  // xg_model and xg_fotmob are handled specially in statRows() below — _merge_sources()
+  // in laliga/scraper.py only ever populates the plain "xg" provider stat from FotMob
+  // (its docstring: "xG is FotMob-only"), so a single STAT_DEFS "xg" entry silently
+  // showed FotMob's number unlabelled while our own calibrated model's xG (already
+  // shown at the top of the scoreboard) never appeared in this comparison panel at all.
   var STAT_DEFS = [
     ["possession", "Possession", true, true],
-    ["xg", "Expected goals (xG)", false, true],
+    ["xg_model", "Expected goals (xG, ours)", false, true],
+    ["xg_fotmob", "Expected goals (xG, FotMob)", false, true],
     ["shots", "Shots", false, true],
     ["sot", "Shots on target", false, true],
     ["big_chances", "Big chances", false, true],
@@ -410,21 +416,36 @@
   }
 
   // One row per STAT_DEFS entry that has a value: {label, h, a, hpct, hBetter, aBetter, isXg, pct}.
-  // Provider stats first, event-derived numbers as the fallback. Shared by the stats panel
-  // and the in-browser image export.
+  // Provider stats first, event-derived numbers as the fallback — EXCEPT xg_model/xg_fotmob,
+  // which are two genuinely different numbers (our own calibrated shot model vs. FotMob's
+  // published figure) and must never fall back into each other: xg_model always comes from
+  // the event stream, xg_fotmob always from the provider's "xg" stat (FotMob-only per
+  // _merge_sources) and shows "–" rather than silently substituting the other model's number
+  // when FotMob's isn't available for a match. Shared by the stats panel and the image export.
   function statRows(rec, D) {
     var s = (rec && rec.stats) || {};
     var es = eventStats(D);
     return STAT_DEFS.map(function (def) {
       var key = def[0];
-      var pair = s[key] || [null, null];
-      if (pair[0] == null && pair[1] == null && es.home[key] != null) pair = [es.home[key], es.away[key]];
+      var pair;
+      if (key === "xg_model") {
+        pair = [es.home.xg, es.away.xg];
+      } else if (key === "xg_fotmob") {
+        // rec.stats.xg is build_data.py's OWN recomputed model value (same number as
+        // xg_model, not FotMob's) — FotMob's actual figure only survives as these two
+        // top-level fields, the same ones the Data tab's "xG (FotMob)" column reads.
+        pair = (rec && rec.xg_home_fotmob != null && rec.xg_away_fotmob != null)
+          ? [rec.xg_home_fotmob, rec.xg_away_fotmob] : [null, null];
+      } else {
+        pair = s[key] || [null, null];
+        if (pair[0] == null && pair[1] == null && es.home[key] != null) pair = [es.home[key], es.away[key]];
+      }
       var h = pair[0], a = pair[1];
       if (h == null && a == null) return null;
       var hv = h == null ? 0 : h, av = a == null ? 0 : a, total = hv + av;
       return { label: def[1], h: h, a: a, hpct: total > 0 ? (hv / total) * 100 : 50,
                hBetter: def[3] ? hv > av : hv < av, aBetter: def[3] ? av > hv : av < hv,
-               isXg: key === "xg", pct: !!def[2] };
+               isXg: key === "xg_model" || key === "xg_fotmob", pct: !!def[2] };
     }).filter(Boolean);
   }
 
@@ -754,6 +775,20 @@
   }
 
   /* ================= SHOT MAP ================= */
+  // Same real shot, priced by three independent sources — never blended, so a reader
+  // can see where they agree (confidence) or diverge (a genuinely ambiguous chance).
+  // FotMob/Understat are null when that provider had no matching shot for this
+  // match/player/minute (build_match_details.py's best-effort team+surname+minute
+  // matching — not every shot matches). Shared by both shot-map detail panels below.
+  function xgCompareHtml(sh) {
+    var rows = [["Ours", sh.xg], ["FotMob", sh.xg_fotmob], ["Understat", sh.xg_understat]]
+      .filter(function (r) { return r[1] != null; });
+    if (rows.length < 2) return "";
+    return '<div class="sd-xgcmp"><div class="sd-xgcmp-head">xG by source</div>' +
+      rows.map(function (r) {
+        return '<div class="sd-xgcmp-row"><span>' + r[0] + '</span><b>' + r[1].toFixed(2) + "</b></div>";
+      }).join("") + "</div>";
+  }
   function buildShots(D) {
     var host = document.getElementById("mv-shots");
     host.innerHTML =
@@ -834,7 +869,7 @@
         "<div><span>Outcome</span><br>" + (sh.goal ? "⚽ Goal" : sh.onTarget ? "On target" : sh.blocked ? "Blocked" : "Off target") + "</div>" +
         "<div><span>Body</span><br>" + esc(sh.body) + "</div>" +
         "<div><span>Situation</span><br>" + esc(sh.sit) + (sh.big ? " · Big chance" : "") + "</div>" +
-        "</div>";
+        "</div>" + xgCompareHtml(sh);
     }
 
     document.getElementById("shHome").addEventListener("click", function () {
@@ -933,7 +968,7 @@
         "<div><span>Outcome</span><br>" + (sh.goal ? "⚽ Goal" : "On target (saved)") + "</div>" +
         "<div><span>Body</span><br>" + esc(sh.body) + "</div>" +
         "<div><span>Situation</span><br>" + esc(sh.sit) + (sh.big ? " · Big chance" : "") + "</div>" +
-        "</div>";
+        "</div>" + xgCompareHtml(sh);
     }
 
     document.getElementById("otHome").addEventListener("click", function () {

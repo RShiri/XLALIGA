@@ -880,6 +880,38 @@ def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]
     return events
 
 
+def _fotmob_shot_xg_list(fm_data: dict, home_id, away_id) -> list[dict]:
+    """FotMob's own per-shot xG (and xGOT), for cross-provider comparison.
+
+    Distinct from _parse_fotmob_shots(): that function reshapes FotMob's shotmap into
+    WhoScored-style events for the FotMob-only fallback event stream and drops the
+    per-shot expectedGoals value. This one is called unconditionally (even when
+    WhoScored is the primary event source, which is the common case) so FotMob's own
+    number survives for a match's shots instead of being fetched and thrown away —
+    matched to the real (WhoScored) shot later by team+player+minute, since FotMob's
+    shot ids don't correspond to WhoScored's. Side is resolved to "home"/"away" here
+    (not left as FotMob's numeric teamId) so the matcher never needs FotMob's id scheme."""
+    shots_raw = (fm_data.get("content", {}).get("shotmap", {}).get("shots", [])) or []
+    out = []
+    for s in shots_raw:
+        tid = s.get("teamId")
+        side = "home" if tid == home_id else "away" if tid == away_id else None
+        if side is None:
+            continue
+        xg = s.get("expectedGoals")
+        if xg is None:
+            continue
+        out.append({
+            "team": side,
+            "player": s.get("playerName") or s.get("fullName") or "",
+            "min": s.get("min", 0),
+            "xg": round(float(xg), 4),
+            "xgot": (round(float(s["expectedGoalsOnTarget"]), 4)
+                     if s.get("expectedGoalsOnTarget") not in (None, 0) else None),
+        })
+    return out
+
+
 def _parse_fotmob_lineup(fm_data: dict, side: str) -> list[dict]:
     """Extract player list from FotMob lineup (home or away).
 
@@ -1603,6 +1635,11 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         "_scraped_at": datetime.now(timezone.utc).isoformat(),
         "_sources":    ([fm_data.get("_source_name", "fotmob")] if not fotmob_unavailable else [])
                        + (["whoscored"] if ws_data else []),
+        # FotMob's own per-shot xG, kept even when WhoScored is the primary event
+        # source — see _fotmob_shot_xg_list(). Matched to the real shot list by
+        # build_match_details.py (team+player+minute; no shared shot id exists).
+        "_fotmob_shots": (_fotmob_shot_xg_list(fm_data, home_id, away_id)
+                          if not fotmob_unavailable else []),
     }
 
 

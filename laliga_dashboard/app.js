@@ -810,6 +810,9 @@
       .map(function (p) { return Object.assign({}, p, { conv: Math.round(p.g / p.shots * 100) }); })
       .sort(function (a, b) { return b.conv - a.conv; });
     var floor = minsFloor(450);
+    var fwdEff = PLAYERS.filter(function (p) {
+      return p.mins >= floor && p.fwd_eff != null && (p.npxg + p.bc_missed_xg) >= 1.0;
+    }).sort(function (a, b) { return b.fwd_eff - a.fwd_eff; });
     var goalsPer90 = per90(function (p) { return p.mins >= floor && p.g > 0; }, function (p) { return p.g / p.mins * 90; });
     var dribblers = per90(function (p) { return p.mins >= floor && p.dribbles > 0; }, function (p) { return p.dribbles / p.mins * 90; });
     var chancesPer90 = per90(function (p) { return p.mins >= floor && p.keyPasses > 0; }, function (p) { return p.keyPasses / p.mins * 90; });
@@ -827,6 +830,9 @@
         rows(fin.slice().sort(function (a, b) { return b.xg_diff - a.xg_diff; }), function (p) { return (p.xg_diff > 0 ? "+" : "") + p.xg_diff.toFixed(2); }, xgSub, "pos")),
       card("Wasteful in front of goal", "Goals below shot xG (min. 1.0 xG faced).",
         rows(fin.slice().sort(function (a, b) { return a.xg_diff - b.xg_diff; }), function (p) { return p.xg_diff.toFixed(2); }, xgSub, "neg")),
+      card("Forward efficiency", "Non-penalty goals ÷ (npxG + xG of missed big chances), min. " + floor + " mins, 1.0 combined xG.",
+        rows(fwdEff, function (p) { return p.fwd_eff.toFixed(2); },
+          function (p) { return p.npg + " npG, " + p.bc_missed + " BC missed"; })),
       card("Chances created per 90'", "Key passes per 90, min. 450 mins.", rows(chancesPer90, function (p) { return p._r.toFixed(2); }, function (p) { return p.keyPasses + " total"; })),
       card("Most shots on target", "Shots that hit the target.", rows(desc("sot"), function (p) { return p.sot; }, function (p) { return p.shots + " shots"; })),
       card("Most shots taken", "Total attempts.", rows(desc("shots"), function (p) { return p.shots; }, function (p) { return p.team; })),
@@ -839,8 +845,9 @@
      Ported from the WC2026 dashboard; stat / preset / radar lists trimmed to the
      metrics La Liga's players.js carries. All client-side from window.LL_PLAYERS. ---- */
   var SO_STATS = [
-    ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0],
+    ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0], ["npg", "Non-penalty goals", 0],
     ["xg", "Expected goals (xG)", 2], ["xg_diff", "Finishing (goals − xG)", 2],
+    ["fwd_eff", "Forward efficiency (npG ÷ chance value)", 2], ["bc_missed", "Big chances missed", 0],
     ["xa", "Expected assists (xA)", 2], ["xgi", "xG involvement (xG + xA)", 2],
     ["shots", "Shots", 0], ["sot", "Shots on target", 0], ["keyPasses", "Key passes", 0],
     ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["pass_pct", "Pass accuracy %", 0],
@@ -1886,8 +1893,11 @@
         "<td class='team'><div class='team-cell'>" + logoImg(p.team) +
           "<span class='nm-wrap'><span class='nm'>" + esc(p.name) + "</span><span class='sub'>" + esc(p.team) + "</span></span></div></td>" +
         "<td>" + (p.mp || 0) + "</td><td>" + (p.g || 0) + "</td><td>" + (p.a || 0) + "</td>" +
+        "<td>" + (p.npg != null ? p.npg : "–") + "</td>" +
         "<td>" + (p.xg != null ? p.xg.toFixed(2) : "–") + "</td><td>" + (p.xa != null ? p.xa.toFixed(2) : "–") + "</td>" +
         diffCell(p.xg_diff) + diffCell(p.xa_diff) +
+        "<td>" + (p.bc_missed != null ? p.bc_missed : "–") + "</td>" +
+        "<td>" + (p.fwd_eff != null ? p.fwd_eff.toFixed(2) : "–") + "</td>" +
         "<td>" + (p.pass_pct != null ? p.pass_pct + "%" : "–") + "</td>" +
         "<td>" + (p.rating != null ? p.rating.toFixed(2) : "–") + "</td></tr>";
     }).join("");
@@ -1895,9 +1905,12 @@
     // scroll floor-width and the folded team-cell layout below — without the class those
     // rules never matched anything and the table just shrank to fit (wrapping "Real Madrid"
     // onto two lines) instead of genuinely scrolling.
-    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th>MP</th><th>G</th><th>A</th><th>xG</th><th>xA</th>" +
+    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th>MP</th><th>G</th><th>A</th>" +
+      "<th title='Non-penalty goals'>npG</th><th>xG</th><th>xA</th>" +
       "<th title='Goals minus xG — positive means finishing above expected'>xG&Delta;</th>" +
       "<th title='Assists minus xA — positive means more assists than expected'>xA&Delta;</th>" +
+      "<th title='Big chances (clear goalscoring opportunities) not converted'>BC Miss</th>" +
+      "<th title='Forward efficiency: non-penalty goals ÷ (non-penalty xG + xG value of missed big chances). Above 1.00 = finishing above the chance quality on offer; below 1.00 = wasteful'>Fwd Eff</th>" +
       "<th>Pass%</th><th>Rating</th></tr></thead><tbody>" + body + "</tbody></table>";
   }
 

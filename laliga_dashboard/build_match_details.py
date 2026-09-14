@@ -223,6 +223,53 @@ def find_png(match_id):
     return None
 
 
+def _norm_player(name):
+    """Loose match key for a player name across providers (accents/case/whitespace
+    differ — e.g. WhoScored's 'Kylian Mbappe' vs FotMob's 'K. Mbappe' vs Understat's
+    'Kylian Mbappe'). Keeps only the last token (surname), which is what actually
+    varies least across the three providers' naming conventions."""
+    a = ascii_name(name or "").lower().strip()
+    parts = [p for p in a.replace(".", " ").split() if p]
+    return parts[-1] if parts else a
+
+
+def _cross_provider_xg_buckets(match_data):
+    """(team, normalized_surname, minute) -> [xg, xg, ...] for FotMob and Understat.
+
+    No shared shot id exists across providers, so shots are matched by team + player
+    surname + minute — best-effort, not guaranteed 1:1 (two shots by the same player
+    in the same minute will match in scrape order). Callers pop() from each bucket so
+    a source shot is never assigned to more than one real shot."""
+    fm_buckets, us_buckets = {}, {}
+    for s in match_data.get("_fotmob_shots") or []:
+        key = (s.get("team"), _norm_player(s.get("player")), s.get("min", 0))
+        fm_buckets.setdefault(key, []).append(s.get("xg"))
+    us = (match_data.get("_understat") or {}).get("shots") or {}
+    for side_key, side in (("h", "home"), ("a", "away")):
+        for s in us.get(side_key) or []:
+            try:
+                minute = int(float(s.get("minute", 0)))
+                xg = float(s.get("xG"))
+            except (TypeError, ValueError):
+                continue
+            key = (side, _norm_player(s.get("player")), minute)
+            us_buckets.setdefault(key, []).append(round(xg, 4))
+    return fm_buckets, us_buckets
+
+
+def _pop_xg(buckets, team, player, minute):
+    """Best-effort lookup: exact minute first, then +-1' (added time / rounding
+    differences between providers are common on the same real shot)."""
+    key = (team, _norm_player(player), minute)
+    vals = buckets.get(key)
+    if not vals:
+        for m in (minute - 1, minute + 1):
+            vals = buckets.get((team, _norm_player(player), m))
+            if vals:
+                break
+    return vals.pop(0) if vals else None
+
+
 def extract(match_data):
     """Build the detail dict for one match (assumes it has events)."""
     home, away = match_data.get("home", {}), match_data.get("away", {})
@@ -263,6 +310,7 @@ def extract(match_data):
                 receiver[i] = player_full_name(match_data, nxt.get("playerId"))
                 break
 
+    fm_xg_buckets, us_xg_buckets = _cross_provider_xg_buckets(match_data)
     shots, passes, goals, dribbles, saves = [], [], [], [], []
     max_min = 0
     for _i, ev in enumerate(events):
@@ -314,14 +362,20 @@ def extract(match_data):
                         gz = round(float(q.get("value")), 1)
                 except (TypeError, ValueError):
                     pass
+            shot_player = player_full_name(match_data, ev.get("playerId"))
             shots.append({
                 "team": side,
                 "x": round(ev.get("x", 0), 1),
                 "y": round(ev.get("y", 0), 1),
                 "min": minute,
                 "sec": ev.get("second", 0),
-                "player": player_full_name(match_data, ev.get("playerId")),
+                "player": shot_player,
                 "xg": xg,
+                # Other providers' xG for the SAME real-world shot, for comparison —
+                # never blended into "xg" above. null when that provider has no
+                # matching shot for this match/player/minute (see _pop_xg).
+                "xg_fotmob": _pop_xg(fm_xg_buckets, side, shot_player, minute),
+                "xg_understat": _pop_xg(us_xg_buckets, side, shot_player, minute),
                 "goal": tname == "Goal",
                 "onTarget": tname in ("Goal", "SavedShot"),
                 "blocked": tname == "BlockedShot",

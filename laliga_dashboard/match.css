@@ -88,6 +88,11 @@ body.match nav.tabs { align-items: center; align-self: center; }
 .shot-detail .sd-head { font-family: var(--font-display); font-weight: 700; font-size: 18px; text-transform: uppercase; margin-bottom: 4px; }
 .shot-detail .sd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap: 8px 18px; margin-top: 6px; font-variant-numeric: tabular-nums; }
 .shot-detail .sd-grid div span { color: var(--muted-2); }
+.sd-xgcmp { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.sd-xgcmp-head { color: var(--muted-2); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.sd-xgcmp-row { display: flex; justify-content: space-between; align-items: baseline; padding: 2px 0; font-variant-numeric: tabular-nums; }
+.sd-xgcmp-row span { color: var(--muted-2); }
+.sd-xgcmp-row b { font-family: var(--font-display); font-size: 15px; }
 
 .side-panels { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
 .lineups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
