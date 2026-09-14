@@ -5,6 +5,14 @@ future session to execute. `xg_core/` stays the canonical home (elevated in plac
 split into a new repo) — same pattern as today: build here, vendor copies into
 `XWORLDCUPTWIT` and `BCNPROJECT-main` when a model updates, per `xg_core/README.md`.
 
+**Correction, added later the same day**: this doc assumes shot-outcome models train
+inside this `xg_core/` folder. That's true for the *old* xg_core (v2)/xA, but the
+*live* shot-xG model (`xg_core_v3`) actually trains in a separate standalone repo,
+`C:\Users\puzik\XG V3` (see `UPDATE_XG_CORE_PROMPT.md` at the XLALIGA repo root). A new
+shot-outcome model like xGOT should very likely train there too, reusing its existing
+corpus/retrain pipeline, not here. See `PROMPT_NEW_MODELS.md` (XLALIGA repo root) for
+the corrected, actionable version of this plan.
+
 ## Why these five, in this order
 
 Ordered by how much new work each needs — cheapest, most-validated wins first, biggest
