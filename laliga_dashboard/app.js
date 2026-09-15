@@ -2189,6 +2189,9 @@
     var cmpTeam = null, cmpName = null;
     if (PL.cmp) { var parts = PL.cmp.split(" @@ "); cmpTeam = parts[0]; cmpName = parts[1]; }
     var pc = cmpName ? plFind(cmpTeam, cmpName) : null;
+    document.getElementById("plSelectedHead").innerHTML =
+      '<span class="pl-sel pl-sel-a">' + photoImg(main) + esc(main.name) + "</span>" +
+      (pc ? '<span class="pl-vs">vs</span><span class="pl-sel pl-sel-b">' + photoImg(pc) + esc(pc.name) + "</span>" : "");
     function rtg(q) { return q.rating ? q.rating.toFixed(2) : "&ndash;"; }
     var s = "";
     s += plCard(main.mp, pc ? pc.mp : null, "Apps");

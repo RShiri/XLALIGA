@@ -508,6 +508,12 @@ code { background: var(--plate-2); border: 1px solid var(--line); padding: 1px 5
 
 /* ---------------- Player Lab ---------------- */
 .pl-controls select { min-width: 190px; }
+.pl-selected-head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin: 4px 0 18px; }
+.pl-selected-head .pl-sel { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 20px; font-weight: 800; font-style: italic; text-transform: uppercase; }
+.pl-selected-head .pl-sel .ph-photo { width: 40px; height: 40px; }
+.pl-selected-head .pl-sel.pl-sel-a { color: var(--accent); }
+.pl-selected-head .pl-sel.pl-sel-b { color: var(--info); }
+.pl-selected-head .pl-vs { color: var(--muted-2); font-size: 13px; text-transform: uppercase; }
 .pl-badges-wrap { display: flex; align-items: flex-start; gap: 12px; margin: -8px 0 18px; flex-wrap: wrap; }
 .pl-badges-label { font-size: 12px; color: var(--muted-2); padding-top: 10px; }
 .pl-badges { display: flex; flex-wrap: wrap; gap: 5px; }
