@@ -1999,9 +1999,14 @@
   var PL = { main: null, cmp: null, teams: {} };   // main/cmp store "Team @@ Player"
   var PL_MAPS = [["shots", "Shots"], ["dribbles", "Take-ons"], ["passes", "Passes"], ["prog", "Progressive passes"]];
   var PL_RADAR = [
-    { k: "g", t: "Finishing" }, { k: "ga", t: "G+A" }, { k: "shots", t: "Shooting" },
-    { k: "keyPasses", t: "Creativity" }, { k: "dribbles", t: "Dribbling" },
-    { k: "def", t: "Defending" }, { k: "aerials", t: "Aerials" }, { k: "rating", t: "Rating", raw: true }
+    { k: "g", t: "Finishing", d: "Goals per 90 minutes." },
+    { k: "ga", t: "G+A", d: "Goals + assists per 90 minutes." },
+    { k: "shots", t: "Shooting", d: "Shots per 90 minutes." },
+    { k: "keyPasses", t: "Creativity", d: "Key passes per 90 minutes." },
+    { k: "dribbles", t: "Dribbling", d: "Take-ons (dribbles) per 90 minutes." },
+    { k: "def", t: "Defending", d: "Tackles + interceptions per 90 minutes." },
+    { k: "aerials", t: "Aerials", d: "Aerial duels won per 90 minutes." },
+    { k: "rating", t: "Rating", raw: true, d: "Average match rating for the season." }
   ];
   function plN2(x) { return (Math.round((x || 0) * 100) / 100).toFixed(2); }
   function plN3(x) { return (Math.round((x || 0) * 1000) / 1000).toFixed(3); }
@@ -2042,13 +2047,11 @@
     if (v >= 11 && v <= 13) return n + "th";
     return n + ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th");
   }
-  // league-percentile strip shown under a card's value when the toggle is on (hidden by
+  // league-percentile label shown under a card's value when the toggle is on (hidden by
   // default via CSS so plCard doesn't need a separate render path for it)
   function plPctlHtml(pct, cpct) {
     if (pct == null) return "";
-    return '<div class="pl-pctl"><i style="width:' + pct + '%"></i>' +
-      (cpct != null ? '<i class="cmp" style="width:' + cpct + '%"></i>' : "") + "</div>" +
-      '<div class="pl-pctl-lbl">' + plOrdinal(pct) + " pctl" +
+    return '<div class="pl-pctl-lbl">' + plOrdinal(pct) + " pctl" +
       (cpct != null ? ' <span class="v2">&middot; ' + plOrdinal(cpct) + "</span>" : "") + "</div>";
   }
   // stat card; shows a second (compare) player's value SIDE BY SIDE when picked
@@ -2073,7 +2076,8 @@
       var lx = cx + (R + 16) * Math.cos(a2), ly = cy + (R + 16) * Math.sin(a2);
       var anc = Math.abs(Math.cos(a2)) < 0.3 ? "middle" : (Math.cos(a2) > 0 ? "start" : "end");
       svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a2)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a2)).toFixed(1) + '" stroke="#23262e" stroke-width="0.8"/>');
-      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 3).toFixed(1) + '" fill="' + PL_MUTED + '" font-size="10.5" text-anchor="' + anc + '">' + PL_RADAR[i].t + "</text>");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 3).toFixed(1) + '" fill="' + PL_MUTED + '" font-size="10.5" text-anchor="' + anc +
+        '" style="cursor:help"><title>' + esc(PL_RADAR[i].d || "") + "</title>" + PL_RADAR[i].t + "</text>");
     }
     var cols = [PL_ACC, PL_BLUE];
     players.forEach(function (p, pi) {
