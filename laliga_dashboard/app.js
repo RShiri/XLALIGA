@@ -2004,6 +2004,8 @@
     { k: "def", t: "Defending" }, { k: "aerials", t: "Aerials" }, { k: "rating", t: "Rating", raw: true }
   ];
   function plN2(x) { return (Math.round((x || 0) * 100) / 100).toFixed(2); }
+  function plN3(x) { return (Math.round((x || 0) * 1000) / 1000).toFixed(3); }
+  function plPassPct(x) { return (x == null ? 0 : x) + "%"; }
   function plSgn(x) { x = Math.round((x || 0) * 100) / 100; return (x > 0 ? "+" : "") + x.toFixed(2); }
   function plSlug(t) { return t.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, ""); }
   function plFind(team, name) {
@@ -2211,6 +2213,14 @@
       "Expected Goal Involvement — xG + xA combined, a player's total expected goal contribution.");
     s += plCard(main.shots, pc ? pc.shots : null, "Shots");
     s += plCard(main.keyPasses, pc ? pc.keyPasses : null, "Key Passes");
+    s += plCard(plPassPct(main.pass_pct), pc ? plPassPct(pc.pass_pct) : null, "Pass%", null,
+      "Percentage of attempted passes completed.");
+    s += plCard(main.prog_passes || 0, pc ? (pc.prog_passes || 0) : null, "Prog Passes", null,
+      "Progressive passes — passes that move the ball meaningfully closer to goal (25%+ closer from your own half, 10%+ from the attacking half, or into the box).");
+    s += plCard(main.prog_carries || 0, pc ? (pc.prog_carries || 0) : null, "Prog Carries", null,
+      "Progressive carries — dribbles/carries that move the ball meaningfully closer to goal, by the same definition as progressive passes.");
+    s += plCard(plN3(main.xt_added_p90), pc ? plN3(pc.xt_added_p90) : null, "xT/90", "accent",
+      "Expected Threat added per 90 minutes from progressive passes and carries — how much a player's ball progression raises the team's chance of scoring.");
     s += plCard(rtg(main), pc ? rtg(pc) : null, "Avg Rating", "accent");
     document.getElementById("plStats").innerHTML = s;
 
