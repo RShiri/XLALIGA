@@ -263,11 +263,14 @@
         "<td>" + r.P + "</td><td>" + r.W + "</td><td>" + r.D + "</td><td>" + r.L + "</td>" +
         "<td>" + r.GF + "</td><td>" + r.GA + "</td><td>" + (r.GD > 0 ? "+" + r.GD : r.GD) + "</td>" +
         '<td class="pts">' + r.Pts + "</td>" +
+        "<td>" + (r.ppda != null ? r.ppda.toFixed(1) : "–") + "</td>" +
         '<td class="form-cell">' + formDots(r.form) + "</td></tr>";
     }).join("");
     host.innerHTML =
       "<table class='standings'><thead><tr><th>#</th><th class='team'>Team</th>" +
-      "<th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th class='form-cell'>Form</th>" +
+      "<th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>" +
+      "<th title='Passes allowed per defensive action in your defensive two-thirds — season average, lower = more intense pressing'>PPDA</th>" +
+      "<th class='form-cell'>Form</th>" +
       "</tr></thead><tbody>" + body + "</tbody></table>" +
       "<div class='zone-legend'>" +
       "<span><i class='z-ucl'></i>Champions League</span>" +
@@ -860,9 +863,11 @@
     ["xa", "Expected assists (xA)", 2], ["xgi", "xG involvement (xG + xA)", 2],
     ["shots", "Shots", 0], ["sot", "Shots on target", 0], ["keyPasses", "Key passes", 0],
     ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["pass_pct", "Pass accuracy %", 0],
+    ["prog_passes", "Progressive passes", 0], ["prog_carries", "Progressive carries", 0],
     ["tackles", "Tackles", 0], ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
     ["aerials", "Aerials won", 0], ["fouls", "Fouls", 0], ["dispossessed", "Dispossessed", 0],
-    ["saves", "Saves", 0], ["touches", "Touches", 0], ["rating", "Average match rating", 2]
+    ["saves", "Saves", 0], ["touches", "Touches", 0], ["rating", "Average match rating", 2],
+    ["gk_goals_prevented", "Goals prevented (GK: xGOT faced − conceded)", 2]
   ];
   var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
   // Minute floors scale with the season: 450+ is right for a full season but filters out every

@@ -25,7 +25,7 @@ import shutil
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from xg_model import team_xg_from_events  # shared shot-extraction + xG (matches the PNGs)
+from xg_model import team_xg_from_events, team_ppda_from_events  # shared shot-extraction + xG (matches the PNGs)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHED_DIR = os.path.join(ROOT, "laliga", "schedules")
@@ -171,6 +171,7 @@ def build_matches(season, schedule):
         sources = []
 
         xg_home_fotmob = xg_away_fotmob = None
+        ppda_home = ppda_away = None
 
         rich = _load_rich(season, fid)
         if rich:
@@ -207,6 +208,7 @@ def build_matches(season, schedule):
                 if ch is not None:
                     xg_home, xg_away, xg_estimated = ch, ca, True
                     stats["xg"] = [xg_home, xg_away]
+                ppda_home, ppda_away = team_ppda_from_events(rich)
             if xg_home is None or xg_away is None:
                 xg_home, xg_away = stats["xg"][0], stats["xg"][1]
 
@@ -236,6 +238,7 @@ def build_matches(season, schedule):
             "png": _find_png(season, fid),
             "stats": stats,
             "sources": sources,
+            "ppda_home": ppda_home, "ppda_away": ppda_away,
         })
     return matches, crests
 
@@ -248,8 +251,13 @@ def compute_standings(matches):
             continue
         h, a, hs, as_ = m["home"], m["away"], m["hs"], m["as"]
         for t in (h, a):
-            T.setdefault(t, dict(team=t, P=0, W=0, D=0, L=0, GF=0, GA=0, GD=0, Pts=0, form=[]))
+            T.setdefault(t, dict(team=t, P=0, W=0, D=0, L=0, GF=0, GA=0, GD=0, Pts=0, form=[],
+                                 ppda_sum=0.0, ppda_n=0))
         H, A = T[h], T[a]
+        if m.get("ppda_home") is not None:
+            H["ppda_sum"] += m["ppda_home"]; H["ppda_n"] += 1
+        if m.get("ppda_away") is not None:
+            A["ppda_sum"] += m["ppda_away"]; A["ppda_n"] += 1
         H["P"] += 1; A["P"] += 1
         H["GF"] += hs; H["GA"] += as_; A["GF"] += as_; A["GA"] += hs
         if hs > as_:
@@ -262,12 +270,16 @@ def compute_standings(matches):
     # Make sure every team that has a fixture appears, even with 0 played.
     for m in matches:
         for t in (m["home"], m["away"]):
-            T.setdefault(t, dict(team=t, P=0, W=0, D=0, L=0, GF=0, GA=0, GD=0, Pts=0, form=[]))
+            T.setdefault(t, dict(team=t, P=0, W=0, D=0, L=0, GF=0, GA=0, GD=0, Pts=0, form=[],
+                                 ppda_sum=0.0, ppda_n=0))
     rows = list(T.values())
     for r in rows:
         r["GD"] = r["GF"] - r["GA"]
         # last-5 form (most recent first), by kickoff order
         r["form"] = [fm[0] for fm in sorted(r["form"], key=lambda x: x[1].get("kickoff") or x[1]["date"])][-5:]
+        # PPDA: season average of the per-match values (a rate stat, not a sum).
+        r["ppda"] = round(r["ppda_sum"] / r["ppda_n"], 2) if r["ppda_n"] else None
+        del r["ppda_sum"], r["ppda_n"]
     rows.sort(key=lambda r: (-r["Pts"], -r["GD"], -r["GF"], r["team"]))
     for i, r in enumerate(rows, 1):
         r["rank"] = i

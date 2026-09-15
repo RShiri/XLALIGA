@@ -8,6 +8,7 @@ aggregate()/per_match_rows() for the database exporter.
 """
 import json
 import glob
+import math
 import os
 import sys
 
@@ -44,7 +45,9 @@ def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos, photo=None,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0, pen=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0, xa=0.0,
-               npxg=0.0, bc_missed=0, bc_missed_xg=0.0)
+               npxg=0.0, bc_missed=0, bc_missed_xg=0.0,
+               gk_shots_faced=0, gk_xgot_faced=0.0, gk_goals_conceded=0,
+               prog_passes=0, prog_carries=0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -75,6 +78,153 @@ def _fotmob_photo_lookup(match_data):
         counts[key] = counts.get(key, 0) + 1
         ids[key] = fmid
     return {k: v for k, v in ids.items() if counts[k] == 1}
+
+
+def _fotmob_xgot_buckets(match_data):
+    """(side, normalized surname, minute) -> [xgot, ...] from FotMob's own shotmap
+    (_fotmob_shots — see laliga/scraper.py's _fotmob_shot_xg_list), for the
+    goalkeeper goals-prevented stat below. Same best-effort team+surname+minute
+    matching as build_match_details.py's cross-provider xG buckets."""
+    out = {}
+    for s in match_data.get("_fotmob_shots") or []:
+        xgot = s.get("xgot")
+        if xgot is None:
+            continue
+        key = (s.get("team"), _norm_player(s.get("player")), s.get("min", 0))
+        out.setdefault(key, []).append(xgot)
+    return out
+
+
+def _pop_xgot(buckets, side, player, minute):
+    key = (side, _norm_player(player), minute)
+    vals = buckets.get(key)
+    if not vals:
+        for m in (minute - 1, minute + 1):
+            vals = buckets.get((side, _norm_player(player), m))
+            if vals:
+                break
+    return vals.pop(0) if vals else None
+
+
+def _keeper_windows(side_data, ex):
+    """[(playerId, on_min, off_min), ...] for this side's keeper(s), ordered by
+    on_min. off_min is None if that keeper played to the final whistle."""
+    windows = []
+    for p in side_data.get("players", []):
+        if p.get("position") != "GK":
+            continue
+        pid = p.get("playerId")
+        started = bool(p.get("isFirstEleven"))
+        on_m = 0 if started else ex["on_min"].get(pid)
+        if on_m is None:
+            continue  # bench keeper who never came on
+        windows.append((pid, on_m, ex["off_min"].get(pid)))
+    windows.sort(key=lambda w: w[1])
+    return windows
+
+
+def _keeper_at_minute(windows, minute):
+    for pid, on_m, off_m in windows:
+        if minute >= on_m and (off_m is None or minute <= off_m):
+            return pid
+    return windows[-1][0] if windows else None
+
+
+def _keeper_shot_extras(match_data, ex):
+    """Facing-keeper playerId -> dict(shots_faced, xgot_faced, goals_conceded), for
+    the goalkeeper goals-prevented stat: Sigma xGOT faced minus goals actually
+    conceded. xGOT comes from FotMob (_fotmob_shots) since neither our own model
+    nor WhoScored's placement is wired into the build pipeline yet — coverage is
+    partial (not every shot matches a FotMob one), same partial-coverage caveat as
+    every other FotMob cross-provider number in this codebase. Own goals are
+    excluded entirely (not a shot faced by the opposing keeper at all, same as
+    every shot-based xG stat elsewhere excludes them)."""
+    home, away = match_data.get("home", {}), match_data.get("away", {})
+    home_tid, away_tid = home.get("teamId"), away.get("teamId")
+    opposite = {"home": "away", "away": "home"}
+    windows = {"home": _keeper_windows(home, ex), "away": _keeper_windows(away, ex)}
+    fm_buckets = _fotmob_xgot_buckets(match_data)
+    pid_name = match_data.get("playerIdNameDictionary", {})
+    out = {}
+    for ev in match_data.get("events", []):
+        t = ev.get("type", {})
+        tname = t.get("displayName") if isinstance(t, dict) else None
+        if tname not in ("Goal", "SavedShot"):
+            continue
+        if is_shootout(ev):
+            continue
+        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        if "OwnGoal" in quals:
+            continue
+        tid = ev.get("teamId")
+        side = "home" if tid == home_tid else "away" if tid == away_tid else None
+        if side is None:
+            continue
+        facing_side = opposite[side]
+        minute = ev.get("minute", 0)
+        kpid = _keeper_at_minute(windows[facing_side], minute)
+        if kpid is None:
+            continue
+        rec = out.setdefault(kpid, dict(shots_faced=0, xgot_faced=0.0, goals_conceded=0))
+        rec["shots_faced"] += 1
+        if tname == "Goal":
+            rec["goals_conceded"] += 1
+        shot_player = pid_name.get(str(ev.get("playerId")), "")
+        xgot = _pop_xgot(fm_buckets, side, shot_player, minute)
+        if xgot is not None:
+            rec["xgot_faced"] += xgot
+    return out
+
+
+_PROG_BOX_X, _PROG_BOX_Y0, _PROG_BOX_Y1 = 85.0, 22.5, 77.5  # WhoScored 0-100 pitch coords
+
+
+def _is_progressive(x, y, ex, ey):
+    """StatsBomb's public progressive-action definition: >=25% closer to goal if it
+    started in the own half, >=10% if in the attacking half, or ends inside the box
+    regardless. WhoScored's x/y are already oriented to the attacking team's
+    perspective (goal fixed at (100, 50) for both sides), same convention the
+    shot/xG code relies on -- no home/away flip needed."""
+    d0 = math.hypot(100.0 - x, 50.0 - y)
+    if d0 <= 0:
+        return False
+    d1 = math.hypot(100.0 - ex, 50.0 - ey)
+    need = 0.25 if x < 50 else 0.10
+    return (d0 - d1) / d0 >= need or (ex >= _PROG_BOX_X and _PROG_BOX_Y0 <= ey <= _PROG_BOX_Y1)
+
+
+def _progressive_actions(match_data):
+    """playerId -> dict(prog_passes, prog_carries) for the match.
+
+    Carries (WhoScored's "TakeOn" event) have no end coordinate on the event
+    itself -- inferred the same way build_match_details.py's dribble map already
+    does: the same player's next on-ball touch within 7 seconds."""
+    events = match_data.get("events", [])
+    out = {}
+    for i, ev in enumerate(events):
+        t = ev.get("type", {})
+        tname = t.get("displayName") if isinstance(t, dict) else None
+        pid = ev.get("playerId")
+        if pid is None or ev.get("outcomeType", {}).get("displayName") != "Successful":
+            continue
+        if tname == "Pass":
+            x, y = ev.get("x", 0), ev.get("y", 0)
+            ex_, ey_ = ev.get("endX", x), ev.get("endY", y)
+            if _is_progressive(x, y, ex_, ey_):
+                out.setdefault(pid, dict(prog_passes=0, prog_carries=0))["prog_passes"] += 1
+        elif tname == "TakeOn":
+            x, y = ev.get("x", 0), ev.get("y", 0)
+            t0 = (ev.get("minute") or 0) * 60 + (ev.get("second") or 0)
+            ex_ = ey_ = None
+            for nxt in events[i + 1:]:
+                if ((nxt.get("minute") or 0) * 60 + (nxt.get("second") or 0)) - t0 > 7:
+                    break
+                if nxt.get("playerId") == pid and nxt.get("x") is not None:
+                    ex_, ey_ = nxt.get("x"), nxt.get("y") or 0
+                    break
+            if ex_ is not None and _is_progressive(x, y, ex_, ey_):
+                out.setdefault(pid, dict(prog_passes=0, prog_carries=0))["prog_carries"] += 1
+    return out
 
 
 def _player_shot_extras(match_data):
@@ -128,6 +278,8 @@ def aggregate(match_dir=MATCH_DIR):
     for mid, d in _iter_played(match_dir):
         ex = _match_extras(d)
         shot_extras = _player_shot_extras(d)
+        keeper_extras = _keeper_shot_extras(d, ex)
+        prog_map = _progressive_actions(d)
         xa_map = player_xa_from_events(d)
         photo_lookup = _fotmob_photo_lookup(d)
         for side in ("home", "away"):
@@ -164,6 +316,15 @@ def aggregate(match_dir=MATCH_DIR):
                 rec["bc_missed"] += sx.get("bc_missed", 0)
                 rec["bc_missed_xg"] += sx.get("bc_missed_xg", 0.0)
                 rec["xa"] += xa_map.get(pid, 0.0)
+                kx = keeper_extras.get(pid)
+                if kx:
+                    rec["gk_shots_faced"] += kx["shots_faced"]
+                    rec["gk_xgot_faced"] += kx["xgot_faced"]
+                    rec["gk_goals_conceded"] += kx["goals_conceded"]
+                pa = prog_map.get(pid)
+                if pa:
+                    rec["prog_passes"] += pa["prog_passes"]
+                    rec["prog_carries"] += pa["prog_carries"]
                 rt = _player_rating(p)
                 if rt is not None:
                     rec["rating_sum"] += rt
@@ -193,6 +354,13 @@ def aggregate(match_dir=MATCH_DIR):
         # >1.0 = finishing above what the chances on offer were worth; <1.0 = wasteful.
         _fwd_denom = r["npxg"] + r["bc_missed_xg"]
         r["fwd_eff"] = round(r["npg"] / _fwd_denom, 2) if _fwd_denom > 0.05 else None
+        # Goals prevented: Sigma xGOT faced minus goals actually conceded (own goals
+        # excluded from both sides, per _keeper_shot_extras). Positive = shot-stopping
+        # above what the shots faced were worth; negative = below. None for outfielders
+        # and keepers who never faced a matched shot (partial FotMob xGOT coverage).
+        r["gk_xgot_faced"] = round(r["gk_xgot_faced"], 2)
+        r["gk_goals_prevented"] = (round(r["gk_xgot_faced"] - r["gk_goals_conceded"], 2)
+                                   if r["pos"] == "GK" and r["gk_shots_faced"] else None)
         for v in list(SUM_STATS.values()) + ["mins"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)

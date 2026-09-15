@@ -175,6 +175,58 @@ def player_xa_from_events(match_data):
     return _XA.player_xa_from_events(match_data, league=_LEAGUE)
 
 
+def team_ppda_from_events(match_data):
+    """PPDA (passes allowed per defensive action) per side: the opponent's completed
+    passes in YOUR defensive two-thirds, divided by your own tackles + interceptions
+    + fouls-committed in that same zone. Lower = more intense pressing. Standard
+    definition, direct arithmetic (no model).
+
+    WhoScored's x/y are stored per-event in the ACTING team's own attacking
+    direction (x=100 = that team's own attacking goal — the same convention the
+    shot/xG code relies on, see ws_to_sb_x's docstring context), so a fixed
+    physical zone maps to opposite x-ranges depending on whose event it is: "team
+    T's defensive two-thirds" is x<=66.67 in T's own events, but x>=33.33 in the
+    opponent's events (they're facing the opposite way on the same pitch).
+
+    Returns (home_ppda, away_ppda); either is None if that side recorded zero
+    defensive actions in its own defensive two-thirds (nothing to divide by)."""
+    events = match_data.get("events") or []
+    home_id = match_data.get("home", {}).get("teamId")
+    away_id = match_data.get("away", {}).get("teamId")
+    DEF_ACTIONS = {"Tackle", "Interception"}
+
+    def _t(e):
+        return e.get("type", {}).get("displayName", "")
+
+    def _o(e):
+        return e.get("outcomeType", {}).get("displayName", "")
+
+    def defensive_actions(tid):
+        n = 0
+        for e in events:
+            if e.get("teamId") != tid or is_shootout(e):
+                continue
+            tn = _t(e)
+            in_own_defensive_zone = (e.get("x", 0) or 0) <= 66.67
+            if tn in DEF_ACTIONS and in_own_defensive_zone:
+                n += 1
+            elif tn == "Foul" and _o(e) == "Unsuccessful" and in_own_defensive_zone:
+                n += 1  # fouls COMMITTED (see scraper.py's _compute_ws_stats)
+        return n
+
+    def opponent_passes(opp_tid):
+        return sum(1 for e in events
+                   if e.get("teamId") == opp_tid and not is_shootout(e)
+                   and _t(e) == "Pass" and _o(e) == "Successful"
+                   and (e.get("x", 0) or 0) >= 33.33)
+
+    def ppda(tid, opp_tid):
+        da = defensive_actions(tid)
+        return round(opponent_passes(opp_tid) / da, 2) if da else None
+
+    return ppda(home_id, away_id), ppda(away_id, home_id)
+
+
 def team_xg_from_events(match_data):
     """Sum shot xG per side from WhoScored events. Returns (home_xg, away_xg) or
     (None, None) when there are no shot events to work with."""
