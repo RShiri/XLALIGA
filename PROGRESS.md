@@ -138,6 +138,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-15 07:44 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 44m 49s | — |
 | 2026-09-14 02:43 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-14 02:42 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 15m 31s | — |
 | 2026-09-14 02:25 | 2026-27 | backfill.py | 4 match(es) | ✅ 3 saved, 1 already had data | 8m 00s | Third --redo-partial pass, LALIGA_VISIBLE=1, ran fully under both the accent-key fix and the driver.get(base)-continue-retry fix: 3/4 recovered to full WhoScored data cleanly (avg ~2m17s/match once fixes were live), confirming both fixes work. Target grew from the expected 3 to 4 because a 4th match (id=5868058, Real Sociedad vs Atletico Madrid) had been freshly scraped FotMob-only by a colliding Windows Task Scheduler run around 01:00-01:25 (see the scrape-lock-contention lesson). Only 1 remains (Malaga vs Deportivo A Coruna, id=5868027): confirmed NOT an accent-key issue (search resolves the ID fine) -- base 1 hit 2x ConnectionResetError (both retries exhausted), base 2 then hit a 120s HTTPConnectionPool read-timeout, which _looks_like_conn_reset does NOT currently treat as retriable (only aborted/reset connections, not plain timeouts). |
