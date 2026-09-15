@@ -175,6 +175,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
 .stat::before { content: ""; position: absolute; top: -2px; left: 0; width: 26px; height: 3px; background: var(--accent); transform: skewX(-30deg); }
 .stat .v { font-size: var(--fs-kpi); font-weight: 700; line-height: 1; letter-spacing: 0.01em; }
 .stat .k { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+.k-tip { cursor: help; border-bottom: 1px dotted var(--muted-2); }
+th[title] { cursor: help; }
 .stat .v.accent { color: var(--accent); }
 .stat .v.blue { color: var(--info); }
 .stat .v.pos { color: var(--positive); }

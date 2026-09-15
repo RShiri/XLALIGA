@@ -1920,8 +1920,10 @@
     // scroll floor-width and the folded team-cell layout below — without the class those
     // rules never matched anything and the table just shrank to fit (wrapping "Real Madrid"
     // onto two lines) instead of genuinely scrolling.
-    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th>MP</th><th>G</th><th>A</th>" +
-      "<th title='Non-penalty goals'>npG</th><th>xG</th><th>xA</th>" +
+    host.innerHTML = "<table class='players'><thead><tr><th>#</th><th class='team'>Player</th><th title='Matches played'>MP</th><th>G</th><th>A</th>" +
+      "<th title='Non-penalty goals'>npG</th>" +
+      "<th title='Expected Goals — the likelihood of a shot being scored, based on its location, angle and situation'>xG</th>" +
+      "<th title=\"Expected Assists — the likelihood that a completed pass leads to a goal, based on the resulting shot's quality\">xA</th>" +
       "<th title='Goals minus xG — positive means finishing above expected'>xG&Delta;</th>" +
       "<th title='Assists minus xA — positive means more assists than expected'>xA&Delta;</th>" +
       "<th title='Big chances (clear goalscoring opportunities) not converted'>BC Miss</th>" +
@@ -2034,10 +2036,11 @@
   }
 
   // stat card; shows a second (compare) player's value SIDE BY SIDE when picked
-  function plCard(mv, cv, k, cls) {
-    if (cv == null) return '<div class="stat"><div class="v ' + (cls || "") + '">' + mv + '</div><div class="k">' + k + "</div></div>";
+  function plCard(mv, cv, k, cls, tip) {
+    var kHtml = tip ? '<span class="k-tip" tabindex="0" title="' + esc(tip) + '">' + k + "</span>" : k;
+    if (cv == null) return '<div class="stat"><div class="v ' + (cls || "") + '">' + mv + '</div><div class="k">' + kHtml + "</div></div>";
     return '<div class="stat"><div class="cmp-vals"><div class="v accent">' + mv +
-      '</div><div class="v2">' + cv + '</div></div><div class="k">' + k + "</div></div>";
+      '</div><div class="v2">' + cv + '</div></div><div class="k">' + kHtml + "</div></div>";
   }
 
   function plRadar(host, players, pool) {
@@ -2198,10 +2201,14 @@
     s += plCard(main.mins, pc ? pc.mins : null, "Minutes");
     s += plCard(main.g, pc ? pc.g : null, "Goals", "accent");
     s += plCard(main.a, pc ? pc.a : null, "Assists", "blue");
-    s += plCard(plN2(main.xg), pc ? plN2(pc.xg) : null, "xG");
-    s += plCard(plSgn(main.xg_diff), pc ? plSgn(pc.xg_diff) : null, "xG&plusmn;", main.xg_diff >= 0 ? "pos" : "neg");
-    s += plCard(plN2(main.xa), pc ? plN2(pc.xa) : null, "xA", "blue");
-    s += plCard(plN2(main.xgi), pc ? plN2(pc.xgi) : null, "xGI", "accent");
+    s += plCard(plN2(main.xg), pc ? plN2(pc.xg) : null, "xG", null,
+      "Expected Goals — the likelihood of a shot being scored, based on its location, angle and situation.");
+    s += plCard(plSgn(main.xg_diff), pc ? plSgn(pc.xg_diff) : null, "xG&plusmn;", main.xg_diff >= 0 ? "pos" : "neg",
+      "Goals minus xG — positive means finishing above what the shots deserved, negative means below.");
+    s += plCard(plN2(main.xa), pc ? plN2(pc.xa) : null, "xA", "blue",
+      "Expected Assists — the likelihood that a completed pass leads to a goal, based on the resulting shot's quality.");
+    s += plCard(plN2(main.xgi), pc ? plN2(pc.xgi) : null, "xGI", "accent",
+      "Expected Goal Involvement — xG + xA combined, a player's total expected goal contribution.");
     s += plCard(main.shots, pc ? pc.shots : null, "Shots");
     s += plCard(main.keyPasses, pc ? pc.keyPasses : null, "Key Passes");
     s += plCard(rtg(main), pc ? rtg(pc) : null, "Avg Rating", "accent");
