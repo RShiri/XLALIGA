@@ -2037,12 +2037,27 @@
     host.addEventListener("pointerleave", function () { tooltip.style.opacity = "0"; });
   }
 
+  function plOrdinal(n) {
+    var v = n % 100;
+    if (v >= 11 && v <= 13) return n + "th";
+    return n + ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th");
+  }
+  // league-percentile strip shown under a card's value when the toggle is on (hidden by
+  // default via CSS so plCard doesn't need a separate render path for it)
+  function plPctlHtml(pct, cpct) {
+    if (pct == null) return "";
+    return '<div class="pl-pctl"><i style="width:' + pct + '%"></i>' +
+      (cpct != null ? '<i class="cmp" style="width:' + cpct + '%"></i>' : "") + "</div>" +
+      '<div class="pl-pctl-lbl">' + plOrdinal(pct) + " pctl" +
+      (cpct != null ? ' <span class="v2">&middot; ' + plOrdinal(cpct) + "</span>" : "") + "</div>";
+  }
   // stat card; shows a second (compare) player's value SIDE BY SIDE when picked
-  function plCard(mv, cv, k, cls, tip) {
+  function plCard(mv, cv, k, cls, tip, pct, cpct) {
     var kHtml = tip ? '<span class="k-tip" tabindex="0" title="' + esc(tip) + '">' + k + "</span>" : k;
-    if (cv == null) return '<div class="stat"><div class="v ' + (cls || "") + '">' + mv + '</div><div class="k">' + kHtml + "</div></div>";
+    var pctHtml = plPctlHtml(pct, cv == null ? null : cpct);
+    if (cv == null) return '<div class="stat"><div class="v ' + (cls || "") + '">' + mv + '</div><div class="k">' + kHtml + "</div>" + pctHtml + "</div>";
     return '<div class="stat"><div class="cmp-vals"><div class="v accent">' + mv +
-      '</div><div class="v2">' + cv + '</div></div><div class="k">' + kHtml + "</div></div>";
+      '</div><div class="v2">' + cv + '</div></div><div class="k">' + kHtml + "</div>" + pctHtml + "</div>";
   }
 
   function plRadar(host, players, pool) {
@@ -2198,35 +2213,46 @@
       '<span class="pl-sel pl-sel-a">' + photoImg(main) + esc(main.name) + "</span>" +
       (pc ? '<span class="pl-vs">vs</span><span class="pl-sel pl-sel-b">' + photoImg(pc) + esc(pc.name) + "</span>" : "");
     function rtg(q) { return q.rating ? q.rating.toFixed(2) : "&ndash;"; }
+    // Percentile pool matches the radar's: 450+ minutes so a two-game cameo doesn't skew the
+    // scale, falling back to everyone if the season's too young for that floor to leave anyone.
+    var pool = PLAYERS.filter(function (q) { return (q.mins || 0) >= 450; });
+    if (!pool.length) pool = PLAYERS;
+    function pctOf(p, key) { return plPct(pool, (p[key] || 0), function (q) { return q[key] || 0; }); }
     var s = "";
-    s += plCard(main.mp, pc ? pc.mp : null, "Apps");
-    s += plCard(main.mins, pc ? pc.mins : null, "Minutes");
-    s += plCard(main.g, pc ? pc.g : null, "Goals", "accent");
-    s += plCard(main.a, pc ? pc.a : null, "Assists", "blue");
+    s += plCard(main.mp, pc ? pc.mp : null, "Apps", null, null, pctOf(main, "mp"), pc && pctOf(pc, "mp"));
+    s += plCard(main.mins, pc ? pc.mins : null, "Minutes", null, null, pctOf(main, "mins"), pc && pctOf(pc, "mins"));
+    s += plCard(main.g, pc ? pc.g : null, "Goals", "accent", null, pctOf(main, "g"), pc && pctOf(pc, "g"));
+    s += plCard(main.a, pc ? pc.a : null, "Assists", "blue", null, pctOf(main, "a"), pc && pctOf(pc, "a"));
     s += plCard(plN2(main.xg), pc ? plN2(pc.xg) : null, "xG", null,
-      "Expected Goals — the likelihood of a shot being scored, based on its location, angle and situation.");
+      "Expected Goals — the likelihood of a shot being scored, based on its location, angle and situation.",
+      pctOf(main, "xg"), pc && pctOf(pc, "xg"));
     s += plCard(plSgn(main.xg_diff), pc ? plSgn(pc.xg_diff) : null, "xG&plusmn;", main.xg_diff >= 0 ? "pos" : "neg",
-      "Goals minus xG — positive means finishing above what the shots deserved, negative means below.");
+      "Goals minus xG — positive means finishing above what the shots deserved, negative means below.",
+      pctOf(main, "xg_diff"), pc && pctOf(pc, "xg_diff"));
     s += plCard(plN2(main.xa), pc ? plN2(pc.xa) : null, "xA", "blue",
-      "Expected Assists — the likelihood that a completed pass leads to a goal, based on the resulting shot's quality.");
+      "Expected Assists — the likelihood that a completed pass leads to a goal, based on the resulting shot's quality.",
+      pctOf(main, "xa"), pc && pctOf(pc, "xa"));
     s += plCard(plN2(main.xgi), pc ? plN2(pc.xgi) : null, "xGI", "accent",
-      "Expected Goal Involvement — xG + xA combined, a player's total expected goal contribution.");
-    s += plCard(main.shots, pc ? pc.shots : null, "Shots");
-    s += plCard(main.keyPasses, pc ? pc.keyPasses : null, "Key Passes");
+      "Expected Goal Involvement — xG + xA combined, a player's total expected goal contribution.",
+      pctOf(main, "xgi"), pc && pctOf(pc, "xgi"));
+    s += plCard(main.shots, pc ? pc.shots : null, "Shots", null, null, pctOf(main, "shots"), pc && pctOf(pc, "shots"));
+    s += plCard(main.keyPasses, pc ? pc.keyPasses : null, "Key Passes", null, null, pctOf(main, "keyPasses"), pc && pctOf(pc, "keyPasses"));
     s += plCard(plPassPct(main.pass_pct), pc ? plPassPct(pc.pass_pct) : null, "Pass%", null,
-      "Percentage of attempted passes completed.");
+      "Percentage of attempted passes completed.", pctOf(main, "pass_pct"), pc && pctOf(pc, "pass_pct"));
     s += plCard(main.prog_passes || 0, pc ? (pc.prog_passes || 0) : null, "Prog Passes", null,
-      "Progressive passes — passes that move the ball meaningfully closer to goal (25%+ closer from your own half, 10%+ from the attacking half, or into the box).");
+      "Progressive passes — passes that move the ball meaningfully closer to goal (25%+ closer from your own half, 10%+ from the attacking half, or into the box).",
+      pctOf(main, "prog_passes"), pc && pctOf(pc, "prog_passes"));
     s += plCard(main.prog_carries || 0, pc ? (pc.prog_carries || 0) : null, "Prog Carries", null,
-      "Progressive carries — dribbles/carries that move the ball meaningfully closer to goal, by the same definition as progressive passes.");
+      "Progressive carries — dribbles/carries that move the ball meaningfully closer to goal, by the same definition as progressive passes.",
+      pctOf(main, "prog_carries"), pc && pctOf(pc, "prog_carries"));
     s += plCard(plN3(main.xt_added_p90), pc ? plN3(pc.xt_added_p90) : null, "xT/90", "accent",
-      "Expected Threat added per 90 minutes from progressive passes and carries — how much a player's ball progression raises the team's chance of scoring.");
-    s += plCard(rtg(main), pc ? rtg(pc) : null, "Avg Rating", "accent");
+      "Expected Threat added per 90 minutes from progressive passes and carries — how much a player's ball progression raises the team's chance of scoring.",
+      pctOf(main, "xt_added_p90"), pc && pctOf(pc, "xt_added_p90"));
+    s += plCard(rtg(main), pc ? rtg(pc) : null, "Avg Rating", "accent", null, pctOf(main, "rating"), pc && pctOf(pc, "rating"));
     document.getElementById("plStats").innerHTML = s;
 
-    var pool = PLAYERS.filter(function (q) { return (q.mins || 0) >= 450; });
     var players = [main]; if (pc) players.push(pc);
-    plRadar(document.getElementById("plRadar"), players, pool.length ? pool : PLAYERS);
+    plRadar(document.getElementById("plRadar"), players, pool);
 
     var barsCard = document.getElementById("plBarsCard");
     if (pc) {
@@ -2335,6 +2361,10 @@
     mainSel._wired = 1;
     mainSel.addEventListener("change", function () { PL.main = mainSel.value; plRender(); });
     cmpSel.addEventListener("change", function () { PL.cmp = cmpSel.value || null; plRender(); });
+    var pctToggle = document.getElementById("plPctlToggle");
+    if (pctToggle) pctToggle.addEventListener("change", function () {
+      document.getElementById("plStats").classList.toggle("show-pctl", pctToggle.checked);
+    });
   }
   function refreshPlayerLab() { plBuild(); plRender(); }
 

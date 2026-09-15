@@ -185,6 +185,15 @@ th[title] { cursor: help; }
 .stat .v.neg { color: var(--negative); }
 .stat .cmp-vals { display: flex; gap: 10px; justify-content: center; align-items: baseline; }
 .stat .cmp-vals .v { font-size: 30px; }
+.pl-pctl, .pl-pctl-lbl { display: none; }
+.pl-stats.show-pctl .pl-pctl { display: block; height: 5px; background: var(--well); margin-top: 8px; position: relative; overflow: hidden; }
+.pl-stats.show-pctl .pl-pctl i { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); }
+.pl-stats.show-pctl .pl-pctl:has(i.cmp) i { height: 50%; }
+.pl-stats.show-pctl .pl-pctl i.cmp { top: auto; bottom: 0; background: var(--info); }
+.pl-stats.show-pctl .pl-pctl-lbl { display: block; font-size: 11px; color: var(--muted-2); margin-top: 4px; }
+.pl-stats.show-pctl .pl-pctl-lbl .v2 { color: var(--info); }
+.pl-pctl-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); cursor: pointer; margin: -2px 0 14px; }
+.pl-pctl-toggle input { cursor: pointer; }
 .stat .v2 { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--info); }
 
 /* ---------------- tables ---------------- */
