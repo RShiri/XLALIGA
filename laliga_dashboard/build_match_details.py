@@ -23,8 +23,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 
-from xg_model import (SHOT_TYPES, shot_xg, match_xg_by_event, player_full_name,
-                      ascii_name, is_shootout, player_xa_from_events)
+from xg_model import (SHOT_TYPES, shot_xg, match_xg_by_event, match_xgot_by_event,
+                      player_full_name, ascii_name, is_shootout, player_xa_from_events)
 
 # raw scrapes are git-ignored and absent in this clone; LALIGA_MATCH_DIR lets a
 # rebuild point at the dev copy (Desktop\XWORLDCUPTWIT\laliga\matches)
@@ -307,6 +307,7 @@ def extract(match_data):
     # Score the match's shots once (v3 needs whole-match context), look up per shot.
     xa_map = player_xa_from_events(match_data)
     xg_by_event = match_xg_by_event(match_data)
+    xgot_by_event = match_xgot_by_event(match_data)
     xg_map = {}
     for _ev in match_data.get("events", []):
         _t = _ev.get("type", {})
@@ -407,6 +408,11 @@ def extract(match_data):
                 # scraper.py's _fotmob_shot_xg_list(). null when FotMob didn't report
                 # one (only shown for shots it considers on target) or no match found.
                 "xgot_fotmob": _pop_xg(fm_xgot_buckets, side, shot_player, minute),
+                # Our own placement-based xGOT model (xgot_core, trained in XG V3) --
+                # full coverage of every on-target shot, unlike FotMob's partial one
+                # above. null for off-target shots/penalties/shots missing goal-mouth
+                # qualifiers (xGOT isn't defined for those) -- see match_xgot_by_event.
+                "xgot_model": xgot_by_event.get(id(ev)),
                 "goal": tname == "Goal",
                 "onTarget": tname in ("Goal", "SavedShot"),
                 "blocked": tname == "BlockedShot",

@@ -27,11 +27,13 @@ from xg_core_v3 import XGScorer as XGScorerV3  # v3 23-feature xG (assist-contex
 from xg_core_v3.features import (SHOT_TYPES as _V3_SHOT_TYPES,   # mirror iter_match_xg's
                                  is_shootout as _v3_is_shootout,  # exact shot filter, so
                                  _qual_set as _v3_qual_set)       # we score the same set
+from xgot_core.score import XGOTScorer         # placement-based xGOT (on-target shots only)
 
 _LEAGUE = "LaLiga"           # per-league calibration shift inside the artifacts
 _XG = XGScorer()             # scalar estimate_xg() — kept for tools/, NOT the live path
 _XG_V3 = XGScorerV3()        # the live engine: scores a whole match, keyed by id(event)
 _XA = XAScorer()
+_XGOT = XGOTScorer()
 
 SCALE_Y = 0.80
 SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
@@ -110,6 +112,29 @@ def match_xg_by_event(match_data):
         if _v3_is_shootout(ev) or "OwnGoal" in _v3_qual_set(ev):
             continue
         out[id(ev)] = _XG_V3.xg_from_shot_event(ev, byid, prev_pass, league=_LEAGUE)
+    return out
+
+
+def match_xgot_by_event(match_data):
+    """id(event) -> calibrated xGOT for every on-target shot (Goal/SavedShot,
+    non-penalty) in the match. Same id(event)-not-eventId gotcha as
+    match_xg_by_event (eventId collides across ~15% of matches) and the same
+    "score once per match, look up by identity" reasoning — xgot_core needs the
+    assisting pass in hand too. Off-target shots and penalties are absent from
+    the map (xGOT isn't defined for them); look up with .get(id(ev)) and treat a
+    miss as null, same as build_match_details.py already does for xgot_fotmob."""
+    evs = match_data.get("events", [])
+    byid = {e.get("eventId"): e for e in evs}
+    prev_pass = None
+    out = {}
+    for ev in evs:
+        t = ev.get("type", {})
+        dn = t.get("displayName") if isinstance(t, dict) else None
+        if dn == "Pass":
+            prev_pass = ev
+        xgot = _XGOT.xgot_from_shot_event(ev, byid, prev_pass, league=_LEAGUE)
+        if xgot is not None:
+            out[id(ev)] = xgot
     return out
 
 

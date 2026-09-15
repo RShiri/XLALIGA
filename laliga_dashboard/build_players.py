@@ -18,7 +18,7 @@ sys.path.insert(0, HERE)
 
 from build_match_details import norm, _match_extras, _player_rating, is_match_file
 from xg_model import (ascii_name, SHOT_TYPES, shot_xg, match_xg_by_event,
-                      is_shootout, player_xa_from_events)
+                      match_xgot_by_event, is_shootout, player_xa_from_events)
 
 MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")
 OUT = os.path.join(HERE, "players.js")
@@ -130,15 +130,16 @@ def _keeper_at_minute(windows, minute):
     return windows[-1][0] if windows else None
 
 
-def _keeper_shot_extras(match_data, ex):
+def _keeper_shot_extras(match_data, ex, xgot_by_event):
     """Facing-keeper playerId -> dict(shots_faced, xgot_faced, goals_conceded), for
     the goalkeeper goals-prevented stat: Sigma xGOT faced minus goals actually
-    conceded. xGOT comes from FotMob (_fotmob_shots) since neither our own model
-    nor WhoScored's placement is wired into the build pipeline yet — coverage is
-    partial (not every shot matches a FotMob one), same partial-coverage caveat as
-    every other FotMob cross-provider number in this codebase. Own goals are
-    excluded entirely (not a shot faced by the opposing keeper at all, same as
-    every shot-based xG stat elsewhere excludes them)."""
+    conceded. xGOT prefers our own placement-based model (xgot_by_event, from
+    xg_model.match_xgot_by_event — full coverage of every on-target shot with
+    goal-mouth qualifiers), falling back to FotMob's own number (_fotmob_shots,
+    partial coverage) only for the shots our model has no value for (penalties,
+    shots missing those qualifiers). Own goals are excluded entirely (not a shot
+    faced by the opposing keeper at all, same as every shot-based xG stat
+    elsewhere excludes them)."""
     home, away = match_data.get("home", {}), match_data.get("away", {})
     home_tid, away_tid = home.get("teamId"), away.get("teamId")
     opposite = {"home": "away", "away": "home"}
@@ -169,8 +170,10 @@ def _keeper_shot_extras(match_data, ex):
         rec["shots_faced"] += 1
         if tname == "Goal":
             rec["goals_conceded"] += 1
-        shot_player = pid_name.get(str(ev.get("playerId")), "")
-        xgot = _pop_xgot(fm_buckets, side, shot_player, minute)
+        xgot = xgot_by_event.get(id(ev))
+        if xgot is None:
+            shot_player = pid_name.get(str(ev.get("playerId")), "")
+            xgot = _pop_xgot(fm_buckets, side, shot_player, minute)
         if xgot is not None:
             rec["xgot_faced"] += xgot
     return out
@@ -194,7 +197,10 @@ def _is_progressive(x, y, ex, ey):
 
 
 def _progressive_actions(match_data):
-    """playerId -> dict(prog_passes, prog_carries) for the match.
+    """playerId -> dict(prog_passes, prog_carries, zones=[(z0,z1),...]) for the match.
+    `zones` is every progressive action's (start, end) xT grid cell, for the
+    per-player xT-added stat below -- collected here (not in _xt_match_data) so a
+    progressive action's zone pair is computed exactly once for both purposes.
 
     Carries (WhoScored's "TakeOn" event) have no end coordinate on the event
     itself -- inferred the same way build_match_details.py's dribble map already
@@ -211,7 +217,9 @@ def _progressive_actions(match_data):
             x, y = ev.get("x", 0), ev.get("y", 0)
             ex_, ey_ = ev.get("endX", x), ev.get("endY", y)
             if _is_progressive(x, y, ex_, ey_):
-                out.setdefault(pid, dict(prog_passes=0, prog_carries=0))["prog_passes"] += 1
+                rec = out.setdefault(pid, dict(prog_passes=0, prog_carries=0, zones=[]))
+                rec["prog_passes"] += 1
+                rec["zones"].append((_xt_zone_of(x, y), _xt_zone_of(ex_, ey_)))
         elif tname == "TakeOn":
             x, y = ev.get("x", 0), ev.get("y", 0)
             t0 = (ev.get("minute") or 0) * 60 + (ev.get("second") or 0)
@@ -223,8 +231,107 @@ def _progressive_actions(match_data):
                     ex_, ey_ = nxt.get("x"), nxt.get("y") or 0
                     break
             if ex_ is not None and _is_progressive(x, y, ex_, ey_):
-                out.setdefault(pid, dict(prog_passes=0, prog_carries=0))["prog_carries"] += 1
+                rec = out.setdefault(pid, dict(prog_passes=0, prog_carries=0, zones=[]))
+                rec["prog_carries"] += 1
+                rec["zones"].append((_xt_zone_of(x, y), _xt_zone_of(ex_, ey_)))
     return out
+
+
+# ---------------------------------------------------------------------------
+# xT (Expected Threat) -- PLAN_new_models.md item 5. Prototyped and validated in
+# xg_core/xt_prototype.py against a full season before shipping here; see that
+# file for the full method writeup (Karun Singh's formulation: a 16x12 zone
+# grid, empirical shot/goal/move probabilities + zone transition matrix from
+# the event stream, value surface via fixed-point iteration) and the finding
+# that drove the design below -- a raw per-action sum is dominated by deep
+# buildup players (centre-backs, keepers), not creators. Fixed by crediting
+# only StatsBomb-progressive actions (same definition as prog_passes/
+# prog_carries above) and reporting per-90, not season totals.
+#
+# Unlike xG/xGOT, xT has no pre-trained artifact: the value surface is fit
+# fresh from each SEASON's own event data (same as the prototype), not scored
+# from a model trained elsewhere -- so it's computed once per aggregate() call
+# across every match in that season, then applied to score the same season's
+# progressive actions.
+_XT_GRID_X, _XT_GRID_Y = 16, 12
+
+
+def _xt_zone_of(x, y):
+    cx = int(min(max(x, 0.0), 99.999) / 100.0 * _XT_GRID_X)
+    cy = int(min(max(y, 0.0), 99.999) / 100.0 * _XT_GRID_Y)
+    return cy * _XT_GRID_X + cx
+
+
+def _xt_match_counts(match_data):
+    """(shots_by_zone, goals_by_zone, moves_by_zone, trans_by_zone) contribution
+    from this match's events, for the season-wide xT value-surface fit -- ALL
+    completed passes/carries count here (not just progressive ones): the value
+    surface models how the ball actually moves, league-wide, not just the
+    subset of actions credited to a player afterward (see _progressive_actions)."""
+    n = _XT_GRID_X * _XT_GRID_Y
+    shots, goals, moves = [0] * n, [0] * n, [0] * n
+    trans = [[0] * n for _ in range(n)]
+    events = match_data.get("events", [])
+    for i, ev in enumerate(events):
+        t = ev.get("type", {})
+        tname = t.get("displayName") if isinstance(t, dict) else None
+        if is_shootout(ev):
+            continue
+        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        if "OwnGoal" in quals:
+            continue
+        x, y = ev.get("x"), ev.get("y")
+        if x is None or y is None:
+            continue
+        z0 = _xt_zone_of(x, y)
+        if tname in SHOT_TYPES:
+            shots[z0] += 1
+            if tname == "Goal":
+                goals[z0] += 1
+            continue
+        if ev.get("outcomeType", {}).get("displayName") != "Successful":
+            continue
+        if tname == "Pass":
+            ex_, ey_ = ev.get("endX", x), ev.get("endY", y)
+        elif tname == "TakeOn":
+            pid = ev.get("playerId")
+            t0 = (ev.get("minute") or 0) * 60 + (ev.get("second") or 0)
+            ex_ = ey_ = None
+            for nxt in events[i + 1:]:
+                if ((nxt.get("minute") or 0) * 60 + (nxt.get("second") or 0)) - t0 > 7:
+                    break
+                if nxt.get("playerId") == pid and nxt.get("x") is not None:
+                    ex_, ey_ = nxt.get("x"), nxt.get("y") or 0
+                    break
+            if ex_ is None:
+                continue
+        else:
+            continue
+        z1 = _xt_zone_of(ex_, ey_)
+        moves[z0] += 1
+        trans[z0][z1] += 1
+    return shots, goals, moves, trans
+
+
+def _xt_solve(shots, goals, moves, trans, iters=24):
+    n = len(shots)
+    shot_prob, goal_prob, move_prob = [0.0] * n, [0.0] * n, [0.0] * n
+    trans_prob = [[0.0] * n for _ in range(n)]
+    for z in range(n):
+        total = shots[z] + moves[z]
+        if total:
+            shot_prob[z] = shots[z] / total
+            move_prob[z] = moves[z] / total
+        if shots[z]:
+            goal_prob[z] = goals[z] / shots[z]
+        if moves[z]:
+            trans_prob[z] = [c / moves[z] for c in trans[z]]
+    xt = [0.0] * n
+    for _ in range(iters):
+        xt = [shot_prob[z] * goal_prob[z] +
+              move_prob[z] * sum(trans_prob[z][z2] * xt[z2] for z2 in range(n))
+              for z in range(n)]
+    return xt
 
 
 def _player_shot_extras(match_data):
@@ -275,11 +382,24 @@ def _iter_played(match_dir=MATCH_DIR):
 
 def aggregate(match_dir=MATCH_DIR):
     players = {}
+    n_zones = _XT_GRID_X * _XT_GRID_Y
+    xt_shots, xt_goals, xt_moves = [0] * n_zones, [0] * n_zones, [0] * n_zones
+    xt_trans = [[0] * n_zones for _ in range(n_zones)]
+    prog_zones_by_player: dict = {}   # playerId -> [(z0,z1), ...], for xT-added after the fit
     for mid, d in _iter_played(match_dir):
         ex = _match_extras(d)
         shot_extras = _player_shot_extras(d)
-        keeper_extras = _keeper_shot_extras(d, ex)
+        keeper_extras = _keeper_shot_extras(d, ex, match_xgot_by_event(d))
         prog_map = _progressive_actions(d)
+        for pid, pa in prog_map.items():
+            prog_zones_by_player.setdefault(pid, []).extend(pa["zones"])
+        m_shots, m_goals, m_moves, m_trans = _xt_match_counts(d)
+        for z in range(n_zones):
+            xt_shots[z] += m_shots[z]; xt_goals[z] += m_goals[z]; xt_moves[z] += m_moves[z]
+            row = xt_trans[z]
+            for z2, c in enumerate(m_trans[z]):
+                if c:
+                    row[z2] += c
         xa_map = player_xa_from_events(d)
         photo_lookup = _fotmob_photo_lookup(d)
         for side in ("home", "away"):
@@ -333,6 +453,15 @@ def aggregate(match_dir=MATCH_DIR):
                 for src, dst in SUM_STATS.items():
                     rec[dst] += _sum_stat(stats, src)
 
+    # xT: fit the value surface once from this season's whole event stream, then
+    # credit each player's progressive actions against it (see the xT comment
+    # block above _xt_zone_of for the full rationale).
+    xt_surface = _xt_solve(xt_shots, xt_goals, xt_moves, xt_trans)
+    xt_added_by_player = {
+        pid: sum(xt_surface[z1] - xt_surface[z0] for z0, z1 in zones)
+        for pid, zones in prog_zones_by_player.items()
+    }
+
     out = []
     for rec in players.values():
         r = dict(rec)
@@ -361,6 +490,11 @@ def aggregate(match_dir=MATCH_DIR):
         r["gk_xgot_faced"] = round(r["gk_xgot_faced"], 2)
         r["gk_goals_prevented"] = (round(r["gk_xgot_faced"] - r["gk_goals_conceded"], 2)
                                    if r["pos"] == "GK" and r["gk_shots_faced"] else None)
+        # xT added per 90, progressive actions only (see the xT comment block above
+        # _xt_zone_of) — stored pre-computed as a rate, same as pass_pct, since the
+        # Standouts view's minutes floor filters on raw stat values, not season totals.
+        r["xt_added_p90"] = (round(xt_added_by_player[r["pid"]] / r["mins"] * 90, 4)
+                             if r["mins"] and r["pid"] in xt_added_by_player else None)
         for v in list(SUM_STATS.values()) + ["mins"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)

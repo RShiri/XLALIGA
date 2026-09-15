@@ -867,7 +867,8 @@
     ["tackles", "Tackles", 0], ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
     ["aerials", "Aerials won", 0], ["fouls", "Fouls", 0], ["dispossessed", "Dispossessed", 0],
     ["saves", "Saves", 0], ["touches", "Touches", 0], ["rating", "Average match rating", 2],
-    ["gk_goals_prevented", "Goals prevented (GK: xGOT faced − conceded)", 2]
+    ["gk_goals_prevented", "Goals prevented (GK: xGOT faced − conceded)", 2],
+    ["xt_added_p90", "xT added per 90 (progressive actions)", 3]
   ];
   var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
   // Minute floors scale with the season: 450+ is right for a full season but filters out every
