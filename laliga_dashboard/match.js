@@ -59,6 +59,58 @@
     return m ? decodeURIComponent(m[1]) : null;
   }
 
+  /* Shared "faces instead of numbers" node renderer for the pitch SVG maps (Pass
+     Network, Average Position): draws either a plain numbered circle (default,
+     matches the existing look) or the same circle with a circular-clipped player
+     photo on top, toggled per map by a checkbox in its own controls bar. Falls
+     back to the numbered circle when a player has no photo, so the toggle never
+     produces an empty node. */
+  var NS_SVG = "http://www.w3.org/2000/svg";
+  var _svgNodeSeq = 0;
+  function drawPitchNode(nodeG, cx, cy, r, color, num, photo, showFaces) {
+    var c = document.createElementNS(NS_SVG, "circle");
+    c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
+    c.setAttribute("r", r.toFixed(2));
+    c.setAttribute("fill", color); c.setAttribute("fill-opacity", "0.92");
+    c.setAttribute("stroke", "#0c0d10"); c.setAttribute("stroke-width", "0.3");
+    nodeG.appendChild(c);
+    if (showFaces && photo) {
+      var id = "pn-face-" + (_svgNodeSeq++);
+      var defs = document.createElementNS(NS_SVG, "defs");
+      var clip = document.createElementNS(NS_SVG, "clipPath");
+      clip.setAttribute("id", id);
+      var cc = document.createElementNS(NS_SVG, "circle");
+      cc.setAttribute("cx", cx.toFixed(2)); cc.setAttribute("cy", cy.toFixed(2)); cc.setAttribute("r", r.toFixed(2));
+      clip.appendChild(cc);
+      defs.appendChild(clip);
+      nodeG.appendChild(defs);
+      var img = document.createElementNS(NS_SVG, "image");
+      img.setAttributeNS("http://www.w3.org/1999/xlink", "href", photo);
+      img.setAttribute("href", photo);
+      img.setAttribute("x", (cx - r).toFixed(2)); img.setAttribute("y", (cy - r).toFixed(2));
+      img.setAttribute("width", (2 * r).toFixed(2)); img.setAttribute("height", (2 * r).toFixed(2));
+      img.setAttribute("preserveAspectRatio", "xMidYMid slice");
+      img.setAttribute("clip-path", "url(#" + id + ")");
+      img.setAttribute("pointer-events", "none");
+      nodeG.appendChild(img);
+      return c;
+    }
+    if (num != null) {
+      var t = document.createElementNS(NS_SVG, "text");
+      t.setAttribute("x", cx.toFixed(2)); t.setAttribute("y", (cy + 0.9).toFixed(2));
+      t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "2.4");
+      t.setAttribute("font-weight", "800"); t.setAttribute("fill", "#fff");
+      t.setAttribute("pointer-events", "none");
+      t.textContent = num;
+      nodeG.appendChild(t);
+    }
+    return c;
+  }
+  function facesToggleHtml(id, checked) {
+    return '<label class="grp faces-toggle"><input type="checkbox" id="' + id + '"' +
+      (checked ? " checked" : "") + '> Faces instead of numbers</label>';
+  }
+
   var id = qid();
   if (!id) { fail("No match id in the URL. Open this page from the dashboard."); return; }
 
@@ -1288,11 +1340,13 @@
   /* ================= PASS NETWORK (avg position + links) ================= */
   function buildNetwork(D) {
     var host = document.getElementById("mv-network");
-    // name -> shirt number, per side, from the line-ups
+    // name -> shirt number / photo, per side, from the line-ups
     var numMap = { home: {}, away: {} };
+    var photoMap = { home: {}, away: {} };
     ["home", "away"].forEach(function (sd) {
       (D.lineups[sd].starters.concat(D.lineups[sd].subs)).forEach(function (p) {
         numMap[sd][p.name] = p.num;
+        photoMap[sd][p.name] = p.photo;
       });
     });
 
@@ -1301,6 +1355,7 @@
         '<button type="button" class="chip-toggle on home" id="nwHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
         '<button type="button" class="chip-toggle away" id="nwAway" aria-pressed="false">' + esc(D.away.name) + "</button>" +
         '<span class="grp">Min. combined passes <input type="range" id="nwMin" aria-label="Minimum combined passes" min="1" max="10" value="3" style="width:90px"> <b id="nwMinLab">3</b></span>' +
+        facesToggleHtml("nwFaces", false) +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
         pitchMarkup() +
@@ -1314,7 +1369,7 @@
       "</div>" +
       '<div class="stat-note" id="nwNote"></div>';
 
-    var state = { side: "home", minLink: 3 };
+    var state = { side: "home", minLink: 3, showFaces: false };
     var linkG = document.getElementById("nwLinks");
     var nodeG = document.getElementById("nwNodes");
     var note = document.getElementById("nwNote");
@@ -1423,26 +1478,13 @@
         var nd = net.nodes[k];
         var cx = tx(state.side, nd.x), cy = ty(state.side, nd.y);
         var r = 1.6 + 2.6 * nd.passes / maxPasses;
-        var c = document.createElementNS(NS, "circle");
-        c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
-        c.setAttribute("r", r.toFixed(2));
-        c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0c0d10"); c.setAttribute("stroke-width", "0.3");
+        var num = numMap[state.side][nd.name];
+        var photo = photoMap[state.side][nd.name];
+        var c = drawPitchNode(nodeG, cx, cy, r, col, num, photo, state.showFaces);
         c.addEventListener("mousemove", function (e) {
           showTip(e, "<b>" + esc(nd.name) + "</b><br>" + nd.passes + " passes involved");
         });
         c.addEventListener("mouseleave", hideTip);
-        nodeG.appendChild(c);
-        var num = numMap[state.side][nd.name];
-        if (num != null) {
-          var t = document.createElementNS(NS, "text");
-          t.setAttribute("x", cx.toFixed(2)); t.setAttribute("y", (cy + 0.9).toFixed(2));
-          t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "2.4");
-          t.setAttribute("font-weight", "800"); t.setAttribute("fill", "#fff");
-          t.setAttribute("pointer-events", "none");
-          t.textContent = num;
-          nodeG.appendChild(t);
-        }
       });
       var teamName = state.side === "home" ? D.home.name : D.away.name;
       note.textContent = teamName + " · " + Object.keys(net.nodes).length + " players · " +
@@ -1462,6 +1504,9 @@
     document.getElementById("nwMin").addEventListener("input", function () {
       state.minLink = parseInt(this.value, 10); document.getElementById("nwMinLab").textContent = this.value; draw();
     });
+    document.getElementById("nwFaces").addEventListener("change", function () {
+      state.showFaces = this.checked; draw();
+    });
     draw();
   }
 
@@ -1473,13 +1518,13 @@
     var host = document.getElementById("mv-avgpos");
     if (!host) return;
     var maxMin = D.maxMin || 90;
-    var info = { home: {}, away: {} };           // name -> {num, on, off, starter} per side
+    var info = { home: {}, away: {} };           // name -> {num, photo, on, off, starter} per side
     ["home", "away"].forEach(function (sd) {
       D.lineups[sd].starters.forEach(function (p) {
-        info[sd][p.name] = { num: p.num, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin), starter: true };
+        info[sd][p.name] = { num: p.num, photo: p.photo, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin), starter: true };
       });
       D.lineups[sd].subs.forEach(function (p) {
-        info[sd][p.name] = { num: p.num, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin), starter: false };
+        info[sd][p.name] = { num: p.num, photo: p.photo, on: (p.on != null ? p.on : 0), off: (p.off != null ? p.off : maxMin), starter: false };
       });
     });
 
@@ -1490,6 +1535,7 @@
         '<span class="grp">Window <select id="apWin">' +
           '<option value="10">10 min</option><option value="15" selected>15 min</option>' +
           '<option value="20">20 min</option><option value="0">Full (0→now)</option></select></span>' +
+        facesToggleHtml("apFaces", false) +
       "</div>" +
       '<div class="timeline-scrub">' +
         '<button class="play-btn" id="apPlay">▶</button>' +
@@ -1508,7 +1554,7 @@
       "</div>" +
       '<div class="stat-note" id="apNote"></div>';
 
-    var state = { side: "home", win: 15, upper: maxMin };
+    var state = { side: "home", win: 15, upper: maxMin, showFaces: false };
     var nodeG = document.getElementById("apNodes");
     var minLab = document.getElementById("apMinLab");
     var note = document.getElementById("apNote");
@@ -1581,7 +1627,7 @@
         } else {
           if (!activeInWindow[name]) return; // display only the player with more time in current window
         }
-        out.push({ name: name, x: a.x / a.n, y: a.y / a.n, n: a.n, num: pi.num });
+        out.push({ name: name, x: a.x / a.n, y: a.y / a.n, n: a.n, num: pi.num, photo: pi.photo });
       });
       return { players: out, lo: lo, hi: hi };
     }
@@ -1594,11 +1640,7 @@
       net.players.forEach(function (p) {
         var cx = tx(state.side, p.x), cy = ty(state.side, p.y);
         var r = 1.6 + 2.4 * p.n / maxN;
-        var c = document.createElementNS(NS, "circle");
-        c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
-        c.setAttribute("r", r.toFixed(2));
-        c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0c0d10"); c.setAttribute("stroke-width", "0.3");
+        var c = drawPitchNode(nodeG, cx, cy, r, col, p.num, p.photo, state.showFaces);
         (function (pl) {
           c.addEventListener("mousemove", function (e) {
             var pi = info[state.side][pl.name] || {};
@@ -1606,16 +1648,6 @@
           });
           c.addEventListener("mouseleave", hideTip);
         })(p);
-        nodeG.appendChild(c);
-        if (p.num != null) {
-          var t = document.createElementNS(NS, "text");
-          t.setAttribute("x", cx.toFixed(2)); t.setAttribute("y", (cy + 0.9).toFixed(2));
-          t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "2.4");
-          t.setAttribute("font-weight", "800"); t.setAttribute("fill", "#fff");
-          t.setAttribute("pointer-events", "none");
-          t.textContent = p.num;
-          nodeG.appendChild(t);
-        }
       });
       var teamName = state.side === "home" ? D.home.name : D.away.name;
       note.textContent = teamName + " · " + net.players.length + " players on pitch · average positions, minutes " +
@@ -1639,6 +1671,7 @@
     document.getElementById("apHome").addEventListener("click", function () { setSide("home"); });
     document.getElementById("apAway").addEventListener("click", function () { setSide("away"); });
     document.getElementById("apWin").addEventListener("change", function () { state.win = parseInt(this.value, 10); setUpper(state.upper); });
+    document.getElementById("apFaces").addEventListener("change", function () { state.showFaces = this.checked; draw(); });
     var range = document.getElementById("apRange");
     range.addEventListener("input", function () { stopPlay(); setUpper(parseInt(this.value, 10)); });
 

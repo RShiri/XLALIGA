@@ -526,6 +526,8 @@ code { background: var(--plate-2); border: 1px solid var(--line); padding: 1px 5
 .pl-legend .pl-leg { display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
 .pl-legend .pl-sw { width: 12px; height: 10px; display: inline-block; flex: 0 0 auto; clip-path: var(--slant-sm); }
 .pl-maps-head { display: flex; gap: 18px; font-family: var(--font-display); font-size: 20px; font-weight: 800; font-style: italic; text-transform: uppercase; margin-bottom: 12px; }
+.pl-name-a, .pl-name-b { display: inline-flex; align-items: center; gap: 8px; }
+.pl-name-a .ph-photo, .pl-name-b .ph-photo { width: 26px; height: 26px; }
 .pl-name-a { color: var(--accent); }
 .pl-name-b { color: var(--info); }
 .pl-heat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 26px; }

@@ -2223,8 +2223,8 @@
       barsCard.style.display = "";
     } else barsCard.style.display = "none";
 
-    document.getElementById("plHeatNameA").textContent = main.name;
-    document.getElementById("plHeatNameB").textContent = pc ? pc.name : "";
+    document.getElementById("plHeatNameA").innerHTML = photoImg(main) + "<span>" + esc(main.name) + "</span>";
+    document.getElementById("plHeatNameB").innerHTML = pc ? photoImg(pc) + "<span>" + esc(pc.name) + "</span>" : "";
     // stamp the render so a slower earlier load can't overdraw a newer selection
     var seq = ++_plRenderSeq;
     plLoadTeam(main.team, function () {
