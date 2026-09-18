@@ -5,10 +5,19 @@
 
         py laliga\weekly_update.py --season <SEASON>
 
-    weekly_update.py re-scans the whole season (refresh fixtures, scrape whatever's
-    newly finished via backfill.py, rebuild the dashboard, plain `git push`), so
-    each per-match firing safely catches exactly the match that just ended (and
-    mops up anything an earlier firing missed).
+    weekly_update.py re-scans the whole season (refresh fixtures, scrape up to
+    BACKFILL_LIMIT newly finished matches via backfill.py, rebuild the dashboard,
+    plain `git push`), so each per-match firing safely catches exactly the match
+    that just ended (and mops up anything an earlier firing missed) without
+    trying to drain an entire backlog in one run.
+
+    ExecutionTimeLimit is 50 min: the dashboard rebuild alone (build_players.py
+    especially) costs ~8-10 min regardless of batch size, plus up to
+    BACKFILL_LIMIT scrapes (each can take several minutes with WhoScored
+    retries). A run that exceeds the limit gets killed by Task Scheduler mid-
+    write, and every task queued behind it then times out waiting on the
+    scrape lock and skips instead of scraping anything — this is what
+    silently stalled matchday 6 on 2026-09-16/17 (see PROGRESS.md).
 
 .DESCRIPTION
     This is the per-fixture sibling of register_weekly_task.ps1 (one fixed weekly
@@ -94,7 +103,7 @@ foreach ($g in $games) {
 
     $action   = New-ScheduledTaskAction -Execute $PythonExe -Argument $pyArgs -WorkingDirectory $RepoRoot
     $trigger  = New-ScheduledTaskTrigger -Once -At $scrapeAt
-    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 25) -WakeToRun
+    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 50) -WakeToRun
 
     Register-ScheduledTask -TaskName $taskName -TaskPath $TaskFolder -Action $action -Trigger $trigger -Settings $settings -Description ("La Liga auto scrape+rebuild+push after " + $g.home + " vs " + $g.away) -Force | Out-Null
     Write-Host ("[OK]     " + $label) -ForegroundColor Green

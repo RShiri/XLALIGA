@@ -7,9 +7,10 @@ per-match tasks in register_tasks.ps1.
 
 Steps (season auto-detected as the newest SCHEDULE_*.json on disk, i.e.
 whichever season is currently in progress):
-    1. laliga/build_schedule.py --season <season>   (FotMob sweep, no browser)
-    2. laliga/backfill.py --season <season>         (WhoScored scrape of any
-       newly-finished match + a full dashboard rebuild — see backfill.py)
+    1. laliga/build_schedule.py --season <season>            (FotMob sweep, no browser)
+    2. laliga/backfill.py --season <season> --limit BACKFILL_LIMIT
+       (WhoScored scrape of up to BACKFILL_LIMIT newly-finished matches +
+       a full dashboard rebuild — see backfill.py)
     3. git add -A && git commit && git push          (only if something changed;
        plain git, NOT git_ops/XWORLDCUPTWIT_REPO — see CLAUDE.md gotchas on why)
 
@@ -22,6 +23,18 @@ missed while the PC was off fires together at boot; without the lock five
 copies of this script then refresh, scrape, rebuild and push concurrently.
 A second instance waits for the running one (up to LOCK_WAIT_S) and, since a
 single run re-scans the whole season anyway, exits if the first is still busy.
+
+BACKFILL_LIMIT caps how many matches a single run scrapes. The dashboard
+rebuild (build_players.py especially) re-processes every match in every
+season regardless of batch size and alone costs ~8-10 min, so an uncapped
+backlog (e.g. several matches finished the same evening, or a backlog that
+built up while the PC was off) can push a single run well past the per-task
+ExecutionTimeLimit in register_fixture_tasks.ps1/register_weekly_task.ps1 —
+Task Scheduler then kills it mid-run, and every task queued behind it times
+out waiting for the lock and skips instead of scraping anything (this is
+what silently stalled matchday 6 on 2026-09-16/17 — see PROGRESS.md). Capping
+the batch bounds each run's worst-case duration; a backlog bigger than the
+cap just drains over the next few triggers instead of blocking all of them.
 
 Usage:
     py laliga/weekly_update.py                  # auto-detect season
@@ -48,9 +61,18 @@ from laliga._runlock import scrape_lock  # noqa: E402
 
 PY = sys.executable or "py"
 
-# The per-fixture tasks are killed by Task Scheduler after 25 min, so give up
-# waiting for the lock a little before that and leave a PROGRESS.md line.
+# The per-fixture tasks are killed by Task Scheduler after 50 min
+# (register_fixture_tasks.ps1's ExecutionTimeLimit), so give up waiting for
+# the lock well before that — leaving enough runway for BACKFILL_LIMIT
+# matches + the full dashboard rebuild (~8-10 min fixed cost) to actually
+# finish and push — and leave a PROGRESS.md line instead of just vanishing.
 LOCK_WAIT_S = 20 * 60
+
+# Matches scraped per run. Keeps a single run's worst-case duration bounded
+# (see the module docstring) instead of trying the whole backlog at once and
+# risking a mid-run kill. A backlog bigger than this drains over the next
+# few triggers rather than blocking all of them — see the docstring above.
+BACKFILL_LIMIT = 3
 
 
 def _newest_season() -> str:
@@ -93,7 +115,7 @@ def _update(season: str, no_push: bool) -> None:
     print(f"── Weekly update — season {season} ──")
 
     rc1 = _run([PY, "laliga/build_schedule.py", "--season", season])
-    rc2 = _run([PY, "laliga/backfill.py", "--season", season])
+    rc2 = _run([PY, "laliga/backfill.py", "--season", season, "--limit", str(BACKFILL_LIMIT)])
 
     pushed = False
     push_note = ""
