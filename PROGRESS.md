@@ -23,6 +23,8 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-17** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
+- **2026-09-16** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
 - **2026-09-15** — Shipped xT (per-90, progressive-only, per xt_prototype.py's resolved design) and integrated the trained xgot_core model into build_match_details.py (xgot_model field) and build_players.py (goals-prevented now prefers full-coverage model over FotMob's partial one). Verified live: Trent Alexander-Arnold tops xT-added, Joan Garcia tops goals-prevented.
 - **2026-09-15** — Resolved the xT leaderboard bias flagged earlier: per-90 + progressive-actions-only (item 3's definition) produces a sensible creativity leaderboard (Trent Alexander-Arnold, Alex Baena, Arda Guler) vs raw sums (dominated by centre-backs/keepers). Recommended default if xT ever ships: per-90, progressive-only, 900+ min floor. Still a prototype, not wired into anything.
 - **2026-09-15** — Prototyped xT (Expected Threat, PLAN_new_models.md item 5) in xg_core/xt_prototype.py: 16x12 zone grid, Markov transition model, value surface via fixed-point iteration. Value surface itself is sound (validated against La Liga 2025-26). Raw per-action leaderboard is dominated by centre-backs/keepers (known xT caveat, not a bug) -- left as an open design question rather than shipped. Not yet a package or wired into any dashboard.
@@ -140,6 +142,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-18 12:20 | 2026-27 | backfill.py | 8 match(es) | ✅ 8 saved | 28m 30s | — |
 | 2026-09-15 07:44 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 44m 49s | — |
 | 2026-09-14 02:43 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-14 02:42 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 15m 31s | — |
