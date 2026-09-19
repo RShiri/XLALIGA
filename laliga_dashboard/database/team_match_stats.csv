@@ -123,3 +123,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868077,2026-09-19,Rayo Vallecano,Osasuna,away,1,1,63,19,10,475,83,1,0,2,13,61,0.73
 5868071,2026-09-19,Athletic Club,Deportivo Alavés,home,0,0,69,24,14,668,90,1,1,0,14,59,1.56
 5868071,2026-09-19,Deportivo Alavés,Athletic Club,away,0,0,31,2,0,309,75,0,0,14,13,41,0.06
+5868073,2026-09-19,Celta Vigo,Racing Santander,home,5,0,41,13,11,451,87,3,0,7,13,48,1.98
+5868073,2026-09-19,Racing Santander,Celta Vigo,away,0,5,59,11,7,647,89,1,1,6,11,52,0.77
