@@ -125,3 +125,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868071,2026-09-19,Deportivo Alavés,Athletic Club,away,0,0,31,2,0,309,75,0,0,14,13,41,0.06
 5868073,2026-09-19,Celta Vigo,Racing Santander,home,5,0,41,13,11,451,87,3,0,7,13,48,1.98
 5868073,2026-09-19,Racing Santander,Celta Vigo,away,0,5,59,11,7,647,89,1,1,6,11,52,0.77
+5868078,2026-09-19,Sevilla,Barcelona,home,1,3,30,7,3,305,73,1,0,10,10,49,0.56
+5868078,2026-09-19,Barcelona,Sevilla,away,3,1,70,24,12,675,90,6,4,2,11,51,3.23
