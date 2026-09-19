@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-19T15:00:07.741988+00:00",
+  "generated_utc": "2026-09-19T17:15:01.525615+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -881,10 +881,10 @@
       "away": "Deportivo Alavés",
       "home_id": "8315",
       "away_id": "9866",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868073,
@@ -897,7 +897,7 @@
       "away_id": "8696",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
