@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-09-20** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 23s
 - **2026-09-17** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
 - **2026-09-16** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
 - **2026-09-15** — Shipped xT (per-90, progressive-only, per xt_prototype.py's resolved design) and integrated the trained xgot_core model into build_match_details.py (xgot_model field) and build_players.py (goals-prevented now prefers full-coverage model over FotMob's partial one). Verified live: Trent Alexander-Arnold tops xT-added, Joan Garcia tops goals-prevented.
@@ -142,6 +143,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-09-20 18:46 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 45m 48s | — |
 | 2026-09-20 07:58 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 1s | — |
 | 2026-09-20 01:46 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 45m 54s | — |
 | 2026-09-19 23:16 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 46m 24s | — |
