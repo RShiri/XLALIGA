@@ -129,3 +129,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868078,2026-09-19,Barcelona,Sevilla,away,3,1,70,24,12,675,90,6,4,2,11,51,3.23
 5868076,2026-09-20,Getafe,Málaga,home,1,0,44,20,11,374,84,1,0,9,16,54,0.85
 5868076,2026-09-20,Málaga,Getafe,away,0,1,56,11,9,461,85,0,0,10,16,46,0.58
+5868072,2026-09-20,Atletico Madrid,Real Madrid,home,2,1,61,18,14,618,90,3,1,2,19,32,1.86
+5868072,2026-09-20,Real Madrid,Atletico Madrid,away,1,2,39,8,4,393,86,1,1,5,6,68,0.46
