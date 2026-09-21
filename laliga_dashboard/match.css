@@ -109,6 +109,8 @@ body.match nav.tabs { align-items: center; align-self: center; }
 .lineup-card li .pos { color: var(--muted-2); font-size: 12px; }
 .lineup-card .subhdr { padding: 6px 16px; font-family: var(--font-label); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-2); border-top: 1px solid var(--line); margin-top: 4px; }
 .lineup-card li .star { color: var(--warn); }
+.lineup-card li .pname a.plink { color: inherit; text-decoration: none; }
+.lineup-card li .pname a.plink:hover, .lineup-card li .pname a.plink:focus-visible { color: var(--accent); }
 .lineup-card li .pname { display: flex; align-items: baseline; gap: 6px; min-width: 0; flex: 1; overflow: hidden; }
 .lineup-card li .badges { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; white-space: nowrap; }
 .lineup-card li .ast, .legend-row .ast { color: var(--info); font-weight: 800; font-size: 12px; }

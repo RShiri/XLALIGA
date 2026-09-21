@@ -31,7 +31,9 @@
   /* URL state: #<season>/<view>, e.g. #2026-27/teamlab — refresh and share land on the same view. */
   function readUrlState() {
     var parts = (location.hash || "").replace(/^#/, "").split("/");
-    return { season: parts[0] || "", view: parts[1] || "" };
+    var player = "";
+    try { player = parts[2] ? decodeURIComponent(parts[2]) : ""; } catch (e) {}
+    return { season: parts[0] || "", view: parts[1] || "", player: player };
   }
   function writeUrlState(view) {
     var cur = document.querySelector("nav.tabs button.active");
@@ -2312,6 +2314,15 @@
   function plBuildPlayers() {
     var mainSel = document.getElementById("plMain"), pool = plPool();
     mainSel.innerHTML = plGroupedOptions(pool, false);
+    // Deep link from a Match Centre line-up: #<season>/playerlab/<Team @@ Player>. Exact
+    // team+name first, then same name on any club (WhoScored/FotMob club names can differ).
+    if (urlState.player && !PL._urlDone) {
+      PL._urlDone = 1;
+      var want = urlState.player, wname = want.split(" @@ ")[1] || want;
+      var hit = pool.filter(function (p) { return (p.team + " @@ " + p.name) === want; })[0] ||
+                pool.filter(function (p) { return p.name === wname; })[0];
+      if (hit) PL.main = hit.team + " @@ " + hit.name;
+    }
     var ok = PL.main && pool.some(function (p) { return (p.team + " @@ " + p.name) === PL.main; });
     if (!ok) {
       var top = pool.slice().sort(function (a, b) { return (b.ga || 0) - (a.ga || 0); })[0];

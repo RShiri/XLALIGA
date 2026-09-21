@@ -52,6 +52,12 @@ def scrape_lock(timeout: float = 1800.0, poll: float = 5.0):
     Yields:
         True if the lock was acquired, False if we proceeded after timing out.
     """
+    # A parent that already holds the lock (weekly_update.py) marks its children with this
+    # env var; without it the child waits `timeout` seconds on its own parent's lock, then
+    # proceeds anyway — a 30 min stall per scrape that blew the tasks' 50 min limit.
+    if os.environ.get("LALIGA_LOCK_HELD") == "1":
+        yield True
+        return
     deadline = time.time() + timeout
     fh = open(_LOCK_PATH, "a+")
     acquired = False

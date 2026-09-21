@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-09-20T17:15:01.952493+00:00",
+  "generated_utc": "2026-09-21T20:07:13.620985+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -951,10 +951,10 @@
       "away": "Real Betis",
       "home_id": "9783",
       "away_id": "8603",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 1,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868080,
@@ -965,10 +965,10 @@
       "away": "Levante",
       "home_id": "10205",
       "away_id": "8581",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 3,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868079,
@@ -979,10 +979,10 @@
       "away": "Real Sociedad",
       "home_id": "10267",
       "away_id": "8560",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 3,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868086,

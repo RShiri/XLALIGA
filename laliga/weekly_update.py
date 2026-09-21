@@ -43,6 +43,7 @@ Usage:
 """
 from __future__ import annotations
 
+import os
 import sys
 import time
 import argparse
@@ -84,7 +85,7 @@ def _newest_season() -> str:
 
 def _run(argv: list[str]) -> int:
     print(f"\n$ {' '.join(argv)}")
-    proc = subprocess.run(argv, cwd=REPO_ROOT)
+    proc = subprocess.run(argv, cwd=REPO_ROOT, env={**os.environ, "LALIGA_LOCK_HELD": "1"})
     return proc.returncode
 
 

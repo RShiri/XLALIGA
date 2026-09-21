@@ -1705,14 +1705,16 @@
       if (p.rc) b += ' <span class="cardm rc"></span>';
       return b;
     }
-    function li(p) {
+    function li(p, team) {
       var rt = p.rating != null
         ? '<span class="rt" style="background:' + ratingColor(p.rating) + '">' + p.rating.toFixed(1) + "</span>"
         : '<span class="rt none">–</span>';
       var mins = p.mins != null ? '<span class="mins">' + p.mins + "'</span>" : "";
       return "<li><span class='no'>" + (p.num == null ? "" : p.num) + "</span>" +
         photoImg(p) +
-        "<span class='pname'>" + (p.motm ? "<span class='star'>★</span> " : "") + esc(p.name) +
+        "<span class='pname'>" + (p.motm ? "<span class='star'>★</span> " : "") +
+        (SEASON ? "<a class='plink' href='index.html#" + SEASON + "/playerlab/" +
+          encodeURIComponent(team + " @@ " + p.name) + "'>" + esc(p.name) + "</a>" : esc(p.name)) +
         "<span class='pos'>" + esc(p.pos) + "</span></span>" +
         "<span class='badges'>" + badges(p) + "</span>" + mins + rt + "</li>";
     }
@@ -1720,8 +1722,8 @@
       var name = side === "home" ? D.home.name : D.away.name;
       return '<div class="lineup-card"><h4>' + esc(name) +
         '<span class="lh">Min · G/A · Rating</span></h4><ul>' +
-        data.starters.map(li).join("") +
-        (data.subs.length ? '<li class="subhdr">Substitutes used</li>' + data.subs.map(li).join("") : "") +
+        data.starters.map(function (p) { return li(p, name); }).join("") +
+        (data.subs.length ? '<li class="subhdr">Substitutes used</li>' + data.subs.map(function (p) { return li(p, name); }).join("") : "") +
         "</ul></div>";
     }
     document.getElementById("mv-lineups").innerHTML =
