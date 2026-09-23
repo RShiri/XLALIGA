@@ -141,6 +141,46 @@ def _understat_xg(season, home, away):
     return (None, None)
 
 
+# Box entries come from the derived matches_detail/<id>.js (build_match_details.py runs first),
+# which keeps every pass and take-on with start/end coords, normalised so each side attacks x=100.
+DETAIL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "matches_detail")
+
+
+def _in_box(x, y):
+    """Opponent's penalty area in WhoScored 0-100 coords (attacking toward x=100)."""
+    return x is not None and y is not None and x >= 83 and 21.1 <= y <= 78.9
+
+
+def _box_entries(fotmob_id):
+    """[home, away] box entries for one match, or None without a detail file. An entry is a
+    completed open-play pass or a successful take-on that starts outside the opponent's box and
+    ends inside it. Corners (taken from the flag, x>=99 at a touchline) are left out: they're set
+    pieces, not a way of working the ball into the area."""
+    path = os.path.join(DETAIL_DIR, f"{fotmob_id}.js")
+    if not os.path.exists(path):
+        return None
+    try:
+        raw = open(path, encoding="utf-8").read()
+        d = json.loads(raw[raw.index("{"):raw.rstrip().rstrip(";").rindex("}") + 1])
+    except Exception:
+        return None
+    out = {"home": 0, "away": 0}
+    for p in d.get("passes") or []:
+        if not p.get("ok") or p.get("team") not in out:
+            continue
+        if p.get("x", 0) >= 99 and (p.get("y", 50) <= 5 or p.get("y", 50) >= 95):
+            continue                                   # corner kick
+        if not _in_box(p.get("x"), p.get("y")) and _in_box(p.get("ex"), p.get("ey")):
+            out[p["team"]] += 1
+    for t in d.get("dribbles") or []:
+        if t.get("ok") and t.get("team") in out and not _in_box(t.get("x"), t.get("y")) \
+                and _in_box(t.get("ex"), t.get("ey")):
+            out[t["team"]] += 1
+    if not (d.get("passes") or d.get("dribbles")):
+        return None
+    return [out["home"], out["away"]]
+
+
 def _load_rich(season, fotmob_id):
     """Return the rich scraped match JSON for a fixture, or None."""
     for cand in (os.path.join(MATCH_DIR, season, f"{fotmob_id}.json"),
@@ -240,6 +280,7 @@ def build_matches(season, schedule):
             "stats": stats,
             "sources": sources,
             "ppda_home": ppda_home, "ppda_away": ppda_away,
+            "box": _box_entries(fid) if (played and has_events) else None,
         })
     return matches, crests
 

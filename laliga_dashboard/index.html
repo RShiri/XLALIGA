@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=7f36405d2d" />
+<link rel="stylesheet" href="styles.css?v=11bb812a60" />
 </head>
 <body class="laliga">
 <header class="site">
@@ -274,6 +274,15 @@
       <div class="tl-legend" id="tlLegend"></div>
     </div>
 
+    <div class="card full-card" id="tlBoxCard">
+      <h3>Box entries · per game</h3>
+      <p class="hint">How often a side gets the ball into the opponent's penalty area, and how often it lets the
+         opponent into its own. An <b>entry</b> is a completed open-play pass or a successful take-on that starts
+         outside the box and ends inside it (corners left out). <b>Net</b> = entries − entries allowed, per game.
+         Counts only deep-scraped matches. Click a header to sort.</p>
+      <div class="table-scroll" id="boxTable"></div>
+    </div>
+
     <div class="card full-card" id="tlDistCard">
       <h3>Distance covered · avg km per game</h3>
       <p class="hint">How far each side runs per match, on average: the whole team, substitutes included.
@@ -506,9 +515,9 @@
 
 <!-- Static, cacheable scripts. data/index.js is tiny (season list + cache version); the season
      bundle data/<season>.js is fetched on demand by app.js (build_split.py writes both). -->
-<script src="data/index.js?v=f40f0fdce1"></script>
+<script src="data/index.js?v=5fd2f69a5b"></script>
 <script src="database/manifest.js"></script>
-<script src="app.js?v=7f36405d2d"></script>
-<script src="control.js?v=7f36405d2d"></script>
+<script src="app.js?v=11bb812a60"></script>
+<script src="control.js?v=11bb812a60"></script>
 </body>
 </html>

@@ -150,6 +150,12 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
   No `document.write`, no `Date.now()` cache-busters: `LL_INDEX.v` (a content hash written by
   `build_split.py`) is the cache-buster for season bundles, player_lab files and matches_detail.
   Forgetting `build_split.py` = the site silently shows the previous build.
+- **Box entries (Team Lab "Box entries · per game") are derived, not scraped** — `build_data._box_entries`
+  reads `laliga_dashboard/matches_detail/<id>.js` and counts completed open-play passes + successful
+  take-ons that start outside the opponent's box (x≥83, 21.1≤y≤78.9) and end inside it; corners are
+  excluded. Stored per match as `m.box = [home, away]`; `app.js renderBoxTable` averages made/allowed per
+  team. WhoScored has no carry events, so dribble-free carries into the box aren't counted — the
+  numbers run below Opta's "box entries". Needs `build_match_details.py` before `build_data.py`.
 - **Distance covered (Team Lab "avg km per game") is FotMob's team stat, not the scrape** — it's
   tracking data, so no WhoScored/Opta event ever carries it. `laliga/fetch_team_stats.py --season <s>`
   finds the "distance" entry among the team stats in FotMob's league payload (falls back to guessed

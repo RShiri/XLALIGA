@@ -221,7 +221,10 @@ table.rank tbody td .delta.pos { color: var(--positive); font-weight: 600; }
 table.rank tbody td .delta.neg { color: var(--negative); font-weight: 600; }
 table.rank.dist thead th { cursor: default; }
 table.rank.dist td.dist-bar { width: 38%; min-width: 120px; }
-@media (max-width: 600px) { table.rank.dist .dist-bar { display: none; } }
+table.rank.box td.dist-bar { width: 32%; min-width: 120px; }
+table.rank.box .box-bars .bar-track { height: 8px; }
+table.rank.box .box-bars .bar-track + .bar-track { margin-top: 3px; }
+@media (max-width: 600px) { table.rank.dist .dist-bar, table.rank.box .dist-bar { display: none; } }
 table.players { min-width: 620px; }
 table.players tbody td .delta.pos { color: var(--positive); font-weight: 600; }
 table.players tbody td .delta.neg { color: var(--negative); font-weight: 600; }

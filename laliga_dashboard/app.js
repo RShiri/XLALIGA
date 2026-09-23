@@ -1426,6 +1426,59 @@
       });
     });
   }
+  /* ---- Team Lab: box entries per game — made (into the opponent's box) and allowed (into your
+     own). Per-match counts come from build_data.py (m.box = [home, away], from matches_detail);
+     only matches with a count are averaged. ---- */
+  var boxSort = { key: "for", dir: -1 };
+  function renderBoxTable() {
+    var host = document.getElementById("boxTable");
+    if (!host) return;
+    var T = {};
+    (D.matches || []).forEach(function (m) {
+      if (!m.played || !m.box) return;
+      [[m.home, m.box[0], m.box[1]], [m.away, m.box[1], m.box[0]]].forEach(function (x) {
+        var r = T[x[0]] || (T[x[0]] = { team: x[0], mp: 0, f: 0, a: 0 });
+        r.mp++; r.f += x[1]; r.a += x[2];
+      });
+    });
+    var rows = Object.keys(T).map(function (k) {
+      var r = T[k]; r["for"] = r.f / r.mp; r.against = r.a / r.mp; r.net = r["for"] - r.against; return r;
+    });
+    if (!rows.length) {
+      host.innerHTML = emptyHtml("No box-entry data for this season yet", "It fills in as matches are deep-scraped.");
+      return;
+    }
+    rows.sort(function (a, b) {
+      if (boxSort.key === "team") return boxSort.dir * a.team.localeCompare(b.team);
+      return boxSort.dir * (a[boxSort.key] - b[boxSort.key]);
+    });
+    var maxF = Math.max.apply(null, rows.map(function (r) { return Math.max(r["for"], r.against); })) || 1;
+    function bar(v, cls) {
+      return "<div class='bar-track'><div class='bar-fill " + cls + "' style='left:0;right:auto;width:" +
+        Math.max(3, v / maxF * 100).toFixed(1) + "%'></div></div>";
+    }
+    var cols = [["team", "Team"], ["mp", "MP"], ["for", "Entries/g"], ["against", "Allowed/g"], ["net", "Net"]];
+    var head = "<th>#</th>" + cols.map(function (c) {
+      var arr = boxSort.key === c[0] ? (boxSort.dir < 0 ? " ▼" : " ▲") : "";
+      return '<th class="' + (c[0] === "team" ? "team" : "") + '" data-k="' + c[0] + '">' + c[1] + '<span class="arr">' + arr + "</span></th>";
+    }).join("") + "<th class='dist-bar'>Made · allowed</th>";
+    var body = rows.map(function (r, i) {
+      return "<tr><td class='pos'>" + (i + 1) + "</td>" +
+        '<td class="team"><div class="team-cell">' + logoImg(r.team) + '<span class="nm">' + esc(r.team) + "</span></div></td>" +
+        "<td>" + r.mp + "</td><td class='pts'>" + r["for"].toFixed(1) + "</td><td>" + r.against.toFixed(1) + "</td>" +
+        "<td><span class='delta " + (r.net >= 0 ? "pos" : "neg") + "'>" + (r.net >= 0 ? "+" : "−") + Math.abs(r.net).toFixed(1) + "</span></td>" +
+        "<td class='dist-bar box-bars'>" + bar(r["for"], "pos") + bar(r.against, "neg") + "</td></tr>";
+    }).join("");
+    host.innerHTML = "<table class='rank box'><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    host.querySelectorAll("th[data-k]").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var k = th.dataset.k;
+        if (boxSort.key === k) boxSort.dir *= -1;
+        else { boxSort.key = k; boxSort.dir = (k === "team" || k === "against") ? 1 : -1; }
+        renderBoxTable();
+      });
+    });
+  }
   /* ---- Team Lab: avg km covered per game, per club (D.distance, from FotMob's team stat via
      laliga/fetch_team_stats.py → build_data.py). Bars span the league's min→max so the gap is visible. ---- */
   function renderDistanceTable() {
@@ -1633,6 +1686,7 @@
     TOTALS = teamTotals();
     renderDbTeamTable();
     renderDistanceTable();
+    renderBoxTable();
     var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
     var mapsHost = document.getElementById("tlMaps");
     if (!SHOTS.length) {
