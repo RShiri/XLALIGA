@@ -1470,6 +1470,7 @@
         "<td class='dist-bar box-bars'>" + bar(r["for"], "pos") + bar(r.against, "neg") + "</td></tr>";
     }).join("");
     host.innerHTML = "<table class='rank box'><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    renderBoxScatter(rows);
     host.querySelectorAll("th[data-k]").forEach(function (th) {
       th.addEventListener("click", function () {
         var k = th.dataset.k;
@@ -1479,8 +1480,73 @@
       });
     });
   }
+  /* Box-entry quadrant chart: made/g (x) vs allowed/g (y, flipped so "allows few" is up). Dashed
+     lines at the league average split it into four styles; each club is drawn as its crest. */
+  function renderBoxScatter(rows) {
+    var host = document.getElementById("boxScatter");
+    if (!host) return;
+    if (!rows.length) { host.innerHTML = ""; return; }
+    // Size the viewBox to the container so text stays legible on a phone instead of shrinking.
+    var W = Math.max(340, Math.min(760, host.clientWidth || 760)), H = W < 520 ? Math.round(W * 1.15) : 470;
+    var L = 52, R = 18, T = 18, B = 46;
+    var xs = rows.map(function (r) { return r["for"]; }), ys = rows.map(function (r) { return r.against; });
+    function dom(v) { var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v), pad = Math.max(0.8, (hi - lo) * 0.12); return [lo - pad, hi + pad]; }
+    var dx = dom(xs), dy = dom(ys);
+    var ax = xs.reduce(function (a, b) { return a + b; }, 0) / xs.length;
+    var ay = ys.reduce(function (a, b) { return a + b; }, 0) / ys.length;
+    function X(v) { return L + (v - dx[0]) / (dx[1] - dx[0]) * (W - L - R); }
+    function Y(v) { return T + (v - dy[0]) / (dy[1] - dy[0]) * (H - T - B); }   // low allowed → top
+    var g = [];
+    // quadrant wash: top-right (make more, allow fewer) gets the accent tint, bottom-left the red one
+    g.push('<rect x="' + X(ax) + '" y="' + T + '" width="' + (W - R - X(ax)) + '" height="' + (Y(ay) - T) + '" style="fill:var(--accent);opacity:.07"/>');
+    g.push('<rect x="' + L + '" y="' + Y(ay) + '" width="' + (X(ax) - L) + '" height="' + (H - B - Y(ay)) + '" style="fill:var(--negative);opacity:.07"/>');
+    for (var t = Math.ceil(dx[0]); t <= dx[1]; t++) {
+      g.push('<line x1="' + X(t) + '" x2="' + X(t) + '" y1="' + T + '" y2="' + (H - B) + '" style="stroke:var(--line);stroke-width:1"/>');
+      g.push('<text x="' + X(t) + '" y="' + (H - B + 16) + '" text-anchor="middle" class="bx-tick">' + t + "</text>");
+    }
+    for (var u = Math.ceil(dy[0]); u <= dy[1]; u++) {
+      g.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(u) + '" y2="' + Y(u) + '" style="stroke:var(--line);stroke-width:1"/>');
+      g.push('<text x="' + (L - 8) + '" y="' + (Y(u) + 4) + '" text-anchor="end" class="bx-tick">' + u + "</text>");
+    }
+    g.push('<line x1="' + X(ax) + '" x2="' + X(ax) + '" y1="' + T + '" y2="' + (H - B) + '" class="bx-avg"/>');
+    g.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(ay) + '" y2="' + Y(ay) + '" class="bx-avg"/>');
+    var narrow = W < 520;
+    [["Dominant", W - R - 8, T + 16, "end"], [narrow ? "Tight" : "Tight · low-event", L + 8, T + 16, "start"],
+     [narrow ? "Open" : "Open · end-to-end", W - R - 8, H - B - 8, "end"], [narrow ? "Pressed" : "Under pressure", L + 8, H - B - 8, "start"]].forEach(function (q) {
+      g.push('<text x="' + q[1] + '" y="' + q[2] + '" text-anchor="' + q[3] + '" class="bx-quad">' + q[0] + "</text>");
+    });
+    g.push('<text x="' + ((L + W - R) / 2) + '" y="' + (H - 6) + '" text-anchor="middle" class="bx-axis">Entries made per game →</text>');
+    g.push('<text transform="translate(14 ' + ((T + H - B) / 2) + ') rotate(-90)" text-anchor="middle" class="bx-axis">Entries allowed per game (fewer ↑)</text>');
+    rows.forEach(function (r) {
+      var cx = X(r["for"]), cy = Y(r.against), url = crestUrl(r.team);
+      var info = esc(r.team) + "|" + r["for"].toFixed(1) + "|" + r.against.toFixed(1) + "|" + r.net.toFixed(1) + "|" + r.mp;
+      g.push('<g class="bx-pt" data-info="' + info + '" tabindex="0">' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="15" style="fill:var(--plate-2);stroke:' + (r.net >= 0 ? "var(--accent)" : "var(--negative)") + ';stroke-width:2"/>' +
+        (url ? '<image href="' + esc(url) + '" x="' + (cx - 10) + '" y="' + (cy - 10) + '" width="20" height="20"/>'
+             : '<text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle" class="bx-tick">' + esc(r.team.slice(0, 3)) + "</text>") +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="20" style="fill:transparent"/></g>');
+    });
+    host.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" class="bx-svg" role="img" aria-label="Box entries made versus allowed per game, one crest per team">' + g.join("") + "</svg>" +
+      "<div class='bx-legend'><span><i class='bx-dash'></i>League average: " + ax.toFixed(1) + " made · " + ay.toFixed(1) + " allowed</span><span><i class='bx-ring pos'></i>Net positive (makes more than it allows)</span><span><i class='bx-ring neg'></i>Net negative</span></div>";
+    function show(el, e) {
+      var p = el.getAttribute("data-info").split("|"), n = parseFloat(p[3]);
+      tooltip.innerHTML = '<div class="t-team">' + p[0] + '</div><div class="t-line">Made ' + p[1] + "/g · Allowed " + p[2] +
+        "/g</div><div class='t-line'>Net " + (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(1) + " · " + p[4] + " games</div>";
+      var bb = el.getBoundingClientRect();
+      tooltip.style.opacity = "1";
+      tooltip.style.left = Math.min(window.innerWidth - 250, (e && e.clientX != null ? e.clientX : bb.right) + 14) + "px";
+      tooltip.style.top = ((e && e.clientY != null ? e.clientY : bb.bottom) + 14) + "px";
+    }
+    host.querySelectorAll(".bx-pt").forEach(function (el) {
+      el.addEventListener("mousemove", function (e) { show(el, e); });
+      el.addEventListener("click", function (e) { show(el, e); });
+      el.addEventListener("focus", function () { show(el, null); });
+      el.addEventListener("mouseleave", function () { tooltip.style.opacity = "0"; });
+      el.addEventListener("blur", function () { tooltip.style.opacity = "0"; });
+    });
+  }
   /* ---- Team Lab: avg km covered per game, per club (D.distance, from FotMob's team stat via
-     laliga/fetch_team_stats.py → build_data.py). Bars span the league's min→max so the gap is visible. ---- */
+     laliga/fetch_team_stats.py → build_data.py). Bars diverge from the league average: right = runs more. ---- */
   function renderDistanceTable() {
     var host = document.getElementById("distTable");
     if (!host) return;
@@ -1493,15 +1559,15 @@
     var kms = rows.map(function (r) { return r.km; });
     var max = Math.max.apply(null, kms), min = Math.min.apply(null, kms);
     var avg = kms.reduce(function (a, b) { return a + b; }, 0) / kms.length;
-    var lo = min - (max - min || 1) * 0.15, span = (max - lo) || 1;
+    var half = Math.max(max - avg, avg - min) || 1;
     var body = rows.map(function (r, i) {
-      var d = r.km - avg, w = Math.max(4, (r.km - lo) / span * 100);
+      var d = r.km - avg, w = Math.max(1, Math.abs(d) / half * 50);
       return "<tr><td class='pos'>" + (i + 1) + "</td>" +
         '<td class="team"><div class="team-cell">' + logoImg(r.team) + '<span class="nm">' + esc(r.team) + "</span></div></td>" +
         "<td>" + (r.mp != null ? r.mp : "–") + "</td>" +
         "<td class='pts'>" + r.km.toFixed(1) + "</td>" +
         "<td><span class='delta " + (d >= 0 ? "pos" : "neg") + "'>" + (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1) + "</span></td>" +
-        "<td class='dist-bar'><div class='bar-track'><div class='bar-fill pos' style='left:0;width:" + w.toFixed(1) + "%'></div></div></td></tr>";
+        "<td class='dist-bar'><div class='bar-track'><div class='bar-mid'></div><div class='bar-fill " + (d >= 0 ? "pos" : "neg") + "' style='width:" + w.toFixed(1) + "%'></div></div></td></tr>";
     }).join("");
     host.innerHTML =
       "<table class='rank dist'><thead><tr><th>#</th><th class='team'>Team</th>" +
