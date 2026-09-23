@@ -29,6 +29,7 @@ from xg_model import team_xg_from_events, team_ppda_from_events  # shared shot-e
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHED_DIR = os.path.join(ROOT, "laliga", "schedules")
+TEAM_STATS_DIR = os.path.join(ROOT, "laliga", "team_stats")  # FotMob season team stats (fetch_team_stats.py)
 MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")  # rich scrapes: <season>/<id>.json
 PNG_DIRS = [os.path.join(ROOT, "laliga_png"), os.path.join(ROOT, "laliga", "output")]
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.js")
@@ -298,6 +299,25 @@ def build_xg_records(matches):
     return recs
 
 
+def build_distance(season, schedule):
+    """Avg km covered per match, per club, from laliga/team_stats/DISTANCE_<season>.json (FotMob's
+    "Total distance per match" team stat — tracking data, so no event scrape can derive it).
+    Rows are keyed back to the schedule's team names by FotMob team id, so a club FotMob
+    spells differently in its stats feed still lines up with the standings. None if absent."""
+    path = os.path.join(TEAM_STATS_DIR, f"DISTANCE_{season}.json")
+    if not os.path.exists(path):
+        return None
+    raw = json.load(open(path, encoding="utf-8"))
+    by_id = {}
+    for f in schedule.get("matches", []):
+        by_id[str(f.get("home_id"))] = f["home"]
+        by_id[str(f.get("away_id"))] = f["away"]
+    rows = [{"team": by_id.get(str(r.get("team_id")), r["team"]), "km": r["km"], "mp": r.get("matches")}
+            for r in raw.get("teams", []) if r.get("km") is not None]
+    rows.sort(key=lambda r: -r["km"])
+    return {"stat": raw.get("stat"), "fetched": (raw.get("fetched_utc") or "")[:10], "teams": rows}
+
+
 def build_season(season):
     path = os.path.join(SCHED_DIR, f"SCHEDULE_{season}.json")
     if not os.path.exists(path):
@@ -329,6 +349,7 @@ def build_season(season):
         "xgRecords": xg_records,
         "crests": crests,
         "teams": sorted(r["team"] for r in standings),
+        "distance": build_distance(season, schedule),
     }
 
 

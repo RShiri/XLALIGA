@@ -1426,6 +1426,38 @@
       });
     });
   }
+  /* ---- Team Lab: avg km covered per game, per club (D.distance, from FotMob's team stat via
+     laliga/fetch_team_stats.py → build_data.py). Bars span the league's min→max so the gap is visible. ---- */
+  function renderDistanceTable() {
+    var host = document.getElementById("distTable");
+    if (!host) return;
+    var dist = D.distance, rows = (dist && dist.teams) || [];
+    if (!rows.length) {
+      host.innerHTML = emptyHtml("No distance data for this season yet",
+        "Run laliga/fetch_team_stats.py --season " + season + " on a machine with FotMob access, then rebuild.");
+      return;
+    }
+    var kms = rows.map(function (r) { return r.km; });
+    var max = Math.max.apply(null, kms), min = Math.min.apply(null, kms);
+    var avg = kms.reduce(function (a, b) { return a + b; }, 0) / kms.length;
+    var lo = min - (max - min || 1) * 0.15, span = (max - lo) || 1;
+    var body = rows.map(function (r, i) {
+      var d = r.km - avg, w = Math.max(4, (r.km - lo) / span * 100);
+      return "<tr><td class='pos'>" + (i + 1) + "</td>" +
+        '<td class="team"><div class="team-cell">' + logoImg(r.team) + '<span class="nm">' + esc(r.team) + "</span></div></td>" +
+        "<td>" + (r.mp != null ? r.mp : "–") + "</td>" +
+        "<td class='pts'>" + r.km.toFixed(1) + "</td>" +
+        "<td><span class='delta " + (d >= 0 ? "pos" : "neg") + "'>" + (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1) + "</span></td>" +
+        "<td class='dist-bar'><div class='bar-track'><div class='bar-fill pos' style='left:0;width:" + w.toFixed(1) + "%'></div></div></td></tr>";
+    }).join("");
+    host.innerHTML =
+      "<table class='rank dist'><thead><tr><th>#</th><th class='team'>Team</th>" +
+      "<th title='Matches the average covers'>MP</th><th title='Average kilometres covered per match'>Km/g</th>" +
+      "<th title='Difference from the league average'>vs avg</th><th class='dist-bar'></th></tr></thead>" +
+      "<tbody>" + body + "</tbody></table>" +
+      "<p class='hint' style='margin:10px 0 0'>League average <b>" + avg.toFixed(1) + " km</b> per game" +
+      (dist.fetched ? " · FotMob, fetched " + esc(dist.fetched) : "") + ".</p>";
+  }
   /* ---- Team Lab: shot map / xG heatmap + team style fingerprint. Shots come from
      window.LL_SHOTS[season] (build_shots.py, aggregated from matches_detail). WhoScored
      coords attack toward x=100; the pitch is drawn goal-at-top. ---- */
@@ -1600,6 +1632,7 @@
     // season totals table (always shown, below the maps)
     TOTALS = teamTotals();
     renderDbTeamTable();
+    renderDistanceTable();
     var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
     var mapsHost = document.getElementById("tlMaps");
     if (!SHOTS.length) {
