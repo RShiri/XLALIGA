@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-10-06** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: To https://github.com/RShiri/XLALIGA.git ! [rejected] main -> main (fetch first) error: failed to push some refs to 'https://github.com/RShiri/XLALIGA.git' hint: Updates were rejected because , took 30s
 - **2026-09-22** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 744s
 - **2026-09-22** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 23024s
 - **2026-09-20** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
@@ -146,6 +147,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-10-10 01:16 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 15m 52s | — |
 | 2026-10-06 12:52 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 1s | — |
 | 2026-09-29 07:00 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
 | 2026-09-22 07:00 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 0s | — |
