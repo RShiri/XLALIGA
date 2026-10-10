@@ -147,6 +147,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-10-11 01:14 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 14m 21s | — |
 | 2026-10-10 22:46 | 2026-27 | backfill.py | 2 match(es) | ✅ 2 saved | 15m 50s | — |
 | 2026-10-10 01:16 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 15m 52s | — |
 | 2026-10-06 12:52 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 1s | — |

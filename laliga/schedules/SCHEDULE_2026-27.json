@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-10T19:30:02.493383+00:00",
+  "generated_utc": "2026-10-10T22:00:02.013318+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1049,10 +1049,10 @@
       "away": "Villarreal",
       "home_id": "8633",
       "away_id": "10205",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 1,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868083,

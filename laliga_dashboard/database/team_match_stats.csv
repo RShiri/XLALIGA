@@ -145,3 +145,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868081,2026-10-10,Atletico Madrid,Deportivo Alavés,away,2,1,68,22,18,753,91,2,0,3,14,51,1.54
 5868084,2026-10-10,Barcelona,Getafe,home,3,0,83,23,17,897,91,7,6,2,9,62,2.45
 5868084,2026-10-10,Getafe,Barcelona,away,0,3,17,4,2,194,61,0,0,14,11,38,0.16
+5868089,2026-10-10,Real Madrid,Villarreal,home,1,0,46,11,7,447,83,3,2,7,8,57,1.24
+5868089,2026-10-10,Villarreal,Real Madrid,away,0,1,54,15,8,514,89,0,0,6,13,43,0.56

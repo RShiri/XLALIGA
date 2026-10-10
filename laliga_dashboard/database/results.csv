@@ -72,3 +72,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868088,2026-10-10,,Estadio de Vallecas,Rayo Vallecano,Athletic Club,0,0,0.04,0.04,1
 5868081,2026-10-10,,Estadio de Mendizorroza,Deportivo Alavés,Atletico Madrid,1,2,1.03,1.54,1
 5868084,2026-10-10,,Spotify Camp Nou,Barcelona,Getafe,3,0,2.45,0.16,1
+5868089,2026-10-10,,Estadio Bernabéu,Real Madrid,Villarreal,1,0,1.24,0.56,1
