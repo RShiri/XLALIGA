@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-09T22:00:03.487457+00:00",
+  "generated_utc": "2026-10-10T19:30:02.493383+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1007,10 +1007,10 @@
       "away": "Athletic Club",
       "home_id": "8370",
       "away_id": "8315",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868081,
@@ -1021,10 +1021,10 @@
       "away": "Atletico Madrid",
       "home_id": "9866",
       "away_id": "9906",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868084,
@@ -1035,10 +1035,10 @@
       "away": "Getafe",
       "home_id": "8634",
       "away_id": "8305",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 3,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868089,
@@ -1051,7 +1051,7 @@
       "away_id": "10205",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {

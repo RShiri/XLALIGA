@@ -69,3 +69,6 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868080,2026-09-20,,Estadio de la Cerámica,Villarreal,Levante,3,1,3.76,0.89,1
 5868079,2026-09-20,,Estadio de Mestalla,Valencia,Real Sociedad,2,3,1.38,2.02,1
 5868086,2026-10-09,,Estadio La Rosaleda,Málaga,Espanyol,1,1,0.59,0.99,1
+5868088,2026-10-10,,Estadio de Vallecas,Rayo Vallecano,Athletic Club,0,0,0.04,0.04,1
+5868081,2026-10-10,,Estadio de Mendizorroza,Deportivo Alavés,Atletico Madrid,1,2,1.03,1.54,1
+5868084,2026-10-10,,Spotify Camp Nou,Barcelona,Getafe,3,0,2.45,0.16,1
