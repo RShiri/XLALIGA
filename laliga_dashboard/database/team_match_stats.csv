@@ -149,3 +149,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868089,2026-10-10,Villarreal,Real Madrid,away,0,1,54,15,8,514,89,0,0,6,13,43,0.56
 5868083,2026-10-11,Elche,Celta Vigo,home,0,0,67,13,6,675,92,0,0,2,19,51,0.72
 5868083,2026-10-11,Celta Vigo,Elche,away,0,0,33,7,2,344,87,1,1,6,21,49,0.5
+5868090,2026-10-11,Real Sociedad,Deportivo A Coruña,home,3,2,40,12,8,380,82,2,1,12,14,38,1.21
+5868090,2026-10-11,Deportivo A Coruña,Real Sociedad,away,2,3,60,21,13,566,86,3,2,5,13,62,1.9

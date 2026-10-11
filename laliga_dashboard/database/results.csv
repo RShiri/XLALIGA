@@ -74,3 +74,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868084,2026-10-10,,Spotify Camp Nou,Barcelona,Getafe,3,0,2.45,0.16,1
 5868089,2026-10-10,,Estadio Bernabéu,Real Madrid,Villarreal,1,0,1.24,0.56,1
 5868083,2026-10-11,,Estadio Manuel Martínez Valero,Elche,Celta Vigo,0,0,0.72,0.5,1
+5868090,2026-10-11,,Estadio Municipal de Anoeta,Real Sociedad,Deportivo A Coruña,3,2,1.21,1.9,1
