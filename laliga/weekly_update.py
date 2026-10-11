@@ -8,6 +8,7 @@ per-match tasks in register_tasks.ps1.
 Steps (season auto-detected as the newest SCHEDULE_*.json on disk, i.e.
 whichever season is currently in progress):
     1. laliga/build_schedule.py --season <season>            (FotMob sweep, no browser)
+       + laliga/fetch_team_stats.py --season <season>   (FotMob team distance per match)
     2. laliga/backfill.py --season <season> --limit BACKFILL_LIMIT
        (WhoScored scrape of up to BACKFILL_LIMIT newly-finished matches +
        a full dashboard rebuild — see backfill.py)
@@ -116,6 +117,9 @@ def _update(season: str, no_push: bool) -> None:
     print(f"── Weekly update — season {season} ──")
 
     rc1 = _run([PY, "laliga/build_schedule.py", "--season", season])
+    # FotMob's "Total distance per match" team stat (tracking data the event scrape can't give).
+    # Best-effort: a miss keeps the previous file and never fails the weekly run.
+    _run([PY, "laliga/fetch_team_stats.py", "--season", season])
     rc2 = _run([PY, "laliga/backfill.py", "--season", season, "--limit", str(BACKFILL_LIMIT)])
 
     pushed = False

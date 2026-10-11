@@ -150,6 +150,20 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
   No `document.write`, no `Date.now()` cache-busters: `LL_INDEX.v` (a content hash written by
   `build_split.py`) is the cache-buster for season bundles, player_lab files and matches_detail.
   Forgetting `build_split.py` = the site silently shows the previous build.
+- **Box entries (Team Lab "Box entries · per game") are derived, not scraped** — `build_data._box_entries`
+  reads `laliga_dashboard/matches_detail/<id>.js` and counts completed open-play passes + successful
+  take-ons that start outside the opponent's box (x≥83, 21.1≤y≤78.9) and end inside it; corners are
+  excluded. Stored per match as `m.box = [home, away]`; `app.js renderBoxTable` averages made/allowed per
+  team. WhoScored has no carry events, so dribble-free carries into the box aren't counted — the
+  numbers run below Opta's "box entries". Needs `build_match_details.py` before `build_data.py`.
+- **Distance covered (Team Lab "avg km per game") is FotMob's team stat, not the scrape** — it's
+  tracking data, so no WhoScored/Opta event ever carries it. `laliga/fetch_team_stats.py --season <s>`
+  finds the "distance" entry among the team stats in FotMob's league payload (falls back to guessed
+  `data.fotmob.com/stats/87/season/<id>/<name>.json` URLs) and writes the tracked
+  `laliga/team_stats/DISTANCE_<season>.json`; `build_data.build_distance` maps it onto schedule names
+  by FotMob team id → `LL_DATA.seasons[s].distance`. `weekly_update.py` runs it before `backfill.py`.
+  If FotMob renames the stat, `--dump` lists what the payload offers. Seasons without it show the
+  empty state.
 - **player_lab files are keyed by season** (`LL_PLAYERLAB[season][team]`, under `player_lab/<season>/`).
   The old team-only files summed every scraped season into one player (Raphinha "327 shots" in a
   3-match season). `build_player_lab.py` needs `data.js` for the id→season map: run it after `build_data.py`.

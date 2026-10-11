@@ -29,6 +29,7 @@ from xg_model import team_xg_from_events, team_ppda_from_events  # shared shot-e
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHED_DIR = os.path.join(ROOT, "laliga", "schedules")
+TEAM_STATS_DIR = os.path.join(ROOT, "laliga", "team_stats")  # FotMob season team stats (fetch_team_stats.py)
 MATCH_DIR = os.environ.get("LALIGA_MATCH_DIR") or os.path.join(ROOT, "laliga", "matches")  # rich scrapes: <season>/<id>.json
 PNG_DIRS = [os.path.join(ROOT, "laliga_png"), os.path.join(ROOT, "laliga", "output")]
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.js")
@@ -140,6 +141,46 @@ def _understat_xg(season, home, away):
     return (None, None)
 
 
+# Box entries come from the derived matches_detail/<id>.js (build_match_details.py runs first),
+# which keeps every pass and take-on with start/end coords, normalised so each side attacks x=100.
+DETAIL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "matches_detail")
+
+
+def _in_box(x, y):
+    """Opponent's penalty area in WhoScored 0-100 coords (attacking toward x=100)."""
+    return x is not None and y is not None and x >= 83 and 21.1 <= y <= 78.9
+
+
+def _box_entries(fotmob_id):
+    """[home, away] box entries for one match, or None without a detail file. An entry is a
+    completed open-play pass or a successful take-on that starts outside the opponent's box and
+    ends inside it. Corners (taken from the flag, x>=99 at a touchline) are left out: they're set
+    pieces, not a way of working the ball into the area."""
+    path = os.path.join(DETAIL_DIR, f"{fotmob_id}.js")
+    if not os.path.exists(path):
+        return None
+    try:
+        raw = open(path, encoding="utf-8").read()
+        d = json.loads(raw[raw.index("{"):raw.rstrip().rstrip(";").rindex("}") + 1])
+    except Exception:
+        return None
+    out = {"home": 0, "away": 0}
+    for p in d.get("passes") or []:
+        if not p.get("ok") or p.get("team") not in out:
+            continue
+        if p.get("x", 0) >= 99 and (p.get("y", 50) <= 5 or p.get("y", 50) >= 95):
+            continue                                   # corner kick
+        if not _in_box(p.get("x"), p.get("y")) and _in_box(p.get("ex"), p.get("ey")):
+            out[p["team"]] += 1
+    for t in d.get("dribbles") or []:
+        if t.get("ok") and t.get("team") in out and not _in_box(t.get("x"), t.get("y")) \
+                and _in_box(t.get("ex"), t.get("ey")):
+            out[t["team"]] += 1
+    if not (d.get("passes") or d.get("dribbles")):
+        return None
+    return [out["home"], out["away"]]
+
+
 def _load_rich(season, fotmob_id):
     """Return the rich scraped match JSON for a fixture, or None."""
     for cand in (os.path.join(MATCH_DIR, season, f"{fotmob_id}.json"),
@@ -239,6 +280,7 @@ def build_matches(season, schedule):
             "stats": stats,
             "sources": sources,
             "ppda_home": ppda_home, "ppda_away": ppda_away,
+            "box": _box_entries(fid) if (played and has_events) else None,
         })
     return matches, crests
 
@@ -298,6 +340,25 @@ def build_xg_records(matches):
     return recs
 
 
+def build_distance(season, schedule):
+    """Avg km covered per match, per club, from laliga/team_stats/DISTANCE_<season>.json (FotMob's
+    "Total distance per match" team stat — tracking data, so no event scrape can derive it).
+    Rows are keyed back to the schedule's team names by FotMob team id, so a club FotMob
+    spells differently in its stats feed still lines up with the standings. None if absent."""
+    path = os.path.join(TEAM_STATS_DIR, f"DISTANCE_{season}.json")
+    if not os.path.exists(path):
+        return None
+    raw = json.load(open(path, encoding="utf-8"))
+    by_id = {}
+    for f in schedule.get("matches", []):
+        by_id[str(f.get("home_id"))] = f["home"]
+        by_id[str(f.get("away_id"))] = f["away"]
+    rows = [{"team": by_id.get(str(r.get("team_id")), r["team"]), "km": r["km"], "mp": r.get("matches")}
+            for r in raw.get("teams", []) if r.get("km") is not None]
+    rows.sort(key=lambda r: -r["km"])
+    return {"stat": raw.get("stat"), "fetched": (raw.get("fetched_utc") or "")[:10], "teams": rows}
+
+
 def build_season(season):
     path = os.path.join(SCHED_DIR, f"SCHEDULE_{season}.json")
     if not os.path.exists(path):
@@ -329,6 +390,7 @@ def build_season(season):
         "xgRecords": xg_records,
         "crests": crests,
         "teams": sorted(r["team"] for r in standings),
+        "distance": build_distance(season, schedule),
     }
 
 
