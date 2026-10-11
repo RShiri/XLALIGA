@@ -95,6 +95,42 @@ def _git(*args: str) -> tuple[int, str]:
     return proc.returncode, (proc.stdout + proc.stderr).strip()
 
 
+# Files this run regenerates. If GitHub changed them too (code pushed from another
+# machine or a cloud session rebuilds them), our freshly built copy wins on a merge
+# conflict; build_split.py then rewrites the cache hashes in index.html/match.html.
+_GENERATED = ("laliga_dashboard/data", "laliga_dashboard/players.js", "laliga_dashboard/shots.js",
+              "laliga_dashboard/matches_detail/", "laliga_dashboard/player_lab/",
+              "laliga_dashboard/database/", "laliga_dashboard/index.html",
+              "laliga_dashboard/match.html", "laliga_png/", "laliga/schedules/", "PROGRESS.md")
+
+
+def _sync_and_push() -> tuple[int, str]:
+    """Push; if GitHub has commits we don't (rejected "fetch first"), merge them and retry.
+
+    Without this, one commit pushed from anywhere else blocks every scheduled push forever
+    (2026-10-06..11: four weekly runs scraped fine but never reached the site)."""
+    rc, out = _git("push")
+    if rc == 0:
+        return rc, out
+    print(f"! push rejected, merging GitHub's commits first:\n{out[:300]}")
+    rc, out = _git("pull", "--no-rebase", "--no-edit", "--autostash")
+    if rc != 0:
+        _, conflicted = _git("diff", "--name-only", "--diff-filter=U")
+        files = [f for f in conflicted.splitlines() if f.strip()]
+        manual = [f for f in files if not f.startswith(_GENERATED)]
+        if not files or manual:
+            _git("merge", "--abort")
+            return 1, f"merge with origin needs a manual fix ({', '.join(manual) or out[:150]})"
+        _git("checkout", "--ours", "--", *files)
+        _git("add", "--", *files)
+        _run([PY, "laliga_dashboard/build_split.py"])  # re-hash index.html/match.html
+        _git("add", "-A")
+        rc, out = _git("commit", "--no-edit")
+        if rc != 0:
+            return rc, f"merge commit failed: {out}"
+    return _git("push")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Weekly La Liga fixtures/results/scrape/push run.")
     ap.add_argument("--season", help="e.g. 2026-27; default = newest schedule on disk")
@@ -130,7 +166,7 @@ def _update(season: str, no_push: bool) -> None:
             _git("add", "-A")
             rc, msg = _git("commit", "-m", f"[LaLiga] weekly update ({season})")
             if rc == 0:
-                rc, out = _git("push")
+                rc, out = _sync_and_push()
                 if rc == 0:
                     pushed = True
                     print("Pushed to GitHub.")
