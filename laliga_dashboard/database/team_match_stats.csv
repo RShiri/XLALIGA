@@ -151,3 +151,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868083,2026-10-11,Celta Vigo,Elche,away,0,0,33,7,2,344,87,1,1,6,21,49,0.5
 5868090,2026-10-11,Real Sociedad,Deportivo A Coruña,home,3,2,40,12,8,380,82,2,1,12,14,38,1.21
 5868090,2026-10-11,Deportivo A Coruña,Real Sociedad,away,2,3,60,21,13,566,86,3,2,5,13,62,1.9
+5868082,2026-10-11,Real Betis,Osasuna,home,5,2,52,20,12,544,91,3,0,7,11,45,2.46
+5868082,2026-10-11,Osasuna,Real Betis,away,2,5,48,12,10,503,88,2,0,8,13,55,1.4
