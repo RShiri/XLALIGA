@@ -153,3 +153,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868090,2026-10-11,Deportivo A Coruña,Real Sociedad,away,2,3,60,21,13,566,86,3,2,5,13,62,1.9
 5868082,2026-10-11,Real Betis,Osasuna,home,5,2,52,20,12,544,91,3,0,7,11,45,2.46
 5868082,2026-10-11,Osasuna,Real Betis,away,2,5,48,12,10,503,88,2,0,8,13,55,1.4
+5868087,2026-10-11,Racing Santander,Valencia,home,2,2,54,20,15,577,85,1,0,2,15,44,1.04
+5868087,2026-10-11,Valencia,Racing Santander,away,2,2,46,10,4,486,78,4,2,13,10,56,1.61
