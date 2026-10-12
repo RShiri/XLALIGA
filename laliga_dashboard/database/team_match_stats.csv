@@ -155,3 +155,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868082,2026-10-11,Osasuna,Real Betis,away,2,5,48,12,10,503,88,2,0,8,13,55,1.4
 5868087,2026-10-11,Racing Santander,Valencia,home,2,2,54,20,15,577,85,1,0,2,15,44,1.04
 5868087,2026-10-11,Valencia,Racing Santander,away,2,2,46,10,4,486,78,4,2,13,10,56,1.61
+5868085,2026-10-12,Levante,Sevilla,home,3,3,57,20,13,553,81,3,2,7,7,48,1.82
+5868085,2026-10-12,Sevilla,Levante,away,3,3,43,18,10,418,79,5,3,9,17,52,2.85
