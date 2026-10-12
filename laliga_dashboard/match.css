@@ -221,3 +221,17 @@ body.match nav.tabs { align-items: center; align-self: center; }
 .so-row.goal .so-oc { color: var(--positive); }
 .so-row.saved .so-oc { color: var(--negative); }
 .so-row.missed .so-oc, .so-row.post .so-oc { color: var(--warn); }
+
+/* one-row header here: brand on the left, the back link on the right (the dashboard puts its tabs on a second row) */
+header.site .header-inner { padding-bottom: 10px; }
+header.site nav.tabs { order: 2; flex: 0 0 auto; height: auto; margin-left: auto; overflow: visible; }
+/* phones: crest above the name, so long club names wrap between words instead of mid-word */
+@media (max-width: 560px) {
+  .sb-main { gap: 10px; }
+  .sb-team, .sb-team.home { flex-direction: column; justify-content: flex-start; text-align: center; gap: 8px; }
+  .sb-team.home { flex-direction: column-reverse; justify-content: flex-end; }
+  .sb-team .nm { font-size: 15px; line-height: 1.1; overflow-wrap: normal; word-break: normal; hyphens: none; }
+  .sb-score { font-size: 36px; }
+  .back-link { font-size: 13px; padding-inline: 12px; }
+  .brand .title { font-size: 20px; }
+}

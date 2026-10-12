@@ -107,8 +107,7 @@ html[data-site-style="c"] nav.tabs button.active,
 html[data-site-style="c"] nav.tabs button[aria-selected="true"],
 html[data-site-style="c"] .mv-nav a.current { color: var(--rs-accent); background: var(--rs-accent-soft); border-bottom-color: var(--rs-accent); }
 html[data-site-style="c"] .mv-nav a { line-height: 46px; }
-html[data-site-style="c"] nav.tabs button { padding: 0 10px; }
-@media (max-width: 1280px) { html[data-site-style="c"] nav.tabs button { padding: 0 8px; font-size: 12.5px; letter-spacing: 0.05em; } }
+html[data-site-style="c"] nav.tabs button { padding: 0 14px; font-size: 13.5px; }
 
 /* section titles: "// " prefix like the portfolio */
 html[data-site-style="c"] .section-head h2,
