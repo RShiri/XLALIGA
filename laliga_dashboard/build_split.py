@@ -17,7 +17,8 @@ files and the per-match detail files. Run this after build_data / build_players 
 build_shots (build_site.py does).
 
 Also rewrites index.html/match.html's <link>/<script> tags for the front-end code itself
-(styles.css, app.js, control.js, match.css, match.js, match_export.js) to `file?v=<hash>`.
+(styles.css, app.js, control.js, match.css, match.js, match_export.js,
+portfolio-theme.css, portfolio-content.js) to `file?v=<hash>`.
 Those tags are static (no document.write cache-buster — that was itself a bug we fixed:
 it forced a fresh download on every single visit), so without a real per-deploy version a
 browser can keep serving a stale cached copy for its full Cache-Control lifetime after a
@@ -60,7 +61,8 @@ def _dump(obj):
 # Front-end code (not data) that index.html / match.html load with a plain, un-cache-busted
 # <link>/<script src>. Versioned together as one hash — they're edited together in practice,
 # and a single shared query string keeps this simple.
-ASSET_FILES = ["styles.css", "app.js", "control.js", "match.css", "match.js", "match_export.js"]
+ASSET_FILES = ["styles.css", "app.js", "control.js", "match.css", "match.js", "match_export.js",
+               "portfolio-theme.css", "portfolio-content.js"]
 HTML_FILES = ["index.html", "match.html"]
 
 

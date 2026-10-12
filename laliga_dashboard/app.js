@@ -39,6 +39,8 @@
     var cur = document.querySelector("nav.tabs button.active");
     var v = view || (cur ? cur.dataset.view : "standings");
     var next = "#" + season + "/" + v;
+    // Player Lab carries the player too, so the address bar is always a shareable link to them
+    if (v === "playerlab" && typeof PL !== "undefined" && PL.main) next += "/" + encodeURIComponent(PL.main);
     if (location.hash !== next) history.replaceState(null, "", next);
   }
   function loadSeason(key, cb) {
@@ -245,6 +247,64 @@
       s.innerHTML = '<div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div>";
       wrap.appendChild(s);
     });
+  }
+
+  /* ---- Season story: a few sentences written from the data, above the table ---- */
+  function siteHe() { return document.documentElement.getAttribute("data-site-lang") === "he"; }
+  function renderInsights() {
+    var host = document.getElementById("seasonInsights");
+    if (!host) return;
+    var rows = D.standings || [], c = D.counts || {};
+    if (!rows.length || !(c.played > 0)) { host.hidden = true; host.innerHTML = ""; return; }
+    var done = c.total && c.played >= c.total;
+    var tiles = [];
+    function tile(kEn, kHe, team, en, he, neg) {
+      tiles.push('<div class="ins-tile' + (neg ? " neg" : "") + '"><div class="ins-k">' + (team ? logoImg(team) : "") +
+        '<span data-he="' + esc(kHe) + '">' + esc(kEn) + "</span></div>" +
+        '<p data-he-html="' + esc(he) + '">' + en + "</p></div>");
+    }
+    function f1(x) { return (Math.round(x * 10) / 10).toFixed(1); }
+    var a = rows[0], b = rows[1], T = function (t) { return "<b>" + esc(t) + "</b>"; };
+    if (b) {
+      var gap = a.Pts - b.Pts;
+      tile(done ? "Champions" : "Top of the table", done ? "אלופה" : "בראש הטבלה", a.team,
+        T(a.team) + (done ? " won the league with " : " lead on ") + a.Pts + " pts, " +
+          (gap ? gap + " clear of " + esc(b.team) : "level with " + esc(b.team) + " on points") + ".",
+        T(a.team) + (done ? " זכתה באליפות עם " : " מובילה עם ") + a.Pts + " נק', " +
+          (gap ? gap + " לפני " + esc(b.team) : "בשוויון נקודות עם " + esc(b.team)) + ".");
+    }
+    var pts = teamPoints().filter(function (r) { return r.n >= 3; });
+    if (pts.length >= 4) {
+      // each tile names a different club where it can, so the story isn't the leader four times over
+      var used = {}; used[a.team] = 1;
+      var pick = function (list) { return list.filter(function (r) { return !used[r.team]; })[0] || list[0]; };
+      var byXgd = pick((AGG || []).filter(function (r) { return r.n >= 3; }).sort(function (x, y) { return y.xgd / y.n - x.xgd / x.n; }));
+      if (byXgd) used[byXgd.team] = 1;
+      if (byXgd) {
+        var per = byXgd.xgd / byXgd.n, sg = per >= 0 ? "+" : "";
+        tile("Best by xG", "הכי טובה לפי xG", byXgd.team,
+          T(byXgd.team) + " create the best chances relative to what they allow: " + sg + per.toFixed(2) + " xG difference per game.",
+          T(byXgd.team) + " מייצרת את ההזדמנויות הטובות ביותר ביחס למה שהיא מאפשרת: הפרש xG של " + sg + per.toFixed(2) + " למשחק.");
+      }
+      var rr = pts.slice().sort(function (x, y) { return (y.pts - y.xpts) - (x.pts - x.xpts); });
+      var lucky = pick(rr), unlucky = rr[rr.length - 1], dl = lucky.pts - lucky.xpts, du = unlucky.xpts - unlucky.pts;
+      if (dl > 0.5) tile("Beating the xG", "מעל ל־xG", lucky.team,
+        T(lucky.team) + " have " + f1(dl) + " more points than their chances were worth: clinical, lucky, or both.",
+        "ל־" + T(lucky.team) + " יש " + f1(dl) + " נקודות יותר ממה שההזדמנויות שלה היו שוות: קטלנית, ברת מזל, או שתיהן.");
+      if (du > 0.5) tile("Owed points", "מגיעות לה נקודות", unlucky.team,
+        T(unlucky.team) + " are " + f1(du) + " points short of what their chances deserved.",
+        "ל־" + T(unlucky.team) + " חסרות " + f1(du) + " נקודות לעומת מה שההזדמנויות שלה הצדיקו.", true);
+    }
+    var top = (PLAYERS || []).slice().sort(function (x, y) { return (y.g || 0) - (x.g || 0) || (x.xg || 0) - (y.xg || 0); })[0];
+    if (top && top.g > 0) {
+      tile("Top scorer", "מלך השערים", top.team,
+        T(top.name) + " (" + esc(top.team) + ")" + (done ? " finished top scorer with " : " leads the scoring with ") + top.g + " goals from " + f1(top.xg || 0) + " xG.",
+        T(top.name) + " (" + esc(top.team) + ")" + (done ? " סיים כמלך השערים עם " : " מוביל בכיבושים עם ") + top.g + " שערים מתוך " + f1(top.xg || 0) + " xG.");
+    }
+    host.hidden = tiles.length < 2;
+    host.innerHTML = '<div class="ins-head"><h3 data-he="סיפור העונה">Season story</h3>' +
+      '<span data-he="נכתב אוטומטית מהנתונים">Written automatically from the data</span></div>' +
+      '<div class="ins-grid">' + tiles.join("") + "</div>";
   }
 
   /* ---- Standings ---- */
@@ -2129,6 +2189,7 @@
     renderMatches();
     renderPlayers();
     renderXgLab();
+    renderInsights();
     renderProjection();
     renderData();
     renderDownloads();
@@ -2409,6 +2470,8 @@
       pctOf(main, "xt_added_p90"), pc && pctOf(pc, "xt_added_p90"));
     s += plCard(rtg(main), pc ? rtg(pc) : null, "Avg Rating", "accent", null, pctOf(main, "rating"), pc && pctOf(pc, "rating"));
     document.getElementById("plStats").innerHTML = s;
+    var activeTab = document.querySelector("nav.tabs button.active");
+    if (activeTab && activeTab.dataset.view === "playerlab") writeUrlState("playerlab");
 
     var players = [main]; if (pc) players.push(pc);
     plRadar(document.getElementById("plRadar"), players, pool);
@@ -2528,6 +2591,17 @@
     if (!mainSel || mainSel._wired) return;
     mainSel._wired = 1;
     mainSel.addEventListener("change", function () { PL.main = mainSel.value; plRender(); });
+    var share = document.getElementById("plShare");
+    if (share) share.addEventListener("click", function () {
+      writeUrlState("playerlab");
+      var url = location.href, label = share.textContent;
+      function ok() {
+        share.classList.add("done"); share.textContent = "Link copied";
+        setTimeout(function () { share.classList.remove("done"); share.textContent = "Copy link"; }, 1800);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, function () { window.prompt("Copy this link", url); });
+      else window.prompt("Copy this link", url);
+    });
     cmpSel.addEventListener("change", function () { PL.cmp = cmpSel.value || null; plRender(); });
     var pctToggle = document.getElementById("plPctlToggle");
     if (pctToggle) pctToggle.addEventListener("change", function () {
@@ -2536,6 +2610,21 @@
   }
   function refreshPlayerLab() { plBuild(); plRender(); }
 
+  /* Scroll strips fade only on the side that hides more tabs; nothing fades when it all fits. */
+  function wireScrollFade(strip) {
+    if (!strip || strip._fade) return;
+    strip._fade = 1;
+    strip.classList.add("scroll-fade");
+    function upd() {
+      var max = strip.scrollWidth - strip.clientWidth;
+      strip.classList.toggle("fade-s", strip.scrollLeft > 2);
+      strip.classList.toggle("fade-e", max > 2 && strip.scrollLeft < max - 2);
+    }
+    strip.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    if (window.ResizeObserver) new ResizeObserver(upd).observe(strip);
+    upd();
+  }
   function initControls() {
     // tabs
     var tabs = Array.prototype.slice.call(document.querySelectorAll("nav.tabs button"));
@@ -2572,6 +2661,7 @@
         selectTab(n.dataset.view, true);
       });
     });
+    wireScrollFade(document.querySelector("nav.tabs"));
     var startView = (urlState.view && document.getElementById("view-" + urlState.view)) ? urlState.view : "standings";
     selectTab(startView, false);
     // season switcher

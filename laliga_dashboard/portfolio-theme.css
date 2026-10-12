@@ -1,0 +1,215 @@
+/* ============================================================================
+   Portfolio theme: aligns the La Liga dashboard with rshiri.github.io.
+   Loaded AFTER styles.css / match.css (and styles_classic.css on the classic
+   pages). The shared brand kit (assets/brand/brand.js) sets
+   html[data-site-style="c"|"a"]; this file maps the project's own tokens onto
+   the kit's --rs-* tokens for each look.
+
+   A "Matchday": the dashboard's native "Broadcast Kinetic" skin (the portfolio's A
+                 look was derived from it), with the kit's fonts and ground.
+   C "HUD":      navy ground, cyan hairlines, square corners, corner brackets,
+                 Chakra Petch uppercase display over IBM Plex Sans.
+   Data colours (team kits, red = negative, warn amber, card yellow/red) are kept.
+   Chart literals emitted by app.js/match.js (lime #d7ff3a signal, pale-blue
+   #9fd0ff info, dark #0c0d10 dot outlines) are re-pointed with attribute
+   selectors in C, so a look switch needs no re-render.
+   ========================================================================== */
+
+/* ---------------- shared: both looks ---------------- */
+html[data-site-style] {
+  --bg: var(--rs-bg);
+  --plate: var(--rs-panel);
+  --plate-2: var(--rs-panel-2);
+  --text: var(--rs-ink);
+  --accent: var(--rs-accent);
+  --accent-ink: var(--rs-accent-ink);
+  --accent-soft: var(--rs-accent-soft);
+  --font-display: var(--rs-display);
+  --font-body: var(--rs-text);
+  --font-label: var(--rs-display);
+  --radius: var(--rs-radius);
+  /* classic-page aliases */
+  --card: var(--rs-panel);
+  --card-2: var(--rs-panel-2);
+  --bg-2: var(--rs-bg-soft);
+}
+html[data-site-style] body { font-family: var(--rs-text); }
+/* the portfolio bar scrolls away; the dashboard header sticks below it as before */
+html[data-site-style] .rs-bar { z-index: 30; }
+
+/* ---------------- A: Matchday ---------------- */
+html[data-site-style="a"] {
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: var(--rs-line-strong);
+  --muted: #b9bfc9;
+  --muted-2: #8a919d;          /* was #737b88: lifted for 4.5:1 on plates */
+  --positive: var(--rs-accent);
+  --goal: var(--rs-goal);
+  --zone-ucl: var(--rs-accent);
+}
+
+/* ---------------- C: HUD ---------------- */
+html[data-site-style="c"] {
+  color-scheme: dark;
+  --well: #030810;
+  --line: rgba(77, 240, 255, 0.12);
+  --line-strong: var(--rs-line);
+  --muted: var(--rs-body);
+  --muted-2: var(--rs-muted);
+  --accent-dim: #2aa6b3;
+  --positive: var(--rs-accent);
+  --info: #b49bff;              /* lavender: must stay distinct from the cyan signal */
+  --info-soft: rgba(180, 155, 255, 0.1);
+  --goal: var(--rs-accent);
+  --zone-ucl: var(--rs-accent);
+  --zone-uel: #b49bff;
+  --zone-uecl: var(--rs-body);
+  --accent-2: #5d7a8c;
+  --glow: 0 0 14px rgba(77, 240, 255, 0.45);
+  --hatch: repeating-linear-gradient(-55deg, rgba(169, 198, 211, 0.3) 0 5px, rgba(169, 198, 211, 0.13) 5px 9px);
+  --hatch-lime: repeating-linear-gradient(-55deg, #4df0ff 0 5px, #2aa6b3 5px 9px);
+  --hatch-info: repeating-linear-gradient(-55deg, #b49bff 0 5px, #7a66b8 5px 9px);
+  --hatch-grey: repeating-linear-gradient(-55deg, #a9c6d3 0 5px, #5d7a8c 5px 9px);
+  --focus-ring: 0 0 0 2px var(--rs-bg), 0 0 0 4px var(--rs-accent);
+  /* square geometry: no chamfers, no slants */
+  --plate-cut: none;
+  --slant: none;
+  --slant-sm: none;
+  --r-sm: 0px; --r-md: 0px; --r-lg: 0px; --r-pill: 0px;
+  --radius: 0px;
+  scrollbar-color: var(--rs-line-strong) var(--rs-bg);
+  accent-color: var(--rs-accent);
+}
+html[data-site-style="c"] body {
+  color: var(--rs-body);
+  background: radial-gradient(80% 50% at 75% 0%, rgba(77, 240, 255, 0.07), transparent 70%) no-repeat, var(--rs-bg);
+  font-weight: 400;
+}
+html[data-site-style="c"] ::selection { background: var(--rs-accent); color: var(--rs-accent-ink); }
+html[data-site-style="c"] body * { font-style: normal !important; }
+html[data-site-style="c"] :is(h1, h2, h3, h4) { font-family: var(--rs-display); color: var(--rs-ink); text-transform: uppercase; font-weight: 700; letter-spacing: 0.02em; }
+html[data-site-style="c"] :is(td, .stat .k, .card .hint, .section-head p) { color: inherit; }
+html[data-site-style="c"] tbody td { color: var(--rs-ink); }
+html[data-site-style="c"] .section-head p, html[data-site-style="c"] .card .hint { color: var(--rs-body); }
+
+/* header */
+html[data-site-style="c"] header.site,
+html[data-site-style="c"] .mv-nav { background: rgba(5, 11, 20, 0.88); border-bottom-color: var(--rs-line); }
+html[data-site-style="c"] .brand .title { font-weight: 700; letter-spacing: 0.18em; font-size: 22px; }
+html[data-site-style="c"] .brand .sub { color: var(--rs-muted); letter-spacing: 0.26em; }
+
+/* tabs / section bar: hairline underline instead of a filled slant */
+html[data-site-style="c"] nav.tabs button,
+html[data-site-style="c"] .mv-nav a { font-weight: 600; letter-spacing: 0.08em; font-size: 13px; color: var(--rs-muted); margin: 0; border-bottom: 2px solid transparent; }
+html[data-site-style="c"] nav.tabs button:hover,
+html[data-site-style="c"] .mv-nav a:hover { color: var(--rs-ink); }
+html[data-site-style="c"] nav.tabs button.active,
+html[data-site-style="c"] nav.tabs button[aria-selected="true"],
+html[data-site-style="c"] .mv-nav a.current { color: var(--rs-accent); background: var(--rs-accent-soft); border-bottom-color: var(--rs-accent); }
+html[data-site-style="c"] .mv-nav a { line-height: 46px; }
+html[data-site-style="c"] nav.tabs button { padding: 0 14px; font-size: 13.5px; }
+
+/* section titles: "// " prefix like the portfolio */
+html[data-site-style="c"] .section-head h2,
+html[data-site-style="c"] .mv-title { font-weight: 700; letter-spacing: 0.02em; gap: 0; }
+html[data-site-style="c"] .section-head h2::before,
+html[data-site-style="c"] .mv-title::before { content: "// "; width: auto; height: auto; background: none; transform: none; color: var(--rs-accent); white-space: pre; }
+html[data-site-style="c"] .section-head { padding-bottom: 14px; border-bottom: 1px solid var(--rs-line); }
+html[data-site-style="c"] .mv-title { border-bottom-color: var(--rs-line); }
+
+/* panels: hairline border + corner brackets */
+html[data-site-style="c"] :is(.card, .pitch-wrap, .tl-map-card, .data-card, .db-match, .match-card, .scoreboard, .champ-card) {
+  background: var(--rs-panel); border: 1px solid var(--rs-line); clip-path: none;
+}
+html[data-site-style="c"] .card { background: linear-gradient(var(--rs-panel-2), var(--rs-panel) 48px); }
+html[data-site-style="c"] .card::before,
+html[data-site-style="c"] .card::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid var(--rs-accent); pointer-events: none; z-index: 2; }
+html[data-site-style="c"] .card::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+html[data-site-style="c"] .card::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+html[data-site-style="c"] .data-card:hover,
+html[data-site-style="c"] .match-card.has-link:hover { border-color: var(--rs-line-strong); background: var(--rs-panel-2); }
+
+/* callouts: cyan rule on the left */
+html[data-site-style="c"] :is(.insight, .explainer, .so-spot) { background: var(--rs-panel); border: 1px solid var(--rs-line); color: var(--rs-body); }
+html[data-site-style="c"] :is(.insight, .explainer, .so-spot)::before { width: 2px; clip-path: none; }
+html[data-site-style="c"] .insight b { color: var(--rs-accent); }
+
+/* KPI strip */
+html[data-site-style="c"] .stat { border-top-color: var(--rs-line); }
+html[data-site-style="c"] .stat::before { transform: none; height: 2px; width: 22px; }
+html[data-site-style="c"] .stat .v { color: var(--rs-ink); font-weight: 600; }
+html[data-site-style="c"] .stat .v.accent { color: var(--rs-accent); }
+html[data-site-style="c"] .stat .k { color: var(--rs-muted); letter-spacing: 0.16em; font-weight: 600; }
+
+/* tables */
+html[data-site-style="c"] thead th,
+html[data-site-style="c"] table.standings th,
+html[data-site-style="c"] table.proj th { color: var(--rs-muted); font-weight: 600; letter-spacing: 0.14em; border-bottom-color: var(--rs-line-strong); }
+html[data-site-style="c"] table.standings th,
+html[data-site-style="c"] table.proj th { background: var(--rs-panel-2); }
+html[data-site-style="c"] :is(td.pts, .stat .v, .sb-score, .mc-score .sc, .r-big, .champ-team) { font-weight: 600; }
+
+/* controls + buttons: hairline outline, solid cyan for primary */
+html[data-site-style="c"] :is(.controls input, .controls select, .so-controls select, .so-controls input, .season-pick select, .pl-controls select, .pl-controls input) {
+  background: var(--rs-bg-soft); border: 1px solid var(--rs-line-strong); color: var(--rs-ink); border-radius: 0; clip-path: none; font-family: var(--rs-text);
+}
+html[data-site-style="c"] :is(.seg, .seg-btn, .so-preset, .back-link, .ctl-open, .ctl-actions button, .pl-badge, .fd, .est-tag, .so-spot-tag, .timeline .goal-ev, .champ-lbl, .champ-plate) { clip-path: none; }
+html[data-site-style="c"] .seg { background: transparent; border: 1px solid var(--rs-line-strong); }
+html[data-site-style="c"] :is(.seg-btn, .so-preset) { font-weight: 600; letter-spacing: 0.12em; }
+html[data-site-style="c"] :is(.so-preset, .back-link) { background: transparent; border: 1px solid var(--rs-line-strong); color: var(--rs-body); }
+html[data-site-style="c"] :is(.seg-btn.active, .so-preset.active) { background: var(--rs-accent); color: var(--rs-accent-ink); }
+html[data-site-style="c"] .back-link:hover { background: var(--rs-accent-soft); color: var(--rs-accent); border-color: var(--rs-accent); }
+html[data-site-style="c"] :is(.data-card .dl, .ctl-primary, .live-toast) { clip-path: var(--rs-cut, polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)); font-weight: 600; letter-spacing: 0.14em; }
+html[data-site-style="c"] .ctl-open { background: transparent; border: 1px solid var(--rs-accent); }
+html[data-site-style="c"] .pl-badge { border: 1px solid var(--rs-line); }
+html[data-site-style="c"] .md-head { color: var(--rs-accent); font-weight: 600; letter-spacing: 0.14em; }
+
+/* champion card + scoreboard: square, cyan left rule */
+html[data-site-style="c"] .champ-card::before,
+html[data-site-style="c"] .scoreboard::before { width: 3px; clip-path: none; }
+@media (min-width: 721px) { html[data-site-style="c"] .scoreboard { padding-left: 44px; } }
+@media (max-width: 720px) {
+  html[data-site-style] .sb-team .nm { font-size: 16px; min-width: 0; overflow-wrap: anywhere; }
+  html[data-site-style="c"] .sb-team .nm { font-size: 15px; letter-spacing: 0; }
+  html[data-site-style="c"] .sb-main { gap: 10px; }
+  html[data-site-style="c"] .sb-score { font-size: 34px; }
+}
+html[data-site-style="c"] .champ-lbl { left: 3px; }
+
+/* bars: square ends */
+html[data-site-style="c"] :is(.bar-track, .ha-track, .corr-scale, .sc-bar, .pbar, .so-bar-track, .legend i, .zone-legend i, .chart-legend .cl-sw, .tl-legend .tl-leg i, .pl-legend .pl-sw) { clip-path: none; }
+
+/* ---- chart literals drawn by app.js / match.js (SVG attributes + inline styles) ---- */
+html[data-site-style="c"] [fill="#d7ff3a"] { fill: var(--rs-accent); }
+html[data-site-style="c"] [stroke="#d7ff3a"] { stroke: var(--rs-accent); }
+html[data-site-style="c"] [fill="#96b328"] { fill: #2aa6b3; }
+html[data-site-style="c"] [stroke="#96b328"] { stroke: #2aa6b3; }
+html[data-site-style="c"] [fill="#9fd0ff"] { fill: #b49bff; }
+html[data-site-style="c"] [stroke="#9fd0ff"] { stroke: #b49bff; }
+html[data-site-style="c"] [stroke="#0c0d10"] { stroke: var(--rs-bg); }
+html[data-site-style="c"] rect[fill="#0c0d10"] { fill: var(--rs-bg); }
+html[data-site-style="c"] [stroke="#15171c"] { stroke: var(--rs-panel-2); }
+html[data-site-style="c"] [style*="background:#d7ff3a"] { background: var(--rs-accent) !important; }
+html[data-site-style="c"] [style*="background:#9fd0ff"] { background: #b49bff !important; }
+html[data-site-style="c"] [style*="color:#d7ff3a"] { color: var(--rs-accent) !important; }
+
+/* ---------------- Hebrew mode (brand kit sets dir="auto" on swapped text) ---------------- */
+html[data-site-lang="he"] [dir="auto"] { letter-spacing: 0 !important; text-transform: none; font-family: "IBM Plex Sans Hebrew", var(--rs-text); }
+html[data-site-lang="he"] :is(h1, h2, h3)[dir="auto"], html[data-site-lang="he"] nav.tabs button[dir="auto"] { font-weight: 600; }
+html[data-site-lang="he"] .section-head h2[dir="auto"], html[data-site-lang="he"] .mv-title[dir="auto"] { font-size: 30px; }
+html[data-site-lang="he"] .stat .k[dir="auto"] { text-align: start; }
+
+/* ---------------- static mock pages (preview.html / sample.html) ---------------- */
+html[data-site-style] body.rs-mock {
+  --bg-darker: var(--rs-bg); --bg-dark: var(--rs-bg-soft);
+  --bg-card: var(--rs-panel); --bg-card-hover: var(--rs-panel-2);
+  --border-color: var(--rs-line); --border-color-glow: var(--rs-line-strong);
+  --gold: var(--rs-accent); --text-gold: var(--rs-accent);
+  --gold-gradient: linear-gradient(135deg, var(--rs-accent), var(--rs-accent));
+  --text-main: var(--rs-ink); --text-muted: var(--rs-muted);
+  --shadow-glow: none;
+  font-family: var(--rs-text); background: var(--rs-bg);
+}
+html[data-site-style] body.rs-mock :is(h1, h2, h3, h4) { font-family: var(--rs-display); text-transform: uppercase; }
+html[data-site-style="a"] body.rs-mock :is(h1, h2, h3, h4) { font-style: italic; }
+html[data-site-style="c"] body.rs-mock * { border-radius: 0 !important; }
