@@ -121,7 +121,16 @@ def _sync_and_push() -> tuple[int, str]:
         if not files or manual:
             _git("merge", "--abort")
             return 1, f"merge with origin needs a manual fix ({', '.join(manual) or out[:150]})"
-        _git("checkout", "--ours", "--", *files)
+        # Data files: keep the copy this run just built. The two HTML pages are hand-edited
+        # too (a design change can land on GitHub mid-run); for those take GitHub's version,
+        # since the only thing this run changes in them is the ?v= cache hash, which
+        # build_split.py rewrites below. "--ours" there would silently drop the other edits.
+        pages = [f for f in files if f in ("laliga_dashboard/index.html", "laliga_dashboard/match.html")]
+        data = [f for f in files if f not in pages]
+        if data:
+            _git("checkout", "--ours", "--", *data)
+        if pages:
+            _git("checkout", "--theirs", "--", *pages)
         _git("add", "--", *files)
         _run([PY, "laliga_dashboard/build_split.py"])  # re-hash index.html/match.html
         _git("add", "-A")
