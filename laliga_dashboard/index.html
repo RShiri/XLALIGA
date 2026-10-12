@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0c0d10" />
 <title>La Liga Dashboard</title>
+<link rel="stylesheet" href="https://rshiri.github.io/assets/brand/brand.css" />
+<script src="https://rshiri.github.io/assets/brand/brand.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=f1a7907e9b" />
+<link rel="stylesheet" href="styles.css?v=b9346e7dd7" />
+<link rel="stylesheet" href="portfolio-theme.css?v=b9346e7dd7" />
+<script src="portfolio-content.js?v=b9346e7dd7"></script>
 </head>
 <body class="laliga">
 <header class="site">
@@ -296,10 +300,10 @@
     </div>
     <details class="explainer" id="explainer-xg" open>
       <summary><h3>New here? What is xG?</h3></summary>
-      <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. A tap-in might be
+      <p data-he-html="<b>xG (שערים צפויים)</b> מדרג כל בעיטה לפי הסיכוי שהיא תיכנס, מ־0 עד 1. בעיטה מקו השער יכולה להיות 0.7 xG, ובעיטת ייאוש מ־30 מטר 0.03. סכמו את הבעיטות של קבוצה ותקבלו כמה שערים מסיים <i>ממוצע</i> היה כובש מההזדמנויות האלה, מדד טוב יותר מהתוצאה לבדה לשאלה &quot;למי זה הגיע&quot;."><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. A tap-in might be
          0.7 xG; a hopeful 30-metre strike 0.03. Sum a team's shots and you get how many goals an <i>average</i>
          finisher would score from those chances — a better "who deserved it" number than the scoreline alone.</p>
-      <p><b>Where does the xG itself come from? We built the model ourselves.</b> Every shot is scored by a
+      <p data-he-html="<b>מאיפה מגיע ה־xG עצמו? בנינו את המודל בעצמנו.</b> כל בעיטה מקבלת ציון ממודל משולב של רגרסיה לוגיסטית ו־Gradient Boosting, שאומן על <b>יותר מ־77,600 בעיטות אמיתיות</b> (ארבע עונות מלאות של לה ליגה, ארבע של הפרמייר ליג ומונדיאל 2026) מול מה שקרה להן בפועל. מלבד <b>המרחק</b>, <b>הזווית אל השער</b>, האם זו הייתה <b>נגיחה</b>, <b>הזדמנות גדולה</b> לפי Opta ו<b>המצב</b> (משחק פתוח, בעיטה חופשית, קרן, מצב נייח או מתפרצת), הוא קורא גם את <b>המסירה שקדמה לבעיטה</b>: הגבהה, כדור עומק, החזרה לאחור, נגיעה ראשונה או אחד על אחד, כי אלה משנים את הסיכוי לשער גם באותו מרחק ובאותה זווית. כיול גימור לכל ליגה שומר שסכום ה־xG יתאים לשערים שנכבשו בפועל, ופנדל מקובע על 0.79. אותו מודל רץ בלוחות של לה ליגה, המונדיאל וברצלונה, כך שהמספרים ניתנים להשוואה בכל מקום. במשחקי העונה הזו הוא עקב אחרי השערים בפועל מקרוב יותר מה־xG שמפרסמים FotMob ו־Understat; בלשונית הנתונים יש השוואה לכל משחק."><b>Where does the xG itself come from? We built the model ourselves.</b> Every shot is scored by a
          blended logistic-regression + gradient-boosted model trained on <b>77,600+ real shots</b> — four full
          La Liga seasons, four Premier League seasons and the 2026 World Cup — against what actually happened to
          them. Besides the shot's <b>distance</b>, the <b>angle the goal mouth opens up</b>, whether it was a
@@ -311,7 +315,7 @@
          dashboards, so the numbers compare cleanly everywhere. On this season's matches it has tracked actual
          goals more closely than either FotMob's or Understat's own published xG — see each match's row in the
          Data tab for a side-by-side.</p>
-      <p class="explainer-note">La Liga xG is computed from the deep-scraped WhoScored shot data. Until a match is
+      <p class="explainer-note" data-he-html="ה־xG של לה ליגה מחושב מנתוני הבעיטות של WhoScored שנסרקו לעומק. עד שמשחק נסרק לעומק הוא נספר בטבלה אבל לא בגרפים האלה.">La Liga xG is computed from the deep-scraped WhoScored shot data. Until a match is
          deep-scraped it contributes to the table but not to these charts.</p>
     </details>
     <div class="stats-strip" id="xgStats"></div>
@@ -500,7 +504,7 @@
      bundle data/<season>.js is fetched on demand by app.js (build_split.py writes both). -->
 <script src="data/index.js?v=a63c1be473"></script>
 <script src="database/manifest.js"></script>
-<script src="app.js?v=f1a7907e9b"></script>
-<script src="control.js?v=f1a7907e9b"></script>
+<script src="app.js?v=b9346e7dd7"></script>
+<script src="control.js?v=b9346e7dd7"></script>
 </body>
 </html>
