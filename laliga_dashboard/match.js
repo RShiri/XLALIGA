@@ -246,6 +246,21 @@
   }
 
   /* ---- sticky jump bar: one link per block, the block in view is underlined ---- */
+  /* Scroll strips fade only on the side that hides more tabs; nothing fades when it all fits. */
+  function wireScrollFade(strip) {
+    if (!strip || strip._fade) return;
+    strip._fade = 1;
+    strip.classList.add("scroll-fade");
+    function upd() {
+      var max = strip.scrollWidth - strip.clientWidth;
+      strip.classList.toggle("fade-s", strip.scrollLeft > 2);
+      strip.classList.toggle("fade-e", max > 2 && strip.scrollLeft < max - 2);
+    }
+    strip.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    if (window.ResizeObserver) new ResizeObserver(upd).observe(strip);
+    upd();
+  }
   function buildSectionNav(root) {
     var blocks = Array.prototype.slice.call(root.querySelectorAll(".mv-block"));
     if (blocks.length < 3) return;
@@ -256,6 +271,7 @@
       return '<a href="#' + host.id + '">' + esc(t.textContent) + "</a>";
     }).join("") + "</div>";
     root.insertBefore(nav, blocks[0]);
+    wireScrollFade(nav.querySelector(".mv-nav-inner"));
     var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
     function mark(id) {
       links.forEach(function (a) {

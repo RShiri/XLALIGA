@@ -145,6 +145,17 @@ XEPL keeps the same journal — a lesson in one repo usually applies to the othe
 - `run_match.py` auto-pushes generated files via `git_ops.py` when `GIT_TOKEN` is set.
 
 ## Gotchas (hard-won — don't re-break these)
+- **Header is two rows at every width, the same in XLALIGA and XEPL** — brand + season picker on row 1,
+  `nav.tabs` takes the whole of row 2 (`order: 3; flex: 1 0 100%`). Don't bring back a one-row header
+  breakpoint: nine tabs next to the wordmark got clipped behind the season picker on wide screens.
+  Tab strips and the Match Centre section bar fade only on the side that hides more (`wireScrollFade` in
+  `app.js`/`match.js`, `.scroll-fade` in `styles.css`).
+- **"Season story" above the table is written client-side** (`app.js renderInsights`) from standings,
+  `teamPoints()`/`AGG` and players — leader, best xG difference, over/under-achiever vs expected points,
+  top scorer — each tile naming a different club where it can. Hebrew comes from `data-he-html` on
+  each tile, so new sentences need both languages.
+- **Player Lab URLs carry the player**: `#<season>/playerlab/<Team @@ Player>` is kept in the address bar
+  and the "Copy link" button copies it; opening that link selects the player.
 - **The site loads per-season bundles, not data.js.** `index.html`/`match.html` load `data/index.js`
   statically and `app.js`/`match.js` inject `data/<season>.js?v=<hash>` on demand (`loadSeason`).
   No `document.write`, no `Date.now()` cache-busters: `LL_INDEX.v` (a content hash written by
