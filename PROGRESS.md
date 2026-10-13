@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-10-13** — FotMob-only shots, follow-up to the 2026-09-13 flip fix: laliga/scraper.py `_parse_fotmob_shots` now rescales FotMob's pitch metres (x/105, y/68) to the 0-100 grid (shots sat ~15 m off-centre, mean y 32-37 on the 3 FotMob-only 2026-27 matches) and maps headers/corners/set pieces/free kicks/fast breaks to WhoScored qualifiers (headers used to become LeftFoot). New laliga/repair_fotmob_shots.py rescales already-saved files once (marker `_fotmob_coords`); weekly_update.py runs it before backfill. Same fix shipped in XEPL, where the old away flip was still live.
 - **2026-10-11** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1658s
 - **2026-10-11** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: To https://github.com/RShiri/XLALIGA.git ! [rejected] main -> main (fetch first) error: failed to push some refs to 'https://github.com/RShiri/XLALIGA.git' hint: Updates were rejected because , took 2585s
 - **2026-10-06** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: To https://github.com/RShiri/XLALIGA.git ! [rejected] main -> main (fetch first) error: failed to push some refs to 'https://github.com/RShiri/XLALIGA.git' hint: Updates were rejected because , took 30s
