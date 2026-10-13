@@ -843,6 +843,29 @@ def _parse_fotmob_stats(fm_data: dict) -> dict:
     return stats
 
 
+# FotMob shotmap fields copied onto each fallback shot event (as "_fotmob").
+_FOTMOB_SHOT_KEEP = ("expectedGoals", "expectedGoalsOnTarget", "isOnTarget", "isBlocked",
+                     "isOwnGoal", "isFromInsideBox", "isSavedOffLine", "shotType",
+                     "situation", "eventType", "goalCrossedY", "goalCrossedZ",
+                     "blockedX", "blockedY", "keeperId", "playerName", "minAdded", "period")
+
+
+def _fotmob_shot_type(s: dict) -> str:
+    """WhoScored event type for one FotMob shot. Blocked shots become BlockedShot (the
+    old map sent them to MissedShots, so the Match Centre never showed a block) and
+    FotMob's "Post" becomes ShotOnPost."""
+    et = str(s.get("eventType") or "")
+    if et == "Goal":
+        return "Goal"
+    if s.get("isBlocked"):
+        return "BlockedShot"
+    if et in ("Post", "ShotOnPost"):
+        return "ShotOnPost"
+    if et in ("AttemptSaved", "SavedShot") or s.get("isOnTarget"):
+        return "SavedShot"
+    return "MissedShots"
+
+
 def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]:
     """
     Convert FotMob shotmap shots into WhoScored-compatible event dicts.
@@ -875,38 +898,47 @@ def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]
         # 2026-27 matches (mean shot y 32-37 instead of ~50).
         x, y = fotmob_xy_to_ws(s.get("x"), s.get("y"))
 
-        outcome_map = {
-            "Goal":          "Goal",
-            "SavedShot":     "SavedShot",
-            "AttemptSaved":  "SavedShot",
-            "Miss":          "MissedShots",
-            "BlockedShot":   "MissedShots",
-            "ShotOnPost":    "ShotOnPost",
-        }
-        ev_type = outcome_map.get(s.get("eventType", ""), "MissedShots")
+        ev_type = _fotmob_shot_type(s)
         is_goal = ev_type == "Goal"
 
         quals = fotmob_shot_qualifiers(s)
+        if s.get("isOwnGoal"):
+            quals.append({"type": {"displayName": "OwnGoal"}})
+        if s.get("goalCrossedY") is not None:
+            # Where it crossed the goal line, across the pitch: FotMob metres (0-68) ->
+            # WhoScored's 0-100 GoalMouthY (posts at ~45.2 / 54.8). Feeds the Match
+            # Centre's "where in the goal" map. GoalMouthZ is left out: FotMob's height
+            # unit isn't confirmed against WhoScored's.
+            quals.append({"type": {"displayName": "GoalMouthY"},
+                          "value": str(round(float(s["goalCrossedY"]) * 100.0 / FOTMOB_PITCH_Y, 1))})
 
+        # WhoScored's "minute" already includes stoppage time (90+3 -> 93); match that.
+        minute = (s.get("min", 0) or 0) + (s.get("minAdded") or 0)
+        period = str(s.get("period") or "")
+        half2 = period.startswith("Second") or (not period and (s.get("min", 0) or 0) > 45)
         events.append({
             "id":           float(s.get("id", 0)),
             "eventId":      s.get("id", 0),
-            "minute":       s.get("min", 0),
+            "minute":       minute,
             "second":       0,
             "teamId":       tid,
             "x":            x,
             "y":            y,
-            "expandedMinute": s.get("min", 0),
-            "period":       {"displayName": "FirstHalf" if s.get("min", 0) <= 45 else "SecondHalf",
-                             "value": 1 if s.get("min", 0) <= 45 else 2},
+            "expandedMinute": minute,
+            "period":       {"displayName": period or ("SecondHalf" if half2 else "FirstHalf"),
+                             "value": 2 if half2 else 1},
             "type":         {"displayName": ev_type, "value": 16 if is_goal else 13},
             "outcomeType":  {"displayName": "Successful" if is_goal else "Unsuccessful",
                              "value": 1 if is_goal else 0},
             "qualifiers":   quals,
             "satisfiedEventsTypes": [],
             "isTouch":      True,
+            "isOwnGoal":    bool(s.get("isOwnGoal")),
             "playerId":     s.get("playerId"),
             "_source":      "fotmob",
+            # FotMob's own per-shot numbers and flags, kept verbatim so nothing the
+            # fallback fetched is thrown away (comparison, xGOT, later re-derivation).
+            "_fotmob":      {k: s.get(k) for k in _FOTMOB_SHOT_KEEP if s.get(k) is not None},
         })
 
     return events
