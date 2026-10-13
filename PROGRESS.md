@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-10-13** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1252s
 - **2026-10-11** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1658s
 - **2026-10-11** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: To https://github.com/RShiri/XLALIGA.git ! [rejected] main -> main (fetch first) error: failed to push some refs to 'https://github.com/RShiri/XLALIGA.git' hint: Updates were rejected because , took 2585s
 - **2026-10-06** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=False, git push failed: To https://github.com/RShiri/XLALIGA.git ! [rejected] main -> main (fetch first) error: failed to push some refs to 'https://github.com/RShiri/XLALIGA.git' hint: Updates were rejected because , took 30s
@@ -150,6 +151,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-10-13 07:00 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 1s | — |
 | 2026-10-13 01:20 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 20m 17s | — |
 | 2026-10-12 01:16 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 15m 55s | — |
 | 2026-10-11 22:45 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 15m 53s | — |
