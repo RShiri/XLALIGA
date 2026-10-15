@@ -356,11 +356,13 @@
     var hasGoals = !!(D.goals && D.goals.length);
     var hasShootout = !!(D.shootout && D.shootout.length);
     // Win probability needs the calibrated params, a played match and shot events.
+    var hasShotTimes = !!(D.shots && D.shots.some(function (s) { return s.min != null; }));
     var hasWinProb = !!(window.WINPROB_PARAMS && window.WINPROB_PARAMS.teams &&
       D.home.score != null && D.away.score != null && D.shots && D.shots.length);
     root.innerHTML = scoreboard(D) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
       // Win-probability timeline sits between the stats and the shot map.
+      (hasShotTimes ? block("xG momentum", "mv-momentum") : "") +
       (hasWinProb ? block("Win probability", "mv-winprob") : "") +
       block("Shot map", "mv-shots") +
       // On-target shot map sits directly under the xG shot map.
@@ -380,6 +382,7 @@
     wireExport(D, rec);
 
     if (hasStats) buildMatchStats(rec, D);
+    if (hasShotTimes) buildMomentum(D);
     if (hasWinProb) buildWinProb(D);
     buildShots(D);
     buildOnTargetShots(D);
@@ -847,6 +850,92 @@
       tip.textContent = mn + "′ · " + D.home.name + " " + fmtPct(valAt(ptsH, mn)) + "% · " +
         D.away.name + " " + fmtPct(valAt(ptsA, mn)) + "% · Draw " + fmtPct(valAt(ptsD, mn)) + "%";
       tip.classList.add("show");
+    });
+  }
+
+  /* ================= xG MOMENTUM ================= */
+  // Cumulative xG "race" over the match (ported from the World Cup site): each shot steps
+  // its side's line up by its xG, so the steeper/higher line built the better chances and
+  // you can see when. Goals are marked on the line (own goals carry no xG, so no step).
+  // Team colours are D.home/away.color, already collision-guarded by teamColours().
+  function buildMomentum(D) {
+    var host = document.getElementById("mv-momentum");
+    if (!host) return;
+    var shots = (D.shots || []).filter(function (s) { return s.min != null; });
+    if (!shots.length) { host.innerHTML = '<p class="mv-wp-hint">No shot data for the xG timeline.</p>'; return; }
+    function tm(s) { return (s.min || 0) + (s.sec || 0) / 60; }
+    shots = shots.slice().sort(function (a, b) { return tm(a) - tm(b); });
+    var goals = D.goals || [];
+    var lastMin = Math.max.apply(null, shots.map(function (s) { return s.min || 0; }));
+    goals.forEach(function (g) { if (g.min > lastMin) lastMin = g.min; });
+    var maxMin = Math.max(90, Math.ceil(lastMin / 5) * 5);
+    function series(side) {
+      var pts = [[0, 0]], c = 0;
+      shots.forEach(function (s) { if (s.team === side) { c += s.xg || 0; pts.push([tm(s), c]); } });
+      pts.push([maxMin, c]);
+      return pts;
+    }
+    var SH = series("home"), SA = series("away");
+    var finH = SH[SH.length - 1][1], finA = SA[SA.length - 1][1];
+    var maxY = Math.max(0.5, finH, finA) * 1.08;
+    var colH = D.home.color, colA = D.away.color;
+    var W = 820, HT = 360, padL = 46, padR = 16, padT = 18, padB = 42;
+    var plotW = W - padL - padR, plotH = HT - padT - padB;
+    function sx(m) { return padL + plotW * m / maxMin; }
+    function sy(v) { return padT + plotH * (1 - v / maxY); }
+    function stepPath(pts) {
+      var d = "";
+      pts.forEach(function (p, i) {
+        if (i === 0) d = "M " + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1);
+        else d += " L " + sx(p[0]).toFixed(1) + " " + sy(pts[i - 1][1]).toFixed(1) + " L " + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1);
+      });
+      return d;
+    }
+    function cumAt(pts, minute) { var v = 0; for (var i = 0; i < pts.length; i++) { if (pts[i][0] <= minute + 1e-9) v = pts[i][1]; else break; } return v; }
+    var svg = ['<svg viewBox="0 0 ' + W + " " + HT + '" class="mv-wp-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    var yStep = maxY <= 1 ? 0.25 : maxY <= 2 ? 0.5 : 1;
+    for (var yv = 0; yv <= maxY + 1e-9; yv += yStep) {
+      var y = sy(yv);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#1a2340" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="var(--muted)" font-size="10.5" text-anchor="end">' + yv.toFixed(yStep < 1 ? 2 : 0) + "</text>");
+    }
+    for (var xm = 0; xm <= maxMin; xm += 15)
+      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="var(--muted)" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
+    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#2b3557" stroke-width="1" stroke-dasharray="3 3"/>');
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="var(--text)" font-size="12" text-anchor="middle">Minute</text>');
+    svg.push('<path d="' + stepPath(SA) + '" fill="none" stroke="' + colA + '" stroke-width="2.6" stroke-linejoin="round"/>');
+    svg.push('<path d="' + stepPath(SH) + '" fill="none" stroke="' + colH + '" stroke-width="2.6" stroke-linejoin="round"/>');
+    goals.forEach(function (g) {
+      var home = g.team === "home", col = home ? colH : colA;
+      var gx = sx(Math.min(g.min, maxMin)), gy = sy(cumAt(home ? SH : SA, g.min + 1e-6));
+      var info = g.min + "' " + (g.scorer || g.player || "") + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") +
+        " — " + (home ? D.home.name : D.away.name);
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#050611" stroke-width="1.4" data-info="' + esc(info) + '"></circle>');
+      svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" font-size="11" text-anchor="middle" pointer-events="none">⚽</text>');
+    });
+    svg.push("</svg>");
+    function sc(v) { return v == null ? "-" : v; }
+    var legend = '<div class="mv-wp-legend">' +
+      '<span><i style="background:' + colH + '"></i>' + esc(D.home.name) + " — <b>" + finH.toFixed(2) + "</b> xG (" + sc(D.home.score) + " goals)</span>" +
+      '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + finA.toFixed(2) + "</b> xG (" + sc(D.away.score) + " goals)</span>" +
+      "</div>";
+    host.innerHTML = '<p class="mv-wp-hint">Cumulative <b>expected goals</b> over the match — each step is a shot, as tall as its xG. ' +
+      "The higher line built the better chances, the steep stretches show when; ⚽ marks goals (hover or tap one for the scorer).</p>" +
+      '<div class="mv-wp-wrap">' + svg.join("") + "</div>" + legend +
+      '<div class="chart-tip" id="mvMomTip"></div>';
+    var tip = document.getElementById("mvMomTip");
+    function isDot(el) { return el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info"); }
+    function momHTML(info) {
+      var i = info.indexOf(" — "), a = i >= 0 ? info.slice(0, i) : info, b = i >= 0 ? info.slice(i + 3) : "";
+      return '<div class="t-team">' + esc(a) + "</div>" + (b ? '<div class="t-line">' + esc(b) + "</div>" : "");
+    }
+    host.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      if (isDot(e.target)) showTip(e, momHTML(e.target.getAttribute("data-info"))); else hideTip();
+    });
+    host.addEventListener("pointerleave", hideTip);
+    host.addEventListener("click", function (e) {
+      if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); }
     });
   }
 
