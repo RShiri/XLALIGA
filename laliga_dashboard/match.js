@@ -183,9 +183,12 @@
      45.2 / 54.8), GoalMouthZ is height (crossbar ≈ 38). Exposes the frame markup,
      the coordinate mappers and key frame positions. ---- */
   var GM = (function () {
-    var GW = 100, GROUND = 50, GY0 = 43, GYR = 14, GZTOP = 48;
+    // GoalMouthY and GoalMouthZ use different units, so Z is scaled on its own: the frame
+    // must keep a real goal's 7.32 × 2.44 m shape (3 : 1), not the raw units' ~1.8 : 1.
+    var GW = 100, GROUND = 31, GY0 = 43, GYR = 14, GZTOP = 48;
+    var ZK = ((54.8 - 45.2) / GYR * GW / 3) / 38;   // crossbar (Z 38) at a third of the goal's width
     function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
-    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
+    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)) * ZK; }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
     function frame() {
       var fr = "#f4f6fb", ng = "rgba(255,255,255,0.14)", net = [];
@@ -2382,9 +2385,12 @@
 
     // goal-mouth view mapping (WhoScored: GoalMouthY across, GoalMouthZ up).
     // Posts sit at GoalMouthY 45.2 / 54.8; crossbar at GoalMouthZ ≈ 38.
-    var GW = 100, GROUND = 50, GY0 = 43, GYR = 14, GZTOP = 48;
+    // GoalMouthY and GoalMouthZ use different units, so Z is scaled on its own: the frame
+    // must keep a real goal's 7.32 × 2.44 m shape (3 : 1), not the raw units' ~1.8 : 1.
+    var GW = 100, GROUND = 31, GY0 = 43, GYR = 14, GZTOP = 48;
+    var ZK = ((54.8 - 45.2) / GYR * GW / 3) / 38;   // crossbar (Z 38) at a third of the goal's width
     function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
-    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
+    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)) * ZK; }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
     var OUT_COL = { goal: "#d7ff3a", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
     var OUT_LBL = { goal: "Scored", saved: "Saved", missed: "Off target", post: "Hit post" };
