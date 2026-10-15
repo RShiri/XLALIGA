@@ -872,6 +872,7 @@
         '<button type="button" class="chip-toggle on home" id="shHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
         '<button type="button" class="chip-toggle on away" id="shAway" aria-pressed="true">' + esc(D.away.name) + "</button>" +
         '<button type="button" class="chip-toggle" id="shGoals" aria-pressed="false">Goals only</button>' +
+        '<button type="button" class="chip-toggle on" id="shLines" aria-pressed="true">Shot paths</button>' +
         '<span class="grp">Min xG <input type="text" id="shMinXg" value="0" size="3" style="width:42px"></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
@@ -885,11 +886,12 @@
         '<span><i class="dot" style="background:var(--c-home)"></i>On target</span>' +
         '<span><i class="dot" style="background:transparent;border:1px solid var(--muted)"></i>Off target</span>' +
         '<span><i class="dot" style="background:#7a869f"></i>Blocked</span>' +
+        '<span><i class="ln-swatch"></i>Shot path → goal</span>' +
         '<span>● size = xG</span>' +
       "</div>" +
       '<div class="shot-detail empty" id="shotDetail">Click any shot to see who took it, when, and its xG.</div>';
 
-    var state = { home: true, away: true, goalsOnly: false, minXg: 0, sel: null };
+    var state = { home: true, away: true, goalsOnly: false, lines: true, minXg: 0, sel: null };
     var layer = document.getElementById("shotLayer");
     var detail = document.getElementById("shotDetail");
 
@@ -905,6 +907,20 @@
         var col = sh.team === "home" ? D.home.color : D.away.color;
         var NS = "http://www.w3.org/2000/svg";
         var fill, stroke = "none", op = 0.85;
+        // Shot path: a line from the shot spot to where it crossed the goal line
+        // (raw x=100, y=GoalMouthY), drawn under the dot; off-target lines point wide
+        // of the posts. Blocked shots never reached the goal line, so they get none.
+        if (state.lines && sh.gy != null && !sh.blocked) {
+          var ln = document.createElementNS(NS, "line");
+          ln.setAttribute("x1", cx.toFixed(2)); ln.setAttribute("y1", cy.toFixed(2));
+          ln.setAttribute("x2", tx(sh.team, 100).toFixed(2)); ln.setAttribute("y2", ty(sh.team, sh.gy).toFixed(2));
+          ln.setAttribute("stroke", sh.goal ? "#ffb020" : col);
+          ln.setAttribute("stroke-width", sh.goal ? "0.4" : "0.28");
+          ln.setAttribute("stroke-opacity", sh.goal ? "0.9" : "0.4");
+          ln.setAttribute("stroke-linecap", "round");
+          ln.setAttribute("pointer-events", "none");
+          layer.appendChild(ln);
+        }
         if (sh.goal) { fill = col; op = 1; }                        // goals = team colour
         else if (sh.blocked) { fill = "#7a869f"; op = 0.7; }
         else if (sh.onTarget) { fill = col; }
@@ -954,6 +970,8 @@
       state.away = !state.away; this.classList.toggle("on"); draw(); });
     document.getElementById("shGoals").addEventListener("click", function () {
       state.goalsOnly = !state.goalsOnly; this.classList.toggle("on"); draw(); });
+    document.getElementById("shLines").addEventListener("click", function () {
+      state.lines = !state.lines; this.classList.toggle("on"); this.setAttribute("aria-pressed", state.lines); draw(); });
     document.getElementById("shMinXg").addEventListener("input", function () {
       state.minXg = parseFloat(this.value) || 0; draw(); });
     draw();
@@ -1012,7 +1030,10 @@
         if (state.goalsOnly && !sh.goal) return;
         shown++;
         if (sh.team === "home") hg++; else ag++;
-        var cx = GM.gxOf(sh.gy), cy = GM.gyOf(sh.gz);
+        // WhoScored GoalMouthY grows toward the attacker's LEFT (same axis as pitch y), so plain
+        // gxOf draws the goal from behind the net. Flip (GW - gxOf) to the shooter's/broadcast
+        // perspective: a near-post finish from the attacker's right lands by the right post.
+        var cx = GM.GW - GM.gxOf(sh.gy), cy = GM.gyOf(sh.gz);
         var r = 1.4 + Math.sqrt(sh.xg) * 2.6;
         var ring = sh.team === "home" ? D.home.color : D.away.color;
         var c = document.createElementNS(NS, "circle");
@@ -2439,7 +2460,8 @@
       pens.forEach(function (k) {
         if (!state[k.team]) return;
         if (k.gy == null || k.gz == null) return;   // no placement coords → list only
-        var cx = gxOf(k.gy), cy = gyOf(k.gz);
+        // Flip (GW - gxOf) to the shooter's perspective, matching the on-target shot map.
+        var cx = GW - gxOf(k.gy), cy = gyOf(k.gz);
         var ring = k.team === "home" ? D.home.color : D.away.color;
         var c = document.createElementNS(NS, "circle");
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));

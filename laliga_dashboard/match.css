@@ -235,3 +235,6 @@ header.site nav.tabs { order: 2; flex: 0 0 auto; height: auto; margin-left: auto
   .back-link { font-size: 13px; padding-inline: 12px; }
   .brand .title { font-size: 20px; }
 }
+
+/* shot-path legend swatch (Shot map) */
+.legend-row .ln-swatch { width: 14px; height: 0; border-top: 2px solid var(--text); opacity: 0.5; display: inline-block; }
