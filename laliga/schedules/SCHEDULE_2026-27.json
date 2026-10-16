@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-14T23:23:37.429465+00:00",
+  "generated_utc": "2026-10-16T22:00:02.345361+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1133,10 +1133,10 @@
       "away": "Levante",
       "home_id": "9783",
       "away_id": "8581",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868094,
