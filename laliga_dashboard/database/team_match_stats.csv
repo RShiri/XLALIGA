@@ -161,3 +161,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868093,2026-10-16,Levante,Deportivo A Coruña,away,1,1,54,11,5,471,81,0,0,8,12,53,0.56
 5868094,2026-10-17,Espanyol,Atletico Madrid,home,0,1,29,10,5,304,72,0,0,10,10,42,0.37
 5868094,2026-10-17,Atletico Madrid,Espanyol,away,1,0,71,19,10,709,89,3,3,5,9,58,1.55
+5868100,2026-10-17,Villarreal,Elche,home,0,0,58,20,15,566,87,4,4,2,12,48,2.01
+5868100,2026-10-17,Elche,Villarreal,away,0,0,42,7,2,424,79,0,0,14,7,52,0.25

@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-17T15:00:01.662860+00:00",
+  "generated_utc": "2026-10-17T17:15:01.998773+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1161,10 +1161,10 @@
       "away": "Elche",
       "home_id": "10205",
       "away_id": "10268",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868091,
@@ -1177,7 +1177,7 @@
       "away_id": "8634",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
