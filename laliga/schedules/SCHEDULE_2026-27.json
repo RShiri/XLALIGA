@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-16T22:00:02.345361+00:00",
+  "generated_utc": "2026-10-17T15:00:01.662860+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1147,10 +1147,10 @@
       "away": "Atletico Madrid",
       "home_id": "8558",
       "away_id": "9906",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868100,
@@ -1163,7 +1163,7 @@
       "away_id": "10268",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
