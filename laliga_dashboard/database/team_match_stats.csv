@@ -169,3 +169,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868099,2026-10-17,Athletic Club,Valencia,away,0,0,63,9,2,617,85,0,0,5,13,47,0.44
 5868097,2026-10-18,Osasuna,Racing Santander,home,2,0,44,20,11,370,75,3,1,4,21,45,2.55
 5868097,2026-10-18,Racing Santander,Osasuna,away,0,2,56,9,4,474,85,0,0,8,9,55,0.3
+5868092,2026-10-18,Celta Vigo,Deportivo Alavés,home,2,1,48,6,3,490,82,1,0,14,14,49,0.72
+5868092,2026-10-18,Deportivo Alavés,Celta Vigo,away,1,2,52,20,15,547,81,1,1,1,17,51,1.08
+5868096,2026-10-18,Málaga,Real Sociedad,home,2,5,45,17,10,516,86,4,3,10,4,62,1.79
+5868096,2026-10-18,Real Sociedad,Málaga,away,5,2,55,21,15,622,89,4,2,8,9,38,2.13
