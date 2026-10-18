@@ -165,3 +165,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868100,2026-10-17,Elche,Villarreal,away,0,0,42,7,2,424,79,0,0,14,7,52,0.25
 5868091,2026-10-17,Real Betis,Barcelona,home,2,5,31,6,6,358,79,3,1,7,10,48,1.35
 5868091,2026-10-17,Barcelona,Real Betis,away,5,2,69,18,12,787,92,5,2,4,11,52,2.68
+5868099,2026-10-17,Valencia,Athletic Club,home,0,0,37,16,4,367,80,5,5,2,14,53,1.55
+5868099,2026-10-17,Athletic Club,Valencia,away,0,0,63,9,2,617,85,0,0,5,13,47,0.44
+5868097,2026-10-18,Osasuna,Racing Santander,home,2,0,44,20,11,370,75,3,1,4,21,45,2.55
+5868097,2026-10-18,Racing Santander,Osasuna,away,0,2,56,9,4,474,85,0,0,8,9,55,0.3

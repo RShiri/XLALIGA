@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-17T19:30:01.771114+00:00",
+  "generated_utc": "2026-10-18T15:00:02.577139+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1189,10 +1189,10 @@
       "away": "Athletic Club",
       "home_id": "10267",
       "away_id": "8315",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868097,
@@ -1203,10 +1203,10 @@
       "away": "Racing Santander",
       "home_id": "8371",
       "away_id": "8696",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868092,
@@ -1219,7 +1219,7 @@
       "away_id": "9866",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {

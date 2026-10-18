@@ -82,3 +82,5 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868094,2026-10-17,,RCDE Stadium,Espanyol,Atletico Madrid,0,1,0.37,1.55,1
 5868100,2026-10-17,,Estadio de la Cerámica,Villarreal,Elche,0,0,2.01,0.25,1
 5868091,2026-10-17,,Estadio La Cartuja de Sevilla,Real Betis,Barcelona,2,5,1.35,2.68,1
+5868099,2026-10-17,,Estadio de Mestalla,Valencia,Athletic Club,0,0,1.55,0.44,1
+5868097,2026-10-18,,Estadio El Sadar,Osasuna,Racing Santander,2,0,2.55,0.3,1
