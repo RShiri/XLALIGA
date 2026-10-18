@@ -173,3 +173,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868092,2026-10-18,Deportivo Alavés,Celta Vigo,away,1,2,52,20,15,547,81,1,1,1,17,51,1.08
 5868096,2026-10-18,Málaga,Real Sociedad,home,2,5,45,17,10,516,86,4,3,10,4,62,1.79
 5868096,2026-10-18,Real Sociedad,Málaga,away,5,2,55,21,15,622,89,4,2,8,9,38,2.13
+5868098,2026-10-18,Real Madrid,Sevilla,home,4,1,65,15,10,697,91,2,0,6,10,51,1.9
+5868098,2026-10-18,Sevilla,Real Madrid,away,1,4,35,11,7,382,80,2,2,5,14,49,1.21
