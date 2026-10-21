@@ -58,6 +58,7 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868066,2026-09-16,,Spotify Camp Nou,Barcelona,Racing Santander,7,2,7.15,1.78,1
 5868063,2026-09-17,,Estadio Benito Villamarín,Real Betis,Getafe,1,0,2.26,0.32,1
 5868068,2026-09-17,,Estadio La Rosaleda,Málaga,Villarreal,1,3,0.3,3.56,1
+5868067,2026-10-21,,Estadio Ciudad de Valencia,Levante,Athletic Club,3,1,2.11,1.56,1
 5868075,2026-09-18,,RCDE Stadium,Espanyol,Elche,1,3,1.02,0.98,1
 5868077,2026-09-19,,Estadio El Sadar,Osasuna,Rayo Vallecano,1,1,0.37,0.73,1
 5868071,2026-09-19,,Estadio de San Mamés,Athletic Club,Deportivo Alavés,0,0,1.56,0.06,1
@@ -87,3 +88,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868092,2026-10-18,,Estadio Abanca-Balaídos,Celta Vigo,Deportivo Alavés,2,1,0.72,1.08,1
 5868096,2026-10-18,,Estadio La Rosaleda,Málaga,Real Sociedad,2,5,1.79,2.13,1
 5868098,2026-10-18,,Estadio Bernabéu,Real Madrid,Sevilla,4,1,1.9,1.21,1
+5868095,2026-10-19,,Estadio Coliseum,Getafe,Rayo Vallecano,1,1,0.8,1.96,1
