@@ -89,3 +89,12 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868096,2026-10-18,,Estadio La Rosaleda,Málaga,Real Sociedad,2,5,1.79,2.13,1
 5868098,2026-10-18,,Estadio Bernabéu,Real Madrid,Sevilla,4,1,1.9,1.21,1
 5868095,2026-10-19,,Estadio Coliseum,Getafe,Rayo Vallecano,1,1,0.8,1.96,1
+5868101,2026-10-23,,Estadio de Mendizorroza,Deportivo Alavés,Málaga,1,1,1.36,0.64,1
+5868107,2026-10-24,,Estadio de Vallecas,Rayo Vallecano,Elche,0,3,1.3,2.52,1
+5868106,2026-10-24,,Campos de Sport de El Sardinero,Racing Santander,Espanyol,2,1,2.34,0.44,1
+5868110,2026-10-24,,Estadio de Mestalla,Valencia,Villarreal,1,2,1.7,1.13,1
+5868103,2026-10-24,,Riyadh Air Metropolitano,Atletico Madrid,Deportivo A Coruña,1,0,1.77,1.84,1
+5868102,2026-10-25,,Estadio de San Mamés,Athletic Club,Getafe,4,0,0.68,0.3,1
+5868104,2026-10-25,,,Celta Vigo,Real Betis,0,0,,,0
+5868108,2026-10-25,,,Real Sociedad,Levante,2,1,,,0
+5868105,2026-10-25,,,Barcelona,Real Madrid,1,2,,,0
