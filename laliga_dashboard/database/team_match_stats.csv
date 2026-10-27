@@ -191,3 +191,9 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868103,2026-10-24,Deportivo A Coruña,Atletico Madrid,away,0,1,45,15,8,466,87,3,3,7,6,52,1.84
 5868102,2026-10-25,Athletic Club,Getafe,home,4,0,62,11,7,619,88,1,0,2,11,56,0.68
 5868102,2026-10-25,Getafe,Athletic Club,away,0,4,38,7,2,380,79,0,0,3,15,44,0.3
+5868104,2026-10-25,Celta Vigo,Real Betis,home,0,0,44,12,8,533,88,1,1,5,9,49,0.66
+5868104,2026-10-25,Real Betis,Celta Vigo,away,0,0,56,15,5,679,91,1,1,7,12,51,1.0
+5868108,2026-10-25,Real Sociedad,Levante,home,2,1,62,17,6,641,92,5,4,1,14,49,2.33
+5868108,2026-10-25,Levante,Real Sociedad,away,1,2,38,6,2,398,84,2,1,5,13,51,0.6
+5868105,2026-10-25,Barcelona,Real Madrid,home,1,2,62,18,12,677,89,2,2,5,15,46,1.49
+5868105,2026-10-25,Real Madrid,Barcelona,away,2,1,38,10,7,408,84,4,2,11,11,54,1.72

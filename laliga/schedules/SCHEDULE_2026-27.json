@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-25T23:00:01.725613+00:00",
+  "generated_utc": "2026-10-27T05:00:02.239995+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1399,10 +1399,10 @@
       "away": "Osasuna",
       "home_id": "8302",
       "away_id": "8371",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868120,

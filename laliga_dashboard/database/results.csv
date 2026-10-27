@@ -95,6 +95,7 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868110,2026-10-24,,Estadio de Mestalla,Valencia,Villarreal,1,2,1.7,1.13,1
 5868103,2026-10-24,,Riyadh Air Metropolitano,Atletico Madrid,Deportivo A Coruña,1,0,1.77,1.84,1
 5868102,2026-10-25,,Estadio de San Mamés,Athletic Club,Getafe,4,0,0.68,0.3,1
-5868104,2026-10-25,,,Celta Vigo,Real Betis,0,0,,,0
-5868108,2026-10-25,,,Real Sociedad,Levante,2,1,,,0
-5868105,2026-10-25,,,Barcelona,Real Madrid,1,2,,,0
+5868104,2026-10-25,,Estadio Abanca-Balaídos,Celta Vigo,Real Betis,0,0,0.66,1.0,1
+5868108,2026-10-25,,Estadio Municipal de Anoeta,Real Sociedad,Levante,2,1,2.33,0.6,1
+5868105,2026-10-25,,Spotify Camp Nou,Barcelona,Real Madrid,1,2,1.49,1.72,1
+5868109,2026-10-26,,,Sevilla,Osasuna,2,0,,,0
