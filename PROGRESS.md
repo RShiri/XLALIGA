@@ -23,6 +23,10 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-11-01** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
+- **2026-11-01** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
+- **2026-11-01** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
+- **2026-11-01** — Weekly update (2026-27): skipped — another update was still running after 20 min (it re-scans the whole season)
 - **2026-10-15** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 65s
 - **2026-10-13** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1252s
 - **2026-10-11** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1658s
@@ -152,6 +156,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-01 19:23 | 2026-27 | backfill.py | 3 match(es) | ✅ 3 saved | 23m 32s | — |
 | 2026-10-27 07:25 | 2026-27 | backfill.py | 3 match(es) | ✅ 3 saved | 25m 31s | — |
 | 2026-10-26 01:18 | 2026-27 | backfill.py | 3 match(es) | ✅ 3 saved | 18m 29s | — |
 | 2026-10-22 00:18 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 18m 17s | — |

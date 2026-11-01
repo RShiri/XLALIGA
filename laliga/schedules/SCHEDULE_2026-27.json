@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-10-27T05:00:02.239995+00:00",
+  "generated_utc": "2026-11-01T17:00:02.311731+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -999,20 +999,6 @@
       "finished": true
     },
     {
-      "fotmob_id": 5868088,
-      "matchday": 8,
-      "date": "2026-10-10",
-      "kickoff_utc": "2026-10-10T12:00:00+00:00",
-      "home": "Rayo Vallecano",
-      "away": "Athletic Club",
-      "home_id": "8370",
-      "away_id": "8315",
-      "home_score": 0,
-      "away_score": 0,
-      "status": "F",
-      "finished": true
-    },
-    {
       "fotmob_id": 5868081,
       "matchday": 8,
       "date": "2026-10-10",
@@ -1121,6 +1107,20 @@
       "away_id": "8302",
       "home_score": 3,
       "away_score": 3,
+      "status": "F",
+      "finished": true
+    },
+    {
+      "fotmob_id": 5868088,
+      "matchday": 8,
+      "date": "2026-12-09",
+      "kickoff_utc": "2026-12-09T19:00:00+00:00",
+      "home": "Rayo Vallecano",
+      "away": "Athletic Club",
+      "home_id": "8370",
+      "away_id": "8315",
+      "home_score": 0,
+      "away_score": 0,
       "status": "F",
       "finished": true
     },
@@ -1413,10 +1413,10 @@
       "away": "Espanyol",
       "home_id": "10205",
       "away_id": "8558",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868117,
@@ -1427,10 +1427,10 @@
       "away": "Atletico Madrid",
       "home_id": "8581",
       "away_id": "9906",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868119,
@@ -1441,10 +1441,10 @@
       "away": "Celta Vigo",
       "home_id": "8370",
       "away_id": "9910",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 3,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868112,
@@ -1455,10 +1455,10 @@
       "away": "Málaga",
       "home_id": "8603",
       "away_id": "9864",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868115,
@@ -1469,10 +1469,10 @@
       "away": "Deportivo Alavés",
       "home_id": "8634",
       "away_id": "9866",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 6,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868116,
@@ -1483,10 +1483,10 @@
       "away": "Sevilla",
       "home_id": "8305",
       "away_id": "8302",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 3,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868118,
@@ -1499,7 +1499,7 @@
       "away_id": "8633",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {

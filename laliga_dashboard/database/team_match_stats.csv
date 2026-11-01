@@ -141,8 +141,6 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868079,2026-09-20,Real Sociedad,Valencia,away,3,2,46,22,14,403,82,2,1,12,12,43,2.02
 5868086,2026-10-09,Málaga,Espanyol,home,1,1,58,15,9,544,88,0,0,6,10,49,0.59
 5868086,2026-10-09,Espanyol,Málaga,away,1,1,42,9,7,390,79,1,1,8,15,51,0.99
-5868088,2026-10-10,Rayo Vallecano,Athletic Club,home,0,0,55,1,1,82,85,0,0,0,2,45,0.04
-5868088,2026-10-10,Athletic Club,Rayo Vallecano,away,0,0,45,1,0,67,81,0,0,1,0,55,0.04
 5868081,2026-10-10,Deportivo Alavés,Atletico Madrid,home,1,2,32,8,5,363,81,1,0,15,11,49,1.03
 5868081,2026-10-10,Atletico Madrid,Deportivo Alavés,away,2,1,68,22,18,753,91,2,0,3,14,51,1.54
 5868084,2026-10-10,Barcelona,Getafe,home,3,0,83,23,17,897,91,7,6,2,9,62,2.45
@@ -159,6 +157,8 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868087,2026-10-11,Valencia,Racing Santander,away,2,2,46,10,4,486,78,4,2,13,10,56,1.61
 5868085,2026-10-12,Levante,Sevilla,home,3,3,57,20,13,553,81,3,2,7,7,48,1.82
 5868085,2026-10-12,Sevilla,Levante,away,3,3,43,18,10,418,79,5,3,9,17,52,2.85
+5868088,2026-12-09,Rayo Vallecano,Athletic Club,home,0,0,55,1,1,82,85,0,0,0,2,45,0.04
+5868088,2026-12-09,Athletic Club,Rayo Vallecano,away,0,0,45,1,0,67,81,0,0,1,0,55,0.04
 5868093,2026-10-16,Deportivo A Coruña,Levante,home,1,1,46,13,9,410,82,2,1,4,17,47,1.25
 5868093,2026-10-16,Levante,Deportivo A Coruña,away,1,1,54,11,5,471,81,0,0,8,12,53,0.56
 5868094,2026-10-17,Espanyol,Atletico Madrid,home,0,1,29,10,5,304,72,0,0,10,10,42,0.37
@@ -197,3 +197,9 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868108,2026-10-25,Levante,Real Sociedad,away,1,2,38,6,2,398,84,2,1,5,13,51,0.6
 5868105,2026-10-25,Barcelona,Real Madrid,home,1,2,62,18,12,677,89,2,2,5,15,46,1.49
 5868105,2026-10-25,Real Madrid,Barcelona,away,2,1,38,10,7,408,84,4,2,11,11,54,1.72
+5868109,2026-10-26,Sevilla,Osasuna,home,2,0,45,17,10,445,78,0,0,6,11,53,0.72
+5868109,2026-10-26,Osasuna,Sevilla,away,0,2,55,10,6,546,85,1,1,8,8,47,0.56
+5868120,2026-10-30,Villarreal,Espanyol,home,0,1,63,14,8,607,89,1,1,3,15,46,0.76
+5868120,2026-10-30,Espanyol,Villarreal,away,1,0,37,5,4,357,81,1,0,9,13,54,0.45
+5868117,2026-10-31,Levante,Atletico Madrid,home,0,2,46,20,12,511,86,2,2,5,7,53,1.55
+5868117,2026-10-31,Atletico Madrid,Levante,away,2,0,54,11,8,587,88,2,0,12,7,47,0.95
