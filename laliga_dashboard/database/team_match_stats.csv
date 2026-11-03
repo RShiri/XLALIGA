@@ -203,3 +203,9 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868120,2026-10-30,Espanyol,Villarreal,away,1,0,37,5,4,357,81,1,0,9,13,54,0.45
 5868117,2026-10-31,Levante,Atletico Madrid,home,0,2,46,20,12,511,86,2,2,5,7,53,1.55
 5868117,2026-10-31,Atletico Madrid,Levante,away,2,0,54,11,8,587,88,2,0,12,7,47,0.95
+5868119,2026-10-31,Rayo Vallecano,Celta Vigo,home,3,0,53,14,9,552,84,1,1,3,11,59,0.94
+5868119,2026-10-31,Celta Vigo,Rayo Vallecano,away,0,3,47,11,4,494,83,1,1,7,16,41,1.07
+5868112,2026-10-31,Real Betis,Málaga,home,2,1,59,24,10,662,89,3,3,7,10,63,1.89
+5868112,2026-10-31,Málaga,Real Betis,away,1,2,41,10,7,460,88,2,1,8,15,37,0.96
+5868115,2026-10-31,Barcelona,Deportivo Alavés,home,6,1,77,13,10,872,93,7,3,5,14,58,3.11
+5868115,2026-10-31,Deportivo Alavés,Barcelona,away,1,6,23,7,6,267,75,2,1,3,11,42,1.11

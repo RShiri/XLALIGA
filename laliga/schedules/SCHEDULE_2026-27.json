@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-11-01T17:00:02.311731+00:00",
+  "generated_utc": "2026-11-03T05:00:01.902924+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1497,10 +1497,10 @@
       "away": "Real Madrid",
       "home_id": "8696",
       "away_id": "8633",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 0,
+      "away_score": 3,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868114,
@@ -1511,10 +1511,10 @@
       "away": "Valencia",
       "home_id": "10268",
       "away_id": "10267",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868111,
@@ -1525,10 +1525,10 @@
       "away": "Real Sociedad",
       "home_id": "8315",
       "away_id": "8560",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868113,
@@ -1539,10 +1539,10 @@
       "away": "Osasuna",
       "home_id": "9783",
       "away_id": "8371",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868128,
