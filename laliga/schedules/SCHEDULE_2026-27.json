@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-11-03T05:00:01.902924+00:00",
+  "generated_utc": "2026-11-08T17:00:03.475015+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1553,10 +1553,10 @@
       "away": "Deportivo Alavés",
       "home_id": "8302",
       "away_id": "9866",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868125,
@@ -1567,10 +1567,10 @@
       "away": "Racing Santander",
       "home_id": "9864",
       "away_id": "8696",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868124,
@@ -1581,10 +1581,10 @@
       "away": "Deportivo A Coruña",
       "home_id": "8558",
       "away_id": "9783",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868126,
@@ -1595,10 +1595,10 @@
       "away": "Athletic Club",
       "home_id": "8371",
       "away_id": "8315",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 1,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868129,
@@ -1609,10 +1609,10 @@
       "away": "Real Madrid",
       "home_id": "10267",
       "away_id": "8633",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 3,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868123,
@@ -1623,10 +1623,10 @@
       "away": "Real Betis",
       "home_id": "10268",
       "away_id": "8603",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868127,
@@ -1639,7 +1639,7 @@
       "away_id": "8370",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {
@@ -1825,80 +1825,10 @@
       "finished": false
     },
     {
-      "fotmob_id": 5868141,
-      "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
-      "home": "Real Betis",
-      "away": "Rayo Vallecano",
-      "home_id": "8603",
-      "away_id": "8370",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
-      "fotmob_id": 5868142,
-      "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
-      "home": "Celta Vigo",
-      "away": "Villarreal",
-      "home_id": "9910",
-      "away_id": "10205",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
-      "fotmob_id": 5868143,
-      "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
-      "home": "Deportivo A Coruña",
-      "away": "Barcelona",
-      "home_id": "9783",
-      "away_id": "8634",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
-      "fotmob_id": 5868144,
-      "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
-      "home": "Elche",
-      "away": "Atletico Madrid",
-      "home_id": "10268",
-      "away_id": "9906",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
-      "fotmob_id": 5868145,
-      "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
-      "home": "Espanyol",
-      "away": "Getafe",
-      "home_id": "8558",
-      "away_id": "8305",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
       "fotmob_id": 5868146,
       "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
+      "date": "2026-11-27",
+      "kickoff_utc": "2026-11-27T20:00:00+00:00",
       "home": "Levante",
       "away": "Racing Santander",
       "home_id": "8581",
@@ -1909,10 +1839,24 @@
       "finished": false
     },
     {
+      "fotmob_id": 5868141,
+      "matchday": 14,
+      "date": "2026-11-28",
+      "kickoff_utc": "2026-11-28T13:00:00+00:00",
+      "home": "Real Betis",
+      "away": "Rayo Vallecano",
+      "home_id": "8603",
+      "away_id": "8370",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
       "fotmob_id": 5868147,
       "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
+      "date": "2026-11-28",
+      "kickoff_utc": "2026-11-28T15:15:00+00:00",
       "home": "Málaga",
       "away": "Athletic Club",
       "home_id": "9864",
@@ -1923,10 +1867,24 @@
       "finished": false
     },
     {
+      "fotmob_id": 5868144,
+      "matchday": 14,
+      "date": "2026-11-28",
+      "kickoff_utc": "2026-11-28T17:30:00+00:00",
+      "home": "Elche",
+      "away": "Atletico Madrid",
+      "home_id": "10268",
+      "away_id": "9906",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
       "fotmob_id": 5868148,
       "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
+      "date": "2026-11-28",
+      "kickoff_utc": "2026-11-28T20:00:00+00:00",
       "home": "Real Madrid",
       "away": "Deportivo Alavés",
       "home_id": "8633",
@@ -1937,10 +1895,52 @@
       "finished": false
     },
     {
+      "fotmob_id": 5868150,
+      "matchday": 14,
+      "date": "2026-11-29",
+      "kickoff_utc": "2026-11-29T13:00:00+00:00",
+      "home": "Valencia",
+      "away": "Osasuna",
+      "home_id": "10267",
+      "away_id": "8371",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
+      "fotmob_id": 5868143,
+      "matchday": 14,
+      "date": "2026-11-29",
+      "kickoff_utc": "2026-11-29T15:15:00+00:00",
+      "home": "Deportivo A Coruña",
+      "away": "Barcelona",
+      "home_id": "9783",
+      "away_id": "8634",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
+      "fotmob_id": 5868142,
+      "matchday": 14,
+      "date": "2026-11-29",
+      "kickoff_utc": "2026-11-29T17:30:00+00:00",
+      "home": "Celta Vigo",
+      "away": "Villarreal",
+      "home_id": "9910",
+      "away_id": "10205",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
       "fotmob_id": 5868149,
       "matchday": 14,
       "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
+      "kickoff_utc": "2026-11-29T20:00:00+00:00",
       "home": "Real Sociedad",
       "away": "Sevilla",
       "home_id": "8560",
@@ -1951,14 +1951,14 @@
       "finished": false
     },
     {
-      "fotmob_id": 5868150,
+      "fotmob_id": 5868145,
       "matchday": 14,
-      "date": "2026-11-29",
-      "kickoff_utc": "2026-11-29T14:00:00+00:00",
-      "home": "Valencia",
-      "away": "Osasuna",
-      "home_id": "10267",
-      "away_id": "8371",
+      "date": "2026-11-30",
+      "kickoff_utc": "2026-11-30T20:00:00+00:00",
+      "home": "Espanyol",
+      "away": "Getafe",
+      "home_id": "8558",
+      "away_id": "8305",
       "home_score": null,
       "away_score": null,
       "status": "N",
@@ -3085,6 +3085,34 @@
       "finished": false
     },
     {
+      "fotmob_id": 5868239,
+      "matchday": 23,
+      "date": "2026-12-02",
+      "kickoff_utc": "2026-12-02T18:00:00+00:00",
+      "home": "Real Sociedad",
+      "away": "Real Madrid",
+      "home_id": "8560",
+      "away_id": "8633",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
+      "fotmob_id": 5868237,
+      "matchday": 23,
+      "date": "2026-12-02",
+      "kickoff_utc": "2026-12-02T20:30:00+00:00",
+      "home": "Barcelona",
+      "away": "Atletico Madrid",
+      "home_id": "8634",
+      "away_id": "9906",
+      "home_score": null,
+      "away_score": null,
+      "status": "N",
+      "finished": false
+    },
+    {
       "fotmob_id": 5868231,
       "matchday": 23,
       "date": "2027-02-07",
@@ -3169,20 +3197,6 @@
       "finished": false
     },
     {
-      "fotmob_id": 5868237,
-      "matchday": 23,
-      "date": "2027-02-07",
-      "kickoff_utc": "2027-02-07T14:00:00+00:00",
-      "home": "Barcelona",
-      "away": "Atletico Madrid",
-      "home_id": "8634",
-      "away_id": "9906",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
       "fotmob_id": 5868238,
       "matchday": 23,
       "date": "2027-02-07",
@@ -3191,20 +3205,6 @@
       "away": "Villarreal",
       "home_id": "8305",
       "away_id": "10205",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
-    },
-    {
-      "fotmob_id": 5868239,
-      "matchday": 23,
-      "date": "2027-02-07",
-      "kickoff_utc": "2027-02-07T14:00:00+00:00",
-      "home": "Real Sociedad",
-      "away": "Real Madrid",
-      "home_id": "8560",
-      "away_id": "8633",
       "home_score": null,
       "away_score": null,
       "status": "N",
