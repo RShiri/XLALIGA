@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-11-08T17:00:03.475015+00:00",
+  "generated_utc": "2026-11-09T03:25:31.558680+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1637,10 +1637,10 @@
       "away": "Rayo Vallecano",
       "home_id": "8560",
       "away_id": "8370",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 1,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868122,
@@ -1651,10 +1651,10 @@
       "away": "Levante",
       "home_id": "9910",
       "away_id": "8581",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 0,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868130,
@@ -1665,10 +1665,10 @@
       "away": "Getafe",
       "home_id": "10205",
       "away_id": "8305",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 2,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868121,
@@ -1679,10 +1679,10 @@
       "away": "Barcelona",
       "home_id": "9906",
       "away_id": "8634",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 2,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868132,

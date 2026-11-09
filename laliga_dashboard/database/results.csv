@@ -114,4 +114,8 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 5868124,2026-11-07,,,Espanyol,Deportivo A Coruña,0,0,,,0
 5868126,2026-11-07,,,Osasuna,Athletic Club,1,1,,,0
 5868129,2026-11-07,,,Valencia,Real Madrid,0,3,,,0
-5868123,2026-11-08,,,Elche,Real Betis,0,2,,,0
+5868123,2026-11-08,,Estadio Manuel Martínez Valero,Elche,Real Betis,0,2,0.9,2.26,1
+5868127,2026-11-08,,Estadio Municipal de Anoeta,Real Sociedad,Rayo Vallecano,1,0,1.31,1.42,1
+5868122,2026-11-08,,Estadio Abanca-Balaídos,Celta Vigo,Levante,0,0,2.66,0.25,1
+5868130,2026-11-08,,Estadio de la Cerámica,Villarreal,Getafe,2,0,2.65,0.67,1
+5868121,2026-11-08,,Riyadh Air Metropolitano,Atletico Madrid,Barcelona,1,2,1.38,1.14,1

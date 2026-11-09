@@ -215,3 +215,13 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868118,2026-11-01,Real Madrid,Racing Santander,away,3,0,54,22,12,572,89,5,3,6,8,56,2.77
 5868114,2026-11-01,Elche,Valencia,home,0,1,69,16,6,660,91,1,1,2,9,55,0.9
 5868114,2026-11-01,Valencia,Elche,away,1,0,31,5,3,301,79,2,1,6,15,45,1.15
+5868123,2026-11-08,Elche,Real Betis,home,0,2,48,13,6,531,88,2,2,10,12,51,0.9
+5868123,2026-11-08,Real Betis,Elche,away,2,0,52,18,12,573,89,5,3,7,7,49,2.26
+5868127,2026-11-08,Real Sociedad,Rayo Vallecano,home,1,0,51,17,11,516,88,3,2,5,11,48,1.31
+5868127,2026-11-08,Rayo Vallecano,Real Sociedad,away,0,1,49,11,5,498,87,3,3,10,8,52,1.42
+5868122,2026-11-08,Celta Vigo,Levante,home,0,0,59,23,14,680,89,5,5,1,8,57,2.66
+5868122,2026-11-08,Levante,Celta Vigo,away,0,0,41,6,1,467,84,0,0,14,9,43,0.25
+5868130,2026-11-08,Villarreal,Getafe,home,2,0,72,22,17,611,86,5,3,4,6,51,2.65
+5868130,2026-11-08,Getafe,Villarreal,away,0,2,28,9,4,241,61,1,1,15,13,49,0.67
+5868121,2026-11-08,Atletico Madrid,Barcelona,home,1,2,37,9,5,417,81,4,3,8,14,55,1.38
+5868121,2026-11-08,Barcelona,Atletico Madrid,away,2,1,63,19,9,705,91,2,1,4,14,45,1.14
