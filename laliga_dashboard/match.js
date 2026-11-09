@@ -528,6 +528,48 @@
     }).filter(Boolean);
   }
 
+  // FotMob-only rows, from team_stats/MATCH_EXTRAS_*.json via build_match_details.py.
+  // Kept out of STAT_DEFS so the in-browser image export keeps its fixed layout.
+  var EXTRA_STAT_DEFS = [
+    ["corners", "Corners"],
+    ["shots_inside", "Shots inside box"],
+    ["shots_outside", "Shots outside box"],
+    ["woodwork", "Hit woodwork"],
+    ["touches_box", "Touches in opposition box"],
+    ["final_third", "Passes into final third"],
+    ["line_breaking", "Line-breaking passes"],
+    ["sprints", "Sprints"],
+    ["top_speed", "Top speed (km/h)"],
+  ];
+
+  function extraStatsHtml(D) {
+    var x = D.extras;
+    if (!x) return "";
+    var rows = EXTRA_STAT_DEFS.map(function (def) {
+      var p = x[def[0]];
+      if (!p || (p[0] == null && p[1] == null)) return "";
+      var h = p[0] == null ? 0 : p[0], a = p[1] == null ? 0 : p[1], total = h + a;
+      var hpct = total > 0 ? (h / total) * 100 : 50;
+      function disp(v) { return v == null ? "–" : v; }
+      return '<div class="stat-cmp">' +
+        '<div class="sc-val ' + (h > a ? "win" : "") + '">' + disp(p[0]) + "</div>" +
+        '<div class="sc-mid"><div class="sc-label">' + def[1] + "</div>" +
+          '<div class="sc-bar"><div class="sc-fill h" style="width:' + hpct.toFixed(1) + '%"></div>' +
+          '<div class="sc-fill a" style="width:' + (100 - hpct).toFixed(1) + '%"></div></div></div>' +
+        '<div class="sc-val ' + (a > h ? "win" : "") + '">' + disp(p[1]) + "</div>" +
+        "</div>";
+    }).join("");
+    if (!rows) return "";
+    var names = x.top_speed_players, fastest = "";
+    if (names) {
+      fastest = '<div class="stat-src" style="text-align:center;font-size:.78em;opacity:.6;margin-top:4px">Fastest: ' +
+        [names[0], names[1]].filter(Boolean).map(esc).join(" · ") + "</div>";
+    }
+    return '<div class="sc-label" style="text-align:center;font-weight:600;margin:18px 0 6px">More match stats</div>' +
+      rows + fastest +
+      '<div class="stat-src" style="text-align:center;font-size:.78em;opacity:.6;margin-top:8px">Source: FotMob</div>';
+  }
+
   function buildMatchStats(rec, D) {
     var host = document.getElementById("mv-stats");
     if (!host) return;
@@ -551,7 +593,7 @@
       : "";
     host.innerHTML = '<div class="stat-panel" style="border-top:none">' +
       '<div class="sp-head"><span>' + esc(D.home.name) + "</span><span>" + esc(D.away.name) + "</span></div>" +
-      rows + cap + "</div>";
+      rows + cap + extraStatsHtml(D) + "</div>";
   }
 
   /* ================= WIN PROBABILITY (calibrated Poisson model) ================= */

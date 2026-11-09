@@ -165,6 +165,7 @@ def _update(season: str, no_push: bool) -> None:
     # FotMob's "Total distance per match" team stat (tracking data the event scrape can't give).
     # Best-effort: a miss keeps the previous file and never fails the weekly run.
     _run([PY, "laliga/fetch_team_stats.py", "--season", season])
+    _run([PY, "laliga/fetch_match_extras.py", "--season", season])  # Match Centre "More match stats"
     rc2 = _run([PY, "laliga/backfill.py", "--season", season, "--limit", str(BACKFILL_LIMIT)])
 
     pushed = False

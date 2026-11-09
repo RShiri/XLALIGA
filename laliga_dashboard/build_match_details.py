@@ -524,6 +524,21 @@ def _match_id_from_file(path):
     return os.path.basename(path)[:-5]
 
 
+_MATCH_EXTRAS = None
+
+
+def _match_extra(match_id):
+    """FotMob-only per-match stats from team_stats/MATCH_EXTRAS_*.json, or None."""
+    global _MATCH_EXTRAS
+    if _MATCH_EXTRAS is None:
+        _MATCH_EXTRAS = {}
+        folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "laliga", "team_stats")
+        for path in glob.glob(os.path.join(folder, "MATCH_EXTRAS_*.json")):
+            with open(path, encoding="utf-8") as fh:
+                _MATCH_EXTRAS.update(json.load(fh))
+    return _MATCH_EXTRAS.get(str(match_id))
+
+
 def write_detail(match_data, match_id=None):
     """Write matches_detail/<id>.js for one match. Returns the path or None."""
     if not (match_data.get("events")):
@@ -538,6 +553,9 @@ def write_detail(match_data, match_id=None):
     detail = extract(match_data)
     detail["id"] = match_id
     detail["png"] = find_png(match_id)
+    extra = _match_extra(match_id)
+    if extra:
+        detail["extras"] = extra
     out = os.path.join(OUT_DIR, match_id + ".js")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("window.MATCH_DETAIL = ")
