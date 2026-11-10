@@ -371,6 +371,7 @@
       (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
       block("Pass network", "mv-network") +
       block("Average position", "mv-avgpos") +
+      (D.heat ? block("Player heatmaps", "mv-heatmap") : "") +
       block("Line-ups", "mv-lineups") +
       // All Goals Map sits below every stats section.
       (hasGoals ? block("All goals map", "mv-goals") : "") +
@@ -390,6 +391,7 @@
     if (hasDribbles) buildDribbles(D);
     buildNetwork(D);
     buildAvgPos(D);
+    buildHeatmap(D);
     buildLineups(D);
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
@@ -1682,6 +1684,121 @@
      Like the pass network but it averages each player's touch positions over a sliding
      time window the user scrubs (or plays). Players appear/disappear as they're subbed
      on/off, so you can watch a team's shape shift across the game. */
+  /* ================= PLAYER HEATMAPS ================= */
+  function buildHeatmap(D) {
+    var host = document.getElementById("mv-heatmap");
+    if (!host || !D.heat) return;
+    var SCALE = 2, GW = PW * SCALE, GH = PH * SCALE, SIGMA = 4.2 * SCALE;
+    var STOPS = [[0, 47, 107, 255, 0], [0.1, 47, 107, 255, 0], [0.24, 47, 107, 255, 125], [0.42, 47, 191, 113, 175],
+                 [0.68, 255, 209, 102, 215], [1, 255, 77, 77, 240]];
+
+    function roster(side) {
+      var seen = D.lineups[side].starters.concat(D.lineups[side].subs).filter(function (p) {
+        return (D.heat[side][p.name] || []).length > 0;
+      });
+      return seen;
+    }
+    function count(side, name) { return D.heat[side][name].length / 2; }
+    function busiest(side) {
+      var best = null;
+      roster(side).forEach(function (p) { if (!best || count(side, p.name) > count(side, best.name)) best = p; });
+      return best;
+    }
+    function ramp(t) {
+      for (var i = 1; i < STOPS.length; i++) {
+        if (t <= STOPS[i][0]) {
+          var a = STOPS[i - 1], b = STOPS[i], k = (t - a[0]) / (b[0] - a[0]);
+          return [a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, a[3] + (b[3] - a[3]) * k, a[4] + (b[4] - a[4]) * k];
+        }
+      }
+      return STOPS[STOPS.length - 1].slice(1);
+    }
+
+    var pm = pitchMarkup(), cut = pm.indexOf("/>") + 2;      // heat goes under the pitch lines
+    host.innerHTML =
+      '<div class="controls-bar">' +
+        '<button type="button" class="chip-toggle on home" id="hmHome" aria-pressed="true">' + esc(D.home.name) + "</button>" +
+        '<button type="button" class="chip-toggle away" id="hmAway" aria-pressed="false">' + esc(D.away.name) + "</button>" +
+      "</div>" +
+      '<div class="agm-tabs" id="hmPlayers"></div>' +
+      '<div class="pitch-wrap"><svg class="pitch-svg" role="img" id="hmSvg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
+        pm.slice(0, cut) +
+        '<image id="hmImg" x="0" y="0" width="' + PW + '" height="' + PH + '" preserveAspectRatio="none"/>' +
+        pm.slice(cut) +
+        '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle" id="hmDir"></text>' +
+      "</svg></div>" +
+      '<div class="legend-row"><span>colour runs from blue (few touches) to red (the player\'s busiest area)</span>' +
+        "<span>each player is scaled to their own match</span></div>" +
+      '<div class="stat-note" id="hmNote"></div>';
+
+    var canvas = document.createElement("canvas");
+    canvas.width = GW; canvas.height = GH;
+    var ctx = canvas.getContext("2d"), image = document.getElementById("hmImg");
+    var state = { side: "home", player: null };
+
+    function draw() {
+      var side = state.side, pts = D.heat[side][state.player.name] || [];
+      var grid = new Float32Array(GW * GH), R = Math.ceil(SIGMA * 3), max = 0;
+      for (var i = 0; i < pts.length; i += 2) {
+        var cx = tx(side, pts[i]) * SCALE, cy = ty(side, pts[i + 1]) * SCALE;
+        var x0 = Math.max(0, Math.floor(cx - R)), x1 = Math.min(GW - 1, Math.ceil(cx + R));
+        var y0 = Math.max(0, Math.floor(cy - R)), y1 = Math.min(GH - 1, Math.ceil(cy + R));
+        for (var y = y0; y <= y1; y++) {
+          for (var x = x0; x <= x1; x++) {
+            var dx = x - cx, dy = y - cy;
+            var v = (grid[y * GW + x] += Math.exp(-(dx * dx + dy * dy) / (2 * SIGMA * SIGMA)));
+            if (v > max) max = v;
+          }
+        }
+      }
+      var img = ctx.createImageData(GW, GH);
+      for (var n = 0; n < grid.length; n++) {
+        var c = ramp(max ? grid[n] / max : 0);
+        img.data[n * 4] = c[0]; img.data[n * 4 + 1] = c[1]; img.data[n * 4 + 2] = c[2]; img.data[n * 4 + 3] = c[3];
+      }
+      ctx.putImageData(img, 0, 0);
+      image.setAttribute("href", canvas.toDataURL("image/png"));
+
+      var teamName = side === "home" ? D.home.name : D.away.name, touches = pts.length / 2;
+      var label = state.player.name + ", " + teamName + ": " + touches + " touches, " + state.player.mins + " minutes";
+      document.getElementById("hmSvg").setAttribute("aria-label", "Heatmap for " + label);
+      document.getElementById("hmNote").textContent = state.player.name + " · " + touches + " touches · " + state.player.mins + " min";
+      document.getElementById("hmDir").textContent = side === "home" ? teamName + " attacking →" : "← " + teamName + " attacking";
+      [].forEach.call(document.querySelectorAll("#hmPlayers .agm-tab"), function (b) {
+        var on = b.getAttribute("data-name") === state.player.name;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+    }
+
+    function setSide(side) {
+      state.side = side;
+      state.player = busiest(side);
+      ["Home", "Away"].forEach(function (s) {
+        var on = s.toLowerCase() === side, b = document.getElementById("hm" + s);
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      var list = document.getElementById("hmPlayers");
+      list.innerHTML = roster(side).map(function (p) {
+        var num = p.num != null ? '<span class="mm">' + esc(p.num) + "</span>" : "";
+        return '<button type="button" class="agm-tab" title="' + esc(p.name) + '" data-name="' + esc(p.name) + '">' +
+          num + esc(p.name.split(" ").pop()) + "</button>";
+      }).join("");
+      [].forEach.call(list.querySelectorAll(".agm-tab"), function (b) {
+        b.addEventListener("click", function () {
+          var name = b.getAttribute("data-name");
+          state.player = roster(side).filter(function (p) { return p.name === name; })[0];
+          draw();
+        });
+      });
+      if (state.player) draw();
+    }
+    document.getElementById("hmHome").addEventListener("click", function () { setSide("home"); });
+    document.getElementById("hmAway").addEventListener("click", function () { setSide("away"); });
+    setSide("home");
+  }
+
   function buildAvgPos(D) {
     var host = document.getElementById("mv-avgpos");
     if (!host) return;

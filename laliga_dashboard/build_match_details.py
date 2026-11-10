@@ -539,6 +539,31 @@ def _match_extra(match_id):
     return _MATCH_EXTRAS.get(str(match_id))
 
 
+# Events WhoScored doesn't flag as touches but where the player is still involved at that spot.
+_HEAT_EXTRA_TYPES = {"BallRecovery", "Aerial", "Challenge", "KeeperPickup", "Claim", "Smother",
+                     "KeeperSweeper", "ShieldBallOpp"}
+
+
+def _player_heat(match_data):
+    """{"home": {name: [x1, y1, x2, y2, ...]}, "away": {...}} for the Match Centre heatmaps.
+
+    Coordinates are each team's own attacking frame (0-100), rounded to keep the file small."""
+    heat = {"home": {}, "away": {}}
+    owner = {}
+    for side in ("home", "away"):
+        for p in match_data.get(side, {}).get("players", []):
+            owner[str(p.get("playerId"))] = (side, ascii_name(p.get("name", "")))
+    for ev in match_data.get("events", []):
+        who = owner.get(str(ev.get("playerId")))
+        x, y = ev.get("x"), ev.get("y")
+        if not who or x is None or y is None or (x == 0 and y == 0):
+            continue
+        if not ev.get("isTouch") and (ev.get("type") or {}).get("displayName") not in _HEAT_EXTRA_TYPES:
+            continue
+        heat[who[0]].setdefault(who[1], []).extend((round(x), round(y)))
+    return heat
+
+
 def write_detail(match_data, match_id=None):
     """Write matches_detail/<id>.js for one match. Returns the path or None."""
     if not (match_data.get("events")):
@@ -553,6 +578,7 @@ def write_detail(match_data, match_id=None):
     detail = extract(match_data)
     detail["id"] = match_id
     detail["png"] = find_png(match_id)
+    detail["heat"] = _player_heat(match_data)
     extra = _match_extra(match_id)
     if extra:
         detail["extras"] = extra
