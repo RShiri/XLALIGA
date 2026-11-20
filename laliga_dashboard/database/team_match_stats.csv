@@ -239,3 +239,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868130,2026-11-08,Getafe,Villarreal,away,0,2,28,9,4,241,61,1,1,15,13,49,0.67
 5868121,2026-11-08,Atletico Madrid,Barcelona,home,1,2,37,9,5,417,81,4,3,8,14,55,1.38
 5868121,2026-11-08,Barcelona,Atletico Madrid,away,2,1,63,19,9,705,91,2,1,4,14,45,1.14
+5868132,2026-11-20,Athletic Club,Espanyol,home,0,1,58,17,9,520,84,3,3,2,16,52,1.77
+5868132,2026-11-20,Espanyol,Athletic Club,away,1,0,42,6,4,383,77,1,0,9,13,48,0.39
