@@ -247,3 +247,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868138,2026-11-21,Valencia,Rayo Vallecano,away,1,0,36,11,6,329,79,0,0,13,17,52,0.44
 5868140,2026-11-21,Sevilla,Real Betis,home,1,1,50,25,13,442,82,0,0,3,21,48,1.4
 5868140,2026-11-21,Real Betis,Sevilla,away,1,1,50,6,4,438,80,1,1,13,14,52,0.65
+5868139,2026-11-21,Real Madrid,Celta Vigo,home,2,1,64,24,15,669,90,6,5,4,4,65,3.94
+5868139,2026-11-21,Celta Vigo,Real Madrid,away,1,2,36,8,5,392,80,1,0,13,13,35,1.23

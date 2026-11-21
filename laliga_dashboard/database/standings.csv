@@ -1,6 +1,6 @@
 position,team,played,won,drawn,lost,gf,ga,gd,points
 1,Barcelona,12,11,0,1,48,13,35,33
-2,Real Madrid,12,10,0,2,31,10,21,30
+2,Real Madrid,13,11,0,2,33,11,22,33
 3,Atletico Madrid,12,9,1,2,23,10,13,28
 4,Real Betis,13,8,3,2,21,16,5,27
 5,Real Sociedad,12,7,1,4,21,20,1,22
@@ -11,7 +11,7 @@ position,team,played,won,drawn,lost,gf,ga,gd,points
 10,Espanyol,13,4,3,6,14,14,0,15
 11,Deportivo A Coruña,13,3,6,4,16,17,-1,15
 12,Racing Santander,12,4,2,6,17,30,-13,14
-13,Celta Vigo,12,2,7,3,10,10,0,13
+13,Celta Vigo,13,2,7,4,11,12,-1,13
 14,Rayo Vallecano,13,3,4,6,15,22,-7,13
 15,Getafe,12,3,3,6,8,18,-10,12
 16,Osasuna,12,3,3,6,12,23,-11,12
