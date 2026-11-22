@@ -255,3 +255,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868137,2026-11-22,Real Sociedad,Racing Santander,away,2,3,63,31,20,659,87,4,4,7,10,55,2.89
 5868136,2026-11-22,Osasuna,Málaga,home,1,0,47,11,8,496,81,2,1,1,15,52,1.17
 5868136,2026-11-22,Málaga,Osasuna,away,0,1,53,5,1,545,85,0,0,6,11,48,0.2
+5868134,2026-11-22,Getafe,Atletico Madrid,home,0,3,31,11,2,354,75,0,0,10,11,47,0.48
+5868134,2026-11-22,Atletico Madrid,Getafe,away,3,0,69,20,13,760,89,8,6,2,11,53,3.89
