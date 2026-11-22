@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-11-22T17:22:57.515596+00:00",
+  "generated_utc": "2026-11-22T20:41:17.579981+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1791,10 +1791,10 @@
       "away": "Málaga",
       "home_id": "8371",
       "away_id": "9864",
-      "home_score": null,
-      "away_score": null,
-      "status": "N",
-      "finished": false
+      "home_score": 1,
+      "away_score": 0,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868134,
@@ -1807,7 +1807,7 @@
       "away_id": "9906",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {

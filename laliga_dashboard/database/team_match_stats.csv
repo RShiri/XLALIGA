@@ -253,3 +253,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868133,2026-11-22,Villarreal,Barcelona,away,2,3,30,5,3,291,73,1,0,17,19,43,0.28
 5868137,2026-11-22,Racing Santander,Real Sociedad,home,3,2,37,12,10,402,74,6,3,19,10,45,2.87
 5868137,2026-11-22,Real Sociedad,Racing Santander,away,2,3,63,31,20,659,87,4,4,7,10,55,2.89
+5868136,2026-11-22,Osasuna,Málaga,home,1,0,47,11,8,496,81,2,1,1,15,52,1.17
+5868136,2026-11-22,Málaga,Osasuna,away,0,1,53,5,1,545,85,0,0,6,11,48,0.2
