@@ -257,3 +257,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868136,2026-11-22,Málaga,Osasuna,away,0,1,53,5,1,545,85,0,0,6,11,48,0.2
 5868134,2026-11-22,Getafe,Atletico Madrid,home,0,3,31,11,2,354,75,0,0,10,11,47,0.48
 5868134,2026-11-22,Atletico Madrid,Getafe,away,3,0,69,20,13,760,89,8,6,2,11,53,3.89
+5868135,2026-11-23,Levante,Elche,home,1,1,51,18,11,506,86,1,1,1,14,46,0.9
+5868135,2026-11-23,Elche,Levante,away,1,1,49,4,2,481,86,1,1,9,12,54,0.48
