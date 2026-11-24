@@ -23,6 +23,7 @@ the other, so when you add an entry here, consider adding it there too.
 ## Platform updates & changes
 
 <!-- progress:platform -->
+- **2026-11-24** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1100s
 - **2026-11-23** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1030s
 - **2026-11-22** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1034s
 - **2026-11-22** — Weekly update (2026-27): schedule rc=0, backfill rc=0, pushed=True, took 1200s
@@ -174,6 +175,7 @@ the other, so when you add an entry here, consider adding it there too.
 <!-- progress:scrapes -->
 | When | Season | Trigger | Target | Result | Took | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-24 13:18 | 2026-27 | backfill.py | 0 match(es) | ⚠️ no data | 3s | — |
 | 2026-11-24 01:29 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 17m 44s | — |
 | 2026-11-23 01:28 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 16m 50s | — |
 | 2026-11-22 22:58 | 2026-27 | backfill.py | 1 match(es) | ✅ 1 saved | 16m 54s | — |
