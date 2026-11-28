@@ -2,7 +2,7 @@
   "season": "2026-27",
   "competition": "LaLiga",
   "fotmob_league_id": "87",
-  "generated_utc": "2026-11-28T16:55:18.579673+00:00",
+  "generated_utc": "2026-11-28T18:26:44.667312+00:00",
   "matches": [
     {
       "fotmob_id": 5868011,
@@ -1861,10 +1861,10 @@
       "away": "Athletic Club",
       "home_id": "9864",
       "away_id": "8315",
-      "home_score": null,
-      "away_score": null,
-      "status": "L",
-      "finished": false
+      "home_score": 3,
+      "away_score": 4,
+      "status": "F",
+      "finished": true
     },
     {
       "fotmob_id": 5868144,
@@ -1877,7 +1877,7 @@
       "away_id": "9906",
       "home_score": null,
       "away_score": null,
-      "status": "N",
+      "status": "L",
       "finished": false
     },
     {

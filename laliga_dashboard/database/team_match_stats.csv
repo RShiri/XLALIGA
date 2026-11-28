@@ -263,3 +263,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 5868146,2026-11-27,Racing Santander,Levante,away,3,1,44,15,10,401,79,2,2,9,11,43,1.19
 5868141,2026-11-28,Real Betis,Rayo Vallecano,home,0,1,55,14,11,566,84,0,0,4,10,62,0.58
 5868141,2026-11-28,Rayo Vallecano,Real Betis,away,1,0,45,13,5,466,81,2,1,11,14,38,1.19
+5868147,2026-11-28,Málaga,Athletic Club,home,3,4,51,18,9,506,83,4,2,5,13,47,1.76
+5868147,2026-11-28,Athletic Club,Málaga,away,4,3,49,15,9,492,83,8,4,6,6,53,3.43
